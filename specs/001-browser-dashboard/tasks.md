@@ -24,7 +24,7 @@ keyboard navigation, accessibility, and responsive behavior.
 - [X] T002 Create source and test directories from the implementation plan in src/components/, src/config/, src/features/dashboard/, src/services/, src/types/, src/utils/, tests/unit/, tests/integration/, and tests/e2e/
 - [X] T003 [P] Configure strict TypeScript settings with no `any` in tsconfig.json
 - [X] T004 [P] Configure linting and formatting scripts for TypeScript and React in package.json and eslint.config.js
-- [ ] T005 [P] Configure unit and component test tooling in vitest.config.ts and tests/setup.ts
+- [X] T005 [P] Configure unit and component test tooling in vitest.config.ts and tests/setup.ts
 - [ ] T006 [P] Configure browser-level validation tooling for e2e checks in playwright.config.ts
 - [ ] T007 [P] Create global app stylesheet with minimalist responsive foundations in src/index.css
 - [ ] T008 [P] Add shared test fixtures for browser storage and default dashboard data in tests/fixtures/dashboardConfig.ts
