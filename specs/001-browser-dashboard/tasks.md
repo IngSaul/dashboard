@@ -20,9 +20,9 @@ keyboard navigation, accessibility, and responsive behavior.
 
 **Purpose**: Initialize the React dashboard project structure, tooling, and test environment.
 
-- [ ] T001 Create Vite React TypeScript project entry files in package.json, index.html, src/main.tsx, and src/App.tsx
-- [ ] T002 Create source and test directories from the implementation plan in src/components/, src/config/, src/features/dashboard/, src/services/, src/types/, src/utils/, tests/unit/, tests/integration/, and tests/e2e/
-- [ ] T003 [P] Configure strict TypeScript settings with no `any` in tsconfig.json
+- [X] T001 Create Vite React TypeScript project entry files in package.json, index.html, src/main.tsx, and src/App.tsx
+- [X] T002 Create source and test directories from the implementation plan in src/components/, src/config/, src/features/dashboard/, src/services/, src/types/, src/utils/, tests/unit/, tests/integration/, and tests/e2e/
+- [X] T003 [P] Configure strict TypeScript settings with no `any` in tsconfig.json
 - [ ] T004 [P] Configure linting and formatting scripts for TypeScript and React in package.json and eslint.config.js
 - [ ] T005 [P] Configure unit and component test tooling in vitest.config.ts and tests/setup.ts
 - [ ] T006 [P] Configure browser-level validation tooling for e2e checks in playwright.config.ts
