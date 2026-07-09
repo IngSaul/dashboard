@@ -1,75 +1,104 @@
-# React + TypeScript + Vite
+# Personal Browser Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A local-first, distraction-free start page that replaces your browser's
+default new-tab page: search, current date/time, weather, and configurable
+shortcut cards grouped by category — no ads, no feeds, no server backend.
+Built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+See [specs/001-browser-dashboard/spec.md](specs/001-browser-dashboard/spec.md)
+for the full feature specification and
+[CLAUDE.md](CLAUDE.md) for project conventions and workflow.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Global search with a configurable destination
+- Live date/time and current weather (non-blocking; degrades gracefully when
+  unavailable)
+- Shortcut cards grouped into categories: add, edit, remove, and reorder
+- Light/dark/system theme, remembered across sessions
+- Full keyboard navigation and accessible labels/focus states
+- Desktop-first responsive layout with tablet support
+- All preferences persist locally in the browser — no account, no sync
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+### Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (see `package.json` engines/devDependencies for the toolchain
+  versions this was built against) and npm.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Run in development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+npm run dev
+```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Opens the dashboard with hot module reloading at the URL Vite prints
+(default `http://localhost:5173`).
+
+### Build for production
+
+```bash
+npm run build
+```
+
+Type-checks (`tsc -b`) and produces an optimized build in `dist/`. Preview
+the production build locally with:
+
+```bash
+npm run preview
+```
+
+### Lint and format
+
+```bash
+npm run lint        # check
+npm run lint:fix     # check and auto-fix
+```
+
+### Tests
+
+```bash
+npm test             # unit + integration tests (Vitest)
+npm run test:watch   # watch mode
+npm run test:e2e     # end-to-end tests (Playwright)
+npm run test:e2e:ui  # Playwright UI mode
+```
+
+## Using it as your new-tab page
+
+The dashboard is a static site (`dist/` after `npm run build`), so you can
+point your browser's new-tab setting at it once it's built and served
+however you prefer (a local static file server, or deployed to any static
+host). Browser-specific new-tab override steps vary by browser/extension and
+are outside this repo's scope.
+
+## Project Structure
 
 ```
+src/
+├── components/   # reusable UI (SearchBar, WeatherSummary, DateTime, ShortcutCard, CategoryNav, ThemeToggle, Settings, StatusMessage)
+├── config/       # typed defaults and validation/repair (defaults.ts, schema.ts)
+├── features/dashboard/  # composition shell (Dashboard.tsx, Dashboard.css)
+├── services/     # business logic (configStore, search, weather, shortcuts, categories, theme)
+├── types/        # shared domain types
+└── utils/        # dateTime, validation, keyboard helpers
+
+tests/
+├── unit/         # business logic tests (Vitest)
+├── integration/  # component interaction tests (Testing Library)
+├── e2e/          # browser-level tests (Playwright)
+└── fixtures/     # shared test fixtures
+```
+
+All configuration — shortcuts, categories, search destination, weather
+preference, theme — is typed and persisted to `localStorage`; nothing
+personal is hardcoded into components. See
+[specs/001-browser-dashboard/data-model.md](specs/001-browser-dashboard/data-model.md)
+for the full data model.

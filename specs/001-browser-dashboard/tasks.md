@@ -142,12 +142,12 @@ keyboard navigation, accessibility, and responsive behavior.
 
 **Purpose**: Final validation, documentation, and cleanup across all stories.
 
-- [ ] T057 [P] Update project README with setup, run, build, and new-tab usage guidance in README.md
-- [ ] T058 [P] Add quickstart validation notes and expected commands to specs/001-browser-dashboard/quickstart.md
-- [ ] T059 Run full unit, integration, and e2e test suite and record fixes in tests/
-- [ ] T060 Run production build and verify no TypeScript `any` or lint violations in src/ and tests/
-- [ ] T061 Validate quickstart scenarios 1-9 manually or with e2e coverage and update specs/001-browser-dashboard/quickstart.md
-- [ ] T062 Review UI density, animation restraint, and absence of ads/feed content across src/features/dashboard/Dashboard.tsx and src/features/dashboard/Dashboard.css
+- [X] T057 [P] Update project README with setup, run, build, and new-tab usage guidance in README.md
+- [X] T058 [P] Add quickstart validation notes and expected commands to specs/001-browser-dashboard/quickstart.md
+- [X] T059 Run full unit, integration, and e2e test suite and record fixes in tests/
+- [X] T060 Run production build and verify no TypeScript `any` or lint violations in src/ and tests/
+- [X] T061 Validate quickstart scenarios 1-9 manually or with e2e coverage and update specs/001-browser-dashboard/quickstart.md
+- [X] T062 Review UI density, animation restraint, and absence of ads/feed content across src/features/dashboard/Dashboard.tsx and src/features/dashboard/Dashboard.css
 
 ---
 

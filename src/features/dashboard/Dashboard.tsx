@@ -7,11 +7,18 @@ import { ShortcutCard } from '../../components/ShortcutCard/ShortcutCard'
 import { StatusMessage } from '../../components/StatusMessage/StatusMessage'
 import { ThemeToggle } from '../../components/ThemeToggle/ThemeToggle'
 import { WeatherSummary } from '../../components/WeatherSummary/WeatherSummary'
-import { filterShortcutsByCategory, getNonEmptyCategories } from '../../services/categories'
+import {
+  addCategory,
+  filterShortcutsByCategory,
+  getNonEmptyCategories,
+  type CategoryInput,
+  type CategoryMutationResult,
+} from '../../services/categories'
 import { loadDashboardConfig, saveDashboardConfig } from '../../services/configStore'
 import {
   addShortcut,
   removeShortcut,
+  reorderShortcuts,
   updateShortcut,
   type ShortcutInput,
   type ShortcutMutationResult,
@@ -85,6 +92,14 @@ export function Dashboard() {
   )
   const editingShortcut = config.shortcuts.find((s) => s.id === editingShortcutId) ?? null
 
+  function handleAddCategory(input: CategoryInput): CategoryMutationResult {
+    const result = addCategory(config.categories, input)
+    if (result.ok) {
+      setConfig((previous) => ({ ...previous, categories: result.categories }))
+    }
+    return result
+  }
+
   function handleThemeChange(mode: ThemeMode) {
     setConfig((previous) => ({
       ...previous,
@@ -113,6 +128,33 @@ export function Dashboard() {
       // The removed card's own "Remove" button had focus; without this it
       // would be lost to <body>, disorienting keyboard/screen-reader users.
       manageToggleRef.current?.focus()
+    }
+  }
+
+  /**
+   * Swaps `shortcut` with its neighbor in the currently visible (possibly
+   * category-filtered) order, applying that swap to the full shortcut list
+   * via the same permutation-based `reorderShortcuts` used in T036's tests.
+   */
+  function handleMoveShortcut(shortcut: Shortcut, direction: 'up' | 'down') {
+    const visibleIds = visibleShortcuts.map((s) => s.id)
+    const visibleIndex = visibleIds.indexOf(shortcut.id)
+    const neighborIndex = direction === 'up' ? visibleIndex - 1 : visibleIndex + 1
+    const neighborId = visibleIds[neighborIndex]
+    if (neighborId === undefined) {
+      return
+    }
+    const fullIds = config.shortcuts.map((s) => s.id)
+    const a = fullIds.indexOf(shortcut.id)
+    const b = fullIds.indexOf(neighborId)
+    const nextIds = fullIds.map((id, index) => {
+      if (index === a) return neighborId
+      if (index === b) return shortcut.id
+      return id
+    })
+    const result = reorderShortcuts(config.shortcuts, nextIds)
+    if (result.ok) {
+      setConfig((previous) => ({ ...previous, shortcuts: result.shortcuts }))
     }
   }
 
@@ -151,6 +193,7 @@ export function Dashboard() {
           editingShortcut={editingShortcut}
           onSubmit={handleSubmitShortcut}
           onCancelEdit={() => setEditingShortcutId(null)}
+          onAddCategory={handleAddCategory}
         />
       ) : null}
 
@@ -158,13 +201,17 @@ export function Dashboard() {
         {visibleShortcuts.length === 0 ? (
           <StatusMessage message="No shortcuts yet." />
         ) : (
-          visibleShortcuts.map((shortcut) => (
+          visibleShortcuts.map((shortcut, index) => (
             <ShortcutCard
               key={shortcut.id}
               shortcut={shortcut}
               editable={isManaging}
+              canMoveUp={index > 0}
+              canMoveDown={index < visibleShortcuts.length - 1}
               onEdit={(s) => setEditingShortcutId(s.id)}
               onRemove={handleRemoveShortcut}
+              onMoveUp={(s) => handleMoveShortcut(s, 'up')}
+              onMoveDown={(s) => handleMoveShortcut(s, 'down')}
             />
           ))
         )}

@@ -75,4 +75,49 @@ describe('Shortcut personalization (User Story 2)', () => {
     expect(screen.queryByRole('link', { name: 'Gmail' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Calendar' })).toBeInTheDocument()
   })
+
+  it('reorders a shortcut and persists the new order after reload (FR-008)', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<Dashboard />)
+
+    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
+    const links = () => screen.getAllByRole('link').map((link) => link.textContent)
+    expect(links()).toEqual(['Gmail', 'Calendar', 'YouTube', 'GitHub'])
+
+    await user.click(screen.getByRole('button', { name: 'Move Calendar up' }))
+    expect(links()).toEqual(['Calendar', 'Gmail', 'YouTube', 'GitHub'])
+    unmount()
+
+    render(<Dashboard />)
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'Calendar',
+      'Gmail',
+      'YouTube',
+      'GitHub',
+    ])
+  })
+
+  it('creates a new category and can assign a shortcut to it (FR-009)', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<Dashboard />)
+
+    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
+    await user.type(screen.getByRole('textbox', { name: /new category/i }), 'Dev Tools')
+    await user.click(screen.getByRole('button', { name: /add category/i }))
+
+    expect(
+      screen.getByRole('option', { name: 'Dev Tools' }),
+    ).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'Dev Tools')
+    await user.type(screen.getByRole('textbox', { name: /label/i }), 'Docs')
+    await user.type(screen.getByRole('textbox', { name: /url/i }), 'https://docs.example.com')
+    await user.click(screen.getByRole('button', { name: /add shortcut/i }))
+    unmount()
+
+    render(<Dashboard />)
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Dev Tools' }))
+    expect(screen.getByRole('link', { name: 'Docs' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Gmail' })).not.toBeInTheDocument()
+  })
 })
