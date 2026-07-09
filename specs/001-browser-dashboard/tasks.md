@@ -40,16 +40,16 @@ keyboard navigation, accessibility, and responsive behavior.
 - [X] T009 Define dashboard domain types for configuration, shortcuts, categories, search, weather, and theme in src/types/dashboard.ts
 - [X] T010 Define typed default dashboard configuration in src/config/defaults.ts
 - [X] T011 Implement configuration validation and repair helpers in src/config/schema.ts
-- [ ] T012 [P] Implement date/time formatting helpers in src/utils/dateTime.ts
-- [ ] T013 [P] Implement URL and string validation helpers in src/utils/validation.ts
-- [ ] T014 [P] Implement keyboard navigation helper utilities in src/utils/keyboard.ts
-- [ ] T015 Implement local configuration persistence service in src/services/configStore.ts
-- [ ] T016 Implement dashboard composition shell in src/features/dashboard/Dashboard.tsx
-- [ ] T017 Implement root app integration for the dashboard in src/App.tsx
-- [ ] T018 Create shared empty/error/fallback UI component in src/components/StatusMessage/StatusMessage.tsx
-- [ ] T019 Create base responsive dashboard layout styles in src/features/dashboard/Dashboard.css
-- [ ] T020 [P] Add unit tests for configuration validation and recovery in tests/unit/configSchema.test.ts
-- [ ] T021 [P] Add unit tests for local persistence load/save/fallback behavior in tests/unit/configStore.test.ts
+- [X] T012 [P] Implement date/time formatting helpers in src/utils/dateTime.ts
+- [X] T013 [P] Implement URL and string validation helpers in src/utils/validation.ts
+- [X] T014 [P] Implement keyboard navigation helper utilities in src/utils/keyboard.ts
+- [X] T015 Implement local configuration persistence service in src/services/configStore.ts
+- [X] T016 Implement dashboard composition shell in src/features/dashboard/Dashboard.tsx
+- [X] T017 Implement root app integration for the dashboard in src/App.tsx
+- [X] T018 Create shared empty/error/fallback UI component in src/components/StatusMessage/StatusMessage.tsx
+- [X] T019 Create base responsive dashboard layout styles in src/features/dashboard/Dashboard.css
+- [X] T020 [P] Add unit tests for configuration validation and recovery in tests/unit/configSchema.test.ts
+- [X] T021 [P] Add unit tests for local persistence load/save/fallback behavior in tests/unit/configStore.test.ts
 
 **Checkpoint**: Foundation ready; user story implementation can now begin in priority order or in parallel where capacity allows.
 

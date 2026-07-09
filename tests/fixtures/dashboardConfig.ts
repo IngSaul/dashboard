@@ -1,68 +1,18 @@
-/**
- * Shared test fixtures for dashboard configuration and browser storage.
- *
- * These local types mirror `specs/001-browser-dashboard/data-model.md` and are
- * intentionally independent from `src/types/dashboard.ts` (defined in T009),
- * since this fixture module is created in Phase 1 (Setup), before the
- * Foundational phase introduces the real domain types.
- */
+import { DASHBOARD_CONFIG_STORAGE_KEY } from '../../src/services/configStore'
+import type {
+  DashboardConfiguration,
+  Shortcut,
+  ShortcutCategory,
+} from '../../src/types/dashboard'
 
-export type ThemeMode = 'light' | 'dark' | 'system'
+/** Shared test fixtures for dashboard configuration and browser storage. */
 
-export interface ThemePreferenceFixture {
-  mode: ThemeMode
-}
-
-export interface SearchPreferenceFixture {
-  providerName: string
-  searchUrlTemplate: string
-  openBehavior: 'currentTab' | 'newTab'
-}
-
-export interface WeatherPreferenceFixture {
-  mode: 'configuredLocation' | 'browserLocation'
-  locationLabel?: string
-  units: 'metric' | 'imperial'
-  enabled: boolean
-}
-
-export interface ShortcutFixture {
-  id: string
-  label: string
-  url: string
-  categoryId?: string
-  description?: string
-  icon?: string
-  order: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface ShortcutCategoryFixture {
-  id: string
-  name: string
-  order: number
-  isVisible: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-export interface DashboardConfigurationFixture {
-  version: number
-  themePreference: ThemePreferenceFixture
-  searchPreference: SearchPreferenceFixture
-  weatherPreference: WeatherPreferenceFixture
-  shortcuts: ShortcutFixture[]
-  categories: ShortcutCategoryFixture[]
-  updatedAt: string
-}
-
-/** Storage key `configStore.ts` (T015) must reuse to read/write this fixture data. */
-export const DASHBOARD_STORAGE_KEY = 'dashboard.config.v1'
+/** localStorage key used by tests to seed/inspect persisted configuration. */
+export const DASHBOARD_STORAGE_KEY = DASHBOARD_CONFIG_STORAGE_KEY
 
 const FIXED_TIMESTAMP = '2026-07-08T09:00:00.000Z'
 
-export const workCategoryFixture: ShortcutCategoryFixture = {
+export const workCategoryFixture: ShortcutCategory = {
   id: 'category-work',
   name: 'Work',
   order: 0,
@@ -71,7 +21,7 @@ export const workCategoryFixture: ShortcutCategoryFixture = {
   updatedAt: FIXED_TIMESTAMP,
 }
 
-export const personalCategoryFixture: ShortcutCategoryFixture = {
+export const personalCategoryFixture: ShortcutCategory = {
   id: 'category-personal',
   name: 'Personal',
   order: 1,
@@ -81,7 +31,7 @@ export const personalCategoryFixture: ShortcutCategoryFixture = {
 }
 
 /** Empty category fixture covers the spec edge case: empty categories must not clutter the UI. */
-export const emptyCategoryFixture: ShortcutCategoryFixture = {
+export const emptyCategoryFixture: ShortcutCategory = {
   id: 'category-empty',
   name: 'Unused',
   order: 2,
@@ -90,7 +40,7 @@ export const emptyCategoryFixture: ShortcutCategoryFixture = {
   updatedAt: FIXED_TIMESTAMP,
 }
 
-export const dashboardShortcutFixtures: ShortcutFixture[] = [
+export const dashboardShortcutFixtures: Shortcut[] = [
   {
     id: 'shortcut-mail',
     label: 'Mail',
@@ -128,9 +78,9 @@ export const dashboardShortcutFixtures: ShortcutFixture[] = [
   },
 ]
 
-export const defaultDashboardConfigFixture: DashboardConfigurationFixture = {
+export const defaultDashboardConfigFixture: DashboardConfiguration = {
   version: 1,
-  themePreference: { mode: 'system' },
+  themePreference: { mode: 'system', resolvedMode: 'light' },
   searchPreference: {
     providerName: 'Example Search',
     searchUrlTemplate: 'https://search.example.com/?q={query}',
