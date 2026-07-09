@@ -127,12 +127,12 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Implementation for User Story 3
 
-- [ ] T051 [P] [US3] Implement theme preference helpers in src/services/theme.ts
-- [ ] T052 [P] [US3] Create ThemeToggle component in src/components/ThemeToggle/ThemeToggle.tsx
-- [ ] T053 [US3] Integrate theme persistence and resolved theme state in src/features/dashboard/Dashboard.tsx
-- [ ] T054 [US3] Add accessible names, landmarks, and focus management across src/components/SearchBar/SearchBar.tsx, src/components/ShortcutCard/ShortcutCard.tsx, src/components/CategoryNav/CategoryNav.tsx, src/components/ThemeToggle/ThemeToggle.tsx, and src/components/Settings/Settings.tsx
-- [ ] T055 [US3] Add reduced-motion-aware animations and responsive desktop/tablet styles in src/index.css and src/features/dashboard/Dashboard.css
-- [ ] T056 [US3] Add e2e keyboard, accessibility, theme reload, and tablet layout validation in tests/e2e/accessibilityAndTheme.spec.ts
+- [X] T051 [P] [US3] Implement theme preference helpers in src/services/theme.ts
+- [X] T052 [P] [US3] Create ThemeToggle component in src/components/ThemeToggle/ThemeToggle.tsx
+- [X] T053 [US3] Integrate theme persistence and resolved theme state in src/features/dashboard/Dashboard.tsx
+- [X] T054 [US3] Add accessible names, landmarks, and focus management across src/components/SearchBar/SearchBar.tsx, src/components/ShortcutCard/ShortcutCard.tsx, src/components/CategoryNav/CategoryNav.tsx, src/components/ThemeToggle/ThemeToggle.tsx, and src/components/Settings/Settings.tsx
+- [X] T055 [US3] Add reduced-motion-aware animations and responsive desktop/tablet styles in src/index.css and src/features/dashboard/Dashboard.css
+- [X] T056 [US3] Add e2e keyboard, accessibility, theme reload, and tablet layout validation in tests/e2e/accessibilityAndTheme.spec.ts
 
 **Checkpoint**: User Story 3 completes comfort, accessibility, theme, and responsive requirements without breaking prior stories.
 

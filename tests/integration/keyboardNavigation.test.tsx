@@ -68,7 +68,10 @@ describe('Keyboard navigation (User Story 3)', () => {
     render(<Dashboard />)
 
     const before = document.documentElement.getAttribute('data-theme')
-    await tabUntil(user, (el) => el.getAttribute('aria-label') === 'Toggle theme')
+    await tabUntil(user, (el) => (el.getAttribute('aria-label') ?? '').includes('Toggle theme'))
+    // The toggle cycles system -> light -> dark -> system; two activations
+    // guarantee a resolved-theme change regardless of the starting mode.
+    await user.keyboard('{Enter}')
     await user.keyboard('{Enter}')
 
     expect(document.documentElement.getAttribute('data-theme')).not.toBe(before)

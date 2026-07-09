@@ -21,7 +21,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-4);
 }
 
 .dashboard__main {
@@ -37,9 +37,14 @@
     gap: var(--space-5);
   }
 
+  /*
+   * Wrap rather than force a full-column stack: search naturally takes its
+   * own row (flex-basis 320px doesn't fit alongside the other controls at
+   * tablet widths) while date/time, weather, theme, and manage stay
+   * grouped and compact on the next line(s) with no overlap.
+   */
   .dashboard__header {
-    flex-direction: column;
-    align-items: stretch;
+    row-gap: var(--space-3);
   }
 
   .dashboard__main {
