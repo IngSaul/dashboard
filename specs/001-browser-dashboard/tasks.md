@@ -39,7 +39,7 @@ keyboard navigation, accessibility, and responsive behavior.
 
 - [X] T009 Define dashboard domain types for configuration, shortcuts, categories, search, weather, and theme in src/types/dashboard.ts
 - [X] T010 Define typed default dashboard configuration in src/config/defaults.ts
-- [ ] T011 Implement configuration validation and repair helpers in src/config/schema.ts
+- [X] T011 Implement configuration validation and repair helpers in src/config/schema.ts
 - [ ] T012 [P] Implement date/time formatting helpers in src/utils/dateTime.ts
 - [ ] T013 [P] Implement URL and string validation helpers in src/utils/validation.ts
 - [ ] T014 [P] Implement keyboard navigation helper utilities in src/utils/keyboard.ts
