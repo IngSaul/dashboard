@@ -89,3 +89,11 @@ tests/
   agent-context update script is present).
 - Do not hand-edit `spec.md`/`plan.md`/`tasks.md` structure outside the
   speckit skills unless just checking off completed tasks.
+
+## Git
+
+- Never run git commit.
+- Never run git push.
+- Never create commits automatically.
+- Suggest a Conventional Commit message only after all validations have passed.
+- Wait for me to execute all Git commands manually.

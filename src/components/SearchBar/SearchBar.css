@@ -1,0 +1,23 @@
+.search-bar {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1 1 320px;
+  min-width: 200px;
+}
+
+.search-bar__input {
+  flex: 1 1 auto;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.search-bar__submit {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-surface);
+}

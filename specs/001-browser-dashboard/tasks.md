@@ -70,16 +70,16 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Implementation for User Story 1
 
-- [ ] T026 [P] [US1] Implement configurable search query builder in src/services/search.ts
-- [ ] T027 [P] [US1] Implement non-blocking weather summary service with unavailable fallback in src/services/weather.ts
-- [ ] T028 [P] [US1] Create reusable SearchBar component in src/components/SearchBar/SearchBar.tsx
-- [ ] T029 [P] [US1] Create reusable DateTime component in src/components/DateTime/DateTime.tsx
-- [ ] T030 [P] [US1] Create reusable WeatherSummary component in src/components/WeatherSummary/WeatherSummary.tsx
-- [ ] T031 [P] [US1] Create read-only ShortcutCard component for visible shortcuts in src/components/ShortcutCard/ShortcutCard.tsx
-- [ ] T032 [US1] Compose search, date/time, weather, and shortcut card list in src/features/dashboard/Dashboard.tsx
-- [ ] T033 [US1] Wire dashboard defaults so first launch renders useful content from src/config/defaults.ts
-- [ ] T034 [US1] Add distraction-free visual styling for search, status, and shortcut grid in src/features/dashboard/Dashboard.css
-- [ ] T035 [US1] Add e2e first-launch validation for one-second usable content and no unrelated content in tests/e2e/firstLaunch.spec.ts
+- [X] T026 [P] [US1] Implement configurable search query builder in src/services/search.ts
+- [X] T027 [P] [US1] Implement non-blocking weather summary service with unavailable fallback in src/services/weather.ts
+- [X] T028 [P] [US1] Create reusable SearchBar component in src/components/SearchBar/SearchBar.tsx
+- [X] T029 [P] [US1] Create reusable DateTime component in src/components/DateTime/DateTime.tsx
+- [X] T030 [P] [US1] Create reusable WeatherSummary component in src/components/WeatherSummary/WeatherSummary.tsx
+- [X] T031 [P] [US1] Create read-only ShortcutCard component for visible shortcuts in src/components/ShortcutCard/ShortcutCard.tsx
+- [X] T032 [US1] Compose search, date/time, weather, and shortcut card list in src/features/dashboard/Dashboard.tsx
+- [X] T033 [US1] Wire dashboard defaults so first launch renders useful content from src/config/defaults.ts
+- [X] T034 [US1] Add distraction-free visual styling for search, status, and shortcut grid in src/features/dashboard/Dashboard.css
+- [X] T035 [US1] Add e2e first-launch validation for one-second usable content and no unrelated content in tests/e2e/firstLaunch.spec.ts
 
 **Checkpoint**: User Story 1 is independently functional and satisfies the MVP start-page flow.
 
