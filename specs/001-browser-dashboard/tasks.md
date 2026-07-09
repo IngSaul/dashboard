@@ -120,10 +120,10 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Tests for User Story 3
 
-- [ ] T047 [P] [US3] Add theme preference unit tests for light, dark, system, and persistence in tests/unit/theme.test.ts
-- [ ] T048 [P] [US3] Add keyboard navigation integration test for search, categories, shortcuts, theme, and settings in tests/integration/keyboardNavigation.test.tsx
-- [ ] T049 [P] [US3] Add accessibility interaction test for labels, focus states, and reduced motion in tests/integration/accessibility.test.tsx
-- [ ] T050 [P] [US3] Add responsive layout e2e checks for desktop and tablet widths in tests/e2e/responsive.spec.ts
+- [X] T047 [P] [US3] Add theme preference unit tests for light, dark, system, and persistence in tests/unit/theme.test.ts
+- [X] T048 [P] [US3] Add keyboard navigation integration test for search, categories, shortcuts, theme, and settings in tests/integration/keyboardNavigation.test.tsx
+- [X] T049 [P] [US3] Add accessibility interaction test for labels, focus states, and reduced motion in tests/integration/accessibility.test.tsx
+- [X] T050 [P] [US3] Add responsive layout e2e checks for desktop and tablet widths in tests/e2e/responsive.spec.ts
 
 ### Implementation for User Story 3
 
