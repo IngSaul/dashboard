@@ -93,9 +93,9 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Tests for User Story 2
 
-- [ ] T036 [P] [US2] Add shortcut CRUD and validation unit tests in tests/unit/shortcuts.test.ts
-- [ ] T037 [P] [US2] Add category assignment and empty-category filtering unit tests in tests/unit/categories.test.ts
-- [ ] T038 [P] [US2] Add personalization interaction test for add/edit/remove/reload persistence in tests/integration/shortcutPersonalization.test.tsx
+- [X] T036 [P] [US2] Add shortcut CRUD and validation unit tests in tests/unit/shortcuts.test.ts
+- [X] T037 [P] [US2] Add category assignment and empty-category filtering unit tests in tests/unit/categories.test.ts
+- [X] T038 [P] [US2] Add personalization interaction test for add/edit/remove/reload persistence in tests/integration/shortcutPersonalization.test.tsx
 
 ### Implementation for User Story 2
 
