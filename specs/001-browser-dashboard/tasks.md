@@ -63,10 +63,10 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Tests for User Story 1
 
-- [ ] T022 [P] [US1] Add search behavior unit tests for non-empty and empty queries in tests/unit/search.test.ts
-- [ ] T023 [P] [US1] Add weather fallback unit tests for loading, available, unavailable, and disabled states in tests/unit/weather.test.ts
-- [ ] T024 [P] [US1] Add date/time update tests for initial render and midnight rollover in tests/unit/dateTime.test.ts
-- [ ] T025 [P] [US1] Add launch interaction test for search, date/time, weather fallback, and shortcut visibility in tests/integration/dashboardLaunch.test.tsx
+- [X] T022 [P] [US1] Add search behavior unit tests for non-empty and empty queries in tests/unit/search.test.ts
+- [X] T023 [P] [US1] Add weather fallback unit tests for loading, available, unavailable, and disabled states in tests/unit/weather.test.ts
+- [X] T024 [P] [US1] Add date/time update tests for initial render and midnight rollover in tests/unit/dateTime.test.ts
+- [X] T025 [P] [US1] Add launch interaction test for search, date/time, weather fallback, and shortcut visibility in tests/integration/dashboardLaunch.test.tsx
 
 ### Implementation for User Story 1
 
