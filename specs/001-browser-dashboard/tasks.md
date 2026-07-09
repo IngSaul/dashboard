@@ -27,7 +27,7 @@ keyboard navigation, accessibility, and responsive behavior.
 - [X] T005 [P] Configure unit and component test tooling in vitest.config.ts and tests/setup.ts
 - [X] T006 [P] Configure browser-level validation tooling for e2e checks in playwright.config.ts
 - [X] T007 [P] Create global app stylesheet with minimalist responsive foundations in src/index.css
-- [ ] T008 [P] Add shared test fixtures for browser storage and default dashboard data in tests/fixtures/dashboardConfig.ts
+- [X] T008 [P] Add shared test fixtures for browser storage and default dashboard data in tests/fixtures/dashboardConfig.ts
 
 ---
 
