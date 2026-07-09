@@ -99,14 +99,14 @@ keyboard navigation, accessibility, and responsive behavior.
 
 ### Implementation for User Story 2
 
-- [ ] T039 [P] [US2] Implement shortcut mutation helpers for create, update, remove, and reorder in src/services/shortcuts.ts
-- [ ] T040 [P] [US2] Implement category mutation and filtering helpers in src/services/categories.ts
-- [ ] T041 [P] [US2] Create CategoryNav component for scanning and filtering shortcuts in src/components/CategoryNav/CategoryNav.tsx
-- [ ] T042 [P] [US2] Create Settings component for editing shortcuts and categories in src/components/Settings/Settings.tsx
-- [ ] T043 [US2] Extend ShortcutCard component with edit and remove actions in src/components/ShortcutCard/ShortcutCard.tsx
-- [ ] T044 [US2] Integrate category filtering and settings editing flow in src/features/dashboard/Dashboard.tsx
-- [ ] T045 [US2] Persist shortcut and category edits through configStore in src/services/configStore.ts
-- [ ] T046 [US2] Add e2e personalization validation for shortcut/category persistence after reload in tests/e2e/personalization.spec.ts
+- [X] T039 [P] [US2] Implement shortcut mutation helpers for create, update, remove, and reorder in src/services/shortcuts.ts
+- [X] T040 [P] [US2] Implement category mutation and filtering helpers in src/services/categories.ts
+- [X] T041 [P] [US2] Create CategoryNav component for scanning and filtering shortcuts in src/components/CategoryNav/CategoryNav.tsx
+- [X] T042 [P] [US2] Create Settings component for editing shortcuts and categories in src/components/Settings/Settings.tsx
+- [X] T043 [US2] Extend ShortcutCard component with edit and remove actions in src/components/ShortcutCard/ShortcutCard.tsx
+- [X] T044 [US2] Integrate category filtering and settings editing flow in src/features/dashboard/Dashboard.tsx
+- [X] T045 [US2] Persist shortcut and category edits through configStore in src/services/configStore.ts
+- [X] T046 [US2] Add e2e personalization validation for shortcut/category persistence after reload in tests/e2e/personalization.spec.ts
 
 **Checkpoint**: User Story 2 is independently testable after the foundation and preserves personalized shortcuts/categories across reloads.
 
