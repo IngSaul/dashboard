@@ -15,6 +15,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * receives focus, rather than asserting one exact, brittle Tab sequence —
  * the real requirement is that every primary control is *somewhere* in a
  * reachable, logical tab order, not at a specific step count.
+ *
+ * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
+ * (T054), which has zero widgets until User Story 1's widget plugins
+ * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
+ * tests are expected to stay red for that reason too until then.
  */
 
 async function tabUntil(

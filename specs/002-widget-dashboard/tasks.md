@@ -107,13 +107,13 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### AppShell composition
 
-- [ ] T049 Implement `BackgroundLayer` (renders `ThemeState.wallpaper` via `backgroundEngine`) in `src/components/shell/BackgroundLayer/` (depends on T044)
-- [ ] T050 Implement `Workspace` + `LeftColumn`/`CenterColumn`/`RightColumn` (render `WorkspaceState.ResolvedLayout`, no layout math of their own) in `src/components/shell/Workspace/` (depends on T045, T046)
-- [ ] T051 Implement `SettingsDrawer` shell (closed by default, empty sections, reads/writes `SettingsState`) in `src/components/shell/SettingsDrawer/` (depends on T047)
-- [ ] T052 Implement `CommandPalette` shell (closed by default, keyboard toggle, focus trap, empty result list — sources wired in Polish) in `src/components/shell/CommandPalette/` (depends on T048)
-- [ ] T053 Implement `AppShell` composing the five state Providers (Theme/Workspace/Plugin/Settings/Search) plus `BackgroundLayer` + `Workspace` + `SettingsDrawer` + `CommandPalette` in `src/components/shell/AppShell/` (depends on T049-T052)
-- [ ] T054 Update `src/features/dashboard/Dashboard.tsx` to render `<AppShell>` instead of the previous fixed-section layout (depends on T053)
-- [ ] T055 Create `src/plugins/index.ts` with an empty `registerBuiltInPlugins()` entry point, called during app init before `AppShell` mounts (depends on T033, T054)
+- [X] T049 Implement `BackgroundLayer` (renders `ThemeState.wallpaper` via `backgroundEngine`) in `src/components/shell/BackgroundLayer/` (depends on T044)
+- [X] T050 Implement `Workspace` + `LeftColumn`/`CenterColumn`/`RightColumn` (render `WorkspaceState.ResolvedLayout`, no layout math of their own) in `src/components/shell/Workspace/` (depends on T045, T046)
+- [X] T051 Implement `SettingsDrawer` shell (closed by default, empty sections, reads/writes `SettingsState`) in `src/components/shell/SettingsDrawer/` (depends on T047)
+- [X] T052 Implement `CommandPalette` shell (closed by default, keyboard toggle, focus trap, empty result list — sources wired in Polish) in `src/components/shell/CommandPalette/` (depends on T048)
+- [X] T053 Implement `AppShell` composing the five state Providers (Theme/Workspace/Plugin/Settings/Search) plus `BackgroundLayer` + `Workspace` + `SettingsDrawer` + `CommandPalette` in `src/components/shell/AppShell/` (depends on T049-T052)
+- [X] T054 Update `src/features/dashboard/Dashboard.tsx` to render `<AppShell>` instead of the previous fixed-section layout (depends on T053)
+- [X] T055 Create `src/plugins/index.ts` with an empty `registerBuiltInPlugins()` entry point, called during app init before `AppShell` mounts (depends on T033, T054)
 
 **Checkpoint**: Foundation ready — `AppShell` renders an empty, correctly-themed, responsive shell with zero widgets. All three user stories can now proceed.
 

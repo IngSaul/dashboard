@@ -14,6 +14,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * Contract: a "Manage shortcuts" control opens a settings panel with a
  * labelled add form (accessible names matching /label/i and /url/i) and,
  * per shortcut, "Edit {label}"/"Remove {label}" controls.
+ *
+ * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
+ * (T054), which has zero widgets until User Story 1's widget plugins
+ * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
+ * tests are expected to stay red for that reason too until then.
  */
 
 describe('Shortcut personalization (User Story 2)', () => {

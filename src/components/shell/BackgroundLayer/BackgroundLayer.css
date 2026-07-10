@@ -1,0 +1,20 @@
+.background-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-background);
+  overflow: hidden;
+}
+
+.background-layer__image {
+  position: absolute;
+  /* Slightly oversized so a blurred edge never reveals a transparent gap. */
+  inset: -5%;
+  background-size: cover;
+  background-position: center;
+  transition: filter var(--motion-duration-slow) var(--motion-easing-standard);
+}
+
+.background-layer__overlay {
+  position: absolute;
+  inset: 0;
+}

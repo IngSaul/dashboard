@@ -15,6 +15,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * browser location. jsdom has no `navigator.geolocation`, so the weather
  * service is expected to resolve to an `unavailable` status without making
  * a network request, keeping this test fast and offline-safe.
+ *
+ * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
+ * (T054), which has zero widgets until User Story 1's widget plugins
+ * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
+ * tests are expected to stay red for that reason too until then.
  */
 
 function mockLocationAssign(): ReturnType<typeof vi.fn> {

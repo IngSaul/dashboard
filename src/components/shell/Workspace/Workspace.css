@@ -1,0 +1,37 @@
+/**
+ * Three-column desktop grid, per design-reference.md: a narrower left
+ * column, a wider center column, and a right column of the same order as
+ * left. `layoutEngine` already folds right into center (tablet) and
+ * everything into center (phone) at the data level — this stylesheet only
+ * needs to stop reserving a track for a column that's now permanently
+ * empty at that breakpoint, via `:empty`.
+ */
+
+.workspace {
+  position: relative;
+  z-index: var(--z-base);
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 320px);
+  gap: var(--space-5);
+  width: min(100%, var(--container-max));
+  margin-inline: auto;
+  padding: var(--page-padding);
+  align-items: start;
+}
+
+.workspace-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.workspace-column:empty {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .workspace {
+    grid-template-columns: 1fr;
+    padding: var(--space-6) var(--page-padding);
+  }
+}

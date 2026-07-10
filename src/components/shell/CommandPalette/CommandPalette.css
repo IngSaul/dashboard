@@ -1,0 +1,53 @@
+/*
+ * `display` is deliberately scoped to `[open]` below rather than set here:
+ * a bare `display: flex` on `.command-palette` would, as author CSS,
+ * override the browser's own `dialog:not([open]) { display: none }` rule
+ * and leave the palette visibly rendered even while closed.
+ */
+.command-palette {
+  z-index: var(--z-palette);
+  margin: 10vh auto auto;
+  width: min(36rem, calc(100vw - var(--space-6)));
+  max-height: min(28rem, calc(100vh - 10vh - var(--space-6)));
+  padding: var(--space-4);
+  border: 1px solid var(--glass-border-visible);
+  border-radius: var(--radius-2xl);
+  background: var(--glass-fill-high);
+  color: var(--color-text);
+  box-shadow: var(--shadow-elevation-3);
+  backdrop-filter: blur(var(--glass-blur-high));
+  -webkit-backdrop-filter: blur(var(--glass-blur-high));
+}
+
+.command-palette[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.command-palette::backdrop {
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+}
+
+.command-palette__results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  overflow-y: auto;
+}
+
+.command-palette__result {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.command-palette__result:hover,
+.command-palette__result:focus-visible {
+  background: var(--glass-fill-low);
+}

@@ -1,0 +1,6 @@
+.app-shell {
+  position: relative;
+  min-height: 100svh;
+  /* Scopes the z-index token scale to this subtree's own stacking context. */
+  isolation: isolate;
+}

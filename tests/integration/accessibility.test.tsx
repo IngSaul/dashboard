@@ -7,6 +7,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * Accessibility contract for User Story 3 (labels, focus states, reduced
  * motion) targets the ThemeToggle control that doesn't exist yet (T052);
  * these tests are expected to fail until that work lands.
+ *
+ * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
+ * (T054), which has zero widgets until User Story 1's widget plugins
+ * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
+ * tests are expected to stay red for that reason too until then.
  */
 
 function mockMatchMedia(matches: boolean): void {
