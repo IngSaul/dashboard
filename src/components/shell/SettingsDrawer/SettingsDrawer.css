@@ -54,3 +54,29 @@
   font-size: var(--font-size-title);
   font-weight: var(--font-weight-semibold);
 }
+
+/*
+ * Shared by every settings-drawer section after `WidgetSettings`
+ * (ShortcutSettings, and the six ThemePreferences group sections) — a
+ * top divider between each, matching `WidgetSettings`'s own internal
+ * `.widget-settings__monitoring` divider style.
+ */
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.settings-section__heading {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.settings-section__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}

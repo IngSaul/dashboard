@@ -166,13 +166,13 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Implementation for User Story 2
 
-- [ ] T076 [US2] Implement `WidgetSettings` (list every registered widget type, enable/disable toggle, column assignment, keyboard-operable move up/down reordering via `utils/keyboard.ts`) in `src/components/WidgetSettings/` (depends on T033, T037, T050)
-- [ ] T077 [US2] Compose `WidgetSettings` inside `SettingsDrawer` alongside the existing `Settings` component, with six distinct, independently editable theme-group sections (theme, appearance, wallpaper, glass, animations, accessibility) in `src/components/shell/SettingsDrawer/` (depends on T051, T076)
-- [ ] T078 [US2] Extend `ThemeToggle` to read/write `ThemeState`'s `theme` group in `src/components/ThemeToggle/` (depends on T044)
-- [ ] T079 [US2] Add wallpaper controls (source picker, blur, dim overlay, gradient) to `SettingsDrawer`'s `wallpaper` section, backed by `backgroundEngine` (depends on T042, T077)
-- [ ] T080 [US2] Add monitoring-source endpoint configuration (URL, poll interval, timeout) to `WidgetSettings` for the `server-status`/`docker-status` widget types (depends on T060, T076)
-- [ ] T081 [US2] Ensure every `WidgetSettings`/`SettingsDrawer` change persists immediately via `WorkspaceState`/`ThemeState` (no separate save step required, matching FR-005) (depends on T077)
-- [ ] T082 [US2] Verify Scenario 2 of [quickstart.md](./quickstart.md) manually (enable/disable/reorder, theme switch, corrupted-storage fallback)
+- [X] T076 [US2] Implement `WidgetSettings` (list every registered widget type, enable/disable toggle, column assignment, keyboard-operable move up/down reordering via `utils/keyboard.ts`) in `src/components/WidgetSettings/` (depends on T033, T037, T050)
+- [X] T077 [US2] Compose `WidgetSettings` inside `SettingsDrawer` alongside the existing `Settings` component, with six distinct, independently editable theme-group sections (theme, appearance, wallpaper, glass, animations, accessibility) in `src/components/shell/SettingsDrawer/` (depends on T051, T076)
+- [X] T078 [US2] Extend `ThemeToggle` to read/write `ThemeState`'s `theme` group in `src/components/ThemeToggle/` (depends on T044)
+- [X] T079 [US2] Add wallpaper controls (source picker, blur, dim overlay, gradient) to `SettingsDrawer`'s `wallpaper` section, backed by `backgroundEngine` (depends on T042, T077)
+- [X] T080 [US2] Add monitoring-source endpoint configuration (URL, poll interval, timeout) to `WidgetSettings` for the `server-status`/`docker-status` widget types (depends on T060, T076)
+- [X] T081 [US2] Ensure every `WidgetSettings`/`SettingsDrawer` change persists immediately via `WorkspaceState`/`ThemeState` (no separate save step required, matching FR-005) (depends on T077)
+- [X] T082 [US2] Verify Scenario 2 of [quickstart.md](./quickstart.md) manually (enable/disable/reorder, theme switch, corrupted-storage fallback)
 
 **Checkpoint**: User Stories 1 AND 2 both work independently — the dashboard is fully customizable through settings.
 
