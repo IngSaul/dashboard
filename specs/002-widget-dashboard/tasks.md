@@ -85,11 +85,11 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 - [x] T033 Implement `widgetRegistry` (`register`/`unregister`/`getMetadata`/`load`/`lazyLoad`, duplicate-registration handling) in `src/services/widgetRegistry.ts` (depends on T028)
 - [x] T034 [P] Unit test `widgetRegistry` register/unregister/getMetadata/duplicate-registration/unknown-type lookups in `tests/unit/widgetRegistry.test.ts` (depends on T033)
 - [x] T035 Implement `widgetLayout` service (enable/order persistence, validation/repair, never-fully-empty guarantee) in `src/services/widgetLayout.ts` (depends on T027, T032)
-- [ ] T036 [P] Unit test `widgetLayout` persistence and repair-on-corruption in `tests/unit/widgetLayout.test.ts` (depends on T035)
-- [ ] T037 Implement `layoutEngine` (`resolveLayout(widgetLayout, breakpoint, registry) -> ResolvedLayout`, `useBreakpoint()` hook) in `src/services/layoutEngine.ts` (depends on T029, T033, T035)
-- [ ] T038 [P] Unit test `layoutEngine.resolveLayout()` as a pure function across breakpoints in `tests/unit/layoutEngine.test.ts` (depends on T037)
-- [ ] T039 Implement `eventBus` (`emit`/`on`/`off`, typed payloads) in `src/services/eventBus.ts` (depends on T030)
-- [ ] T040 [P] Unit test `eventBus` emit/on/off and multiple-subscriber isolation in `tests/unit/eventBus.test.ts` (depends on T039)
+- [x] T036 [P] Unit test `widgetLayout` persistence and repair-on-corruption in `tests/unit/widgetLayout.test.ts` (depends on T035)
+- [x] T037 Implement `layoutEngine` (`resolveLayout(widgetLayout, breakpoint, registry) -> ResolvedLayout`, `useBreakpoint()` hook) in `src/services/layoutEngine.ts` (depends on T029, T033, T035)
+- [x] T038 [P] Unit test `layoutEngine.resolveLayout()` as a pure function across breakpoints in `tests/unit/layoutEngine.test.ts` (depends on T037)
+- [x] T039 Implement `eventBus` (`emit`/`on`/`off`, typed payloads) in `src/services/eventBus.ts` (depends on T030)
+- [x] T040 [P] Unit test `eventBus` emit/on/off and multiple-subscriber isolation in `tests/unit/eventBus.test.ts` (depends on T039)
 
 ### Theme and background
 
