@@ -25,10 +25,10 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 **Purpose**: Project scaffolding for the new architecture layers
 
-- [ ] T001 Create new top-level directories per plan.md: `src/design/`, `src/state/`, `src/plugins/`, `src/services/storage/`, `src/components/glass/`, `src/components/shell/`, `src/components/widgets/`
-- [ ] T002 Add `lucide-react` and `simple-icons` as dependencies in `package.json` (tree-shakeable, per-icon imports only)
-- [ ] T003 [P] Confirm ESLint/TypeScript strict config (`eslint.config.js`, `tsconfig.json`) covers the new `src/design/`, `src/state/`, `src/plugins/` directories with the existing no-`any` rules
-- [ ] T004 [P] Create empty typed widget catalog stub at `src/config/widgets.ts` (exports `WIDGET_CATALOG: WidgetType[]`, filled in during Foundational)
+- [x] T001 Create new top-level directories per plan.md: `src/design/`, `src/state/`, `src/plugins/`, `src/services/storage/`, `src/components/glass/`, `src/components/shell/`, `src/components/widgets/`
+- [x] T002 Add `lucide-react` and `simple-icons` as dependencies in `package.json` (tree-shakeable, per-icon imports only)
+- [x] T003 [P] Confirm ESLint/TypeScript strict config (`eslint.config.js`, `tsconfig.json`) covers the new `src/design/`, `src/state/`, `src/plugins/` directories with the existing no-`any` rules
+- [x] T004 [P] Create empty typed widget catalog stub at `src/config/widgets.ts` (exports `WIDGET_CATALOG: WidgetType[]`, filled in during Foundational)
 
 **Checkpoint**: Directories and tooling ready for foundational work.
 
