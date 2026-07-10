@@ -99,11 +99,11 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### State slices (React Context)
 
-- [ ] T044 [P] Implement `ThemeProvider`/`useThemeState()` (all six `ThemePreferences` groups) in `src/state/ThemeProvider.tsx` (depends on T041, T042)
-- [ ] T045 [P] Implement `WorkspaceProvider`/`useWorkspaceState()` (persisted `WidgetLayout`, `ResolvedLayout`, ephemeral per-widget runtime state) in `src/state/WorkspaceProvider.tsx` (depends on T035, T037)
-- [ ] T046 [P] Implement `PluginProvider`/`usePluginState()` (registry snapshot) in `src/state/PluginProvider.tsx` (depends on T033)
-- [ ] T047 [P] Implement `SettingsProvider`/`useSettingsState()` (drawer open/section, ephemeral) in `src/state/SettingsProvider.tsx`
-- [ ] T048 [P] Implement `SearchProvider`/`useSearchState()` (query/results/palette open, ephemeral skeleton — no sources wired yet) in `src/state/SearchProvider.tsx`
+- [X] T044 [P] Implement `ThemeProvider`/`useThemeState()` (all six `ThemePreferences` groups) in `src/state/ThemeProvider.tsx` (depends on T041, T042)
+- [X] T045 [P] Implement `WorkspaceProvider`/`useWorkspaceState()` (persisted `WidgetLayout`, `ResolvedLayout`, ephemeral per-widget runtime state) in `src/state/WorkspaceProvider.tsx` (depends on T035, T037)
+- [X] T046 [P] Implement `PluginProvider`/`usePluginState()` (registry snapshot) in `src/state/PluginProvider.tsx` (depends on T033)
+- [X] T047 [P] Implement `SettingsProvider`/`useSettingsState()` (drawer open/section, ephemeral) in `src/state/SettingsProvider.tsx`
+- [X] T048 [P] Implement `SearchProvider`/`useSearchState()` (query/results/palette open, ephemeral skeleton — no sources wired yet) in `src/state/SearchProvider.tsx`
 
 ### AppShell composition
 
