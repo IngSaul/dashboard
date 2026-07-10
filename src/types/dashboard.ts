@@ -1,3 +1,5 @@
+import type { MonitoringSourceConfig, Note, ThemePreferences, WidgetLayout } from './widgets'
+
 /**
  * Dashboard domain types.
  *
@@ -86,4 +88,16 @@ export interface DashboardConfiguration {
   shortcuts: Shortcut[]
   categories: ShortcutCategory[]
   updatedAt: string
+  /**
+   * 002-widget-dashboard additions. New top-level keys on the same
+   * persisted configuration object (not a parallel storage mechanism) —
+   * see `specs/002-widget-dashboard/data-model.md`. `themePreference`
+   * above (feature 001, mode + resolvedMode only) is left as-is;
+   * `themePreferences` (plural) is the new, richer six-group structure
+   * that `ThemeProvider` reads going forward.
+   */
+  widgetLayout: WidgetLayout
+  themePreferences: ThemePreferences
+  monitoringSourceConfig: MonitoringSourceConfig
+  note: Note
 }

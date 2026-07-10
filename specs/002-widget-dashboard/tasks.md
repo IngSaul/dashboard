@@ -74,17 +74,17 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Widget/layout/theme types and schema
 
-- [ ] T028 [P] Define `Widget`, `WidgetLayout`, `WidgetDescriptor`, `WidgetMetadata`, `ThemePreferences`, `BackgroundConfig`, `MonitoringSourceConfig`, `Note`, `IconSource` types in `src/types/widgets.ts` per [data-model.md](./data-model.md)
-- [ ] T029 [P] Define `Breakpoint` and `ResolvedLayout` types in `src/types/layout.ts`
-- [ ] T030 [P] Define the event-name → payload map type in `src/types/events.ts`
-- [ ] T031 Extend `src/config/schema.ts` with validation/repair for widget layout, theme-group, background, monitoring, and icon schemas (depends on T028)
-- [ ] T032 Extend `src/config/defaults.ts` with widget catalog defaults, default `WidgetLayout` (clock + shortcuts enabled), and default `ThemePreferences` (depends on T031)
+- [x] T028 [P] Define `Widget`, `WidgetLayout`, `WidgetDescriptor`, `WidgetMetadata`, `ThemePreferences`, `BackgroundConfig`, `MonitoringSourceConfig`, `Note`, `IconSource` types in `src/types/widgets.ts` per [data-model.md](./data-model.md)
+- [x] T029 [P] Define `Breakpoint` and `ResolvedLayout` types in `src/types/layout.ts`
+- [x] T030 [P] Define the event-name → payload map type in `src/types/events.ts`
+- [x] T031 Extend `src/config/schema.ts` with validation/repair for widget layout, theme-group, background, monitoring, and icon schemas (depends on T028)
+- [x] T032 Extend `src/config/defaults.ts` with widget catalog defaults, default `WidgetLayout` (clock + shortcuts enabled), and default `ThemePreferences` (depends on T031)
 
 ### Widget registry, layout engine, event bus
 
-- [ ] T033 Implement `widgetRegistry` (`register`/`unregister`/`getMetadata`/`load`/`lazyLoad`, duplicate-registration handling) in `src/services/widgetRegistry.ts` (depends on T028)
-- [ ] T034 [P] Unit test `widgetRegistry` register/unregister/getMetadata/duplicate-registration/unknown-type lookups in `tests/unit/widgetRegistry.test.ts` (depends on T033)
-- [ ] T035 Implement `widgetLayout` service (enable/order persistence, validation/repair, never-fully-empty guarantee) in `src/services/widgetLayout.ts` (depends on T027, T032)
+- [x] T033 Implement `widgetRegistry` (`register`/`unregister`/`getMetadata`/`load`/`lazyLoad`, duplicate-registration handling) in `src/services/widgetRegistry.ts` (depends on T028)
+- [x] T034 [P] Unit test `widgetRegistry` register/unregister/getMetadata/duplicate-registration/unknown-type lookups in `tests/unit/widgetRegistry.test.ts` (depends on T033)
+- [x] T035 Implement `widgetLayout` service (enable/order persistence, validation/repair, never-fully-empty guarantee) in `src/services/widgetLayout.ts` (depends on T027, T032)
 - [ ] T036 [P] Unit test `widgetLayout` persistence and repair-on-corruption in `tests/unit/widgetLayout.test.ts` (depends on T035)
 - [ ] T037 Implement `layoutEngine` (`resolveLayout(widgetLayout, breakpoint, registry) -> ResolvedLayout`, `useBreakpoint()` hook) in `src/services/layoutEngine.ts` (depends on T029, T033, T035)
 - [ ] T038 [P] Unit test `layoutEngine.resolveLayout()` as a pure function across breakpoints in `tests/unit/layoutEngine.test.ts` (depends on T037)

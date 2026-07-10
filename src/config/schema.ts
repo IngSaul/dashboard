@@ -1,3 +1,4 @@
+import type { GlassBorderStrength, GlassIntensity } from '../design/glass'
 import { createDefaultDashboardConfig, DEFAULT_DASHBOARD_CONFIG_VERSION } from './defaults'
 import type {
   DashboardConfiguration,
@@ -12,6 +13,19 @@ import type {
   WeatherPreference,
   WeatherUnits,
 } from '../types/dashboard'
+import type {
+  BackgroundConfig,
+  BackgroundGradient,
+  IconProviderKind,
+  IconSource,
+  MonitoringSourceConfig,
+  Note,
+  ThemePreferences,
+  Widget,
+  WidgetColumn,
+  WidgetLayout,
+  WidgetType,
+} from '../types/widgets'
 
 /**
  * Configuration validation and repair.
@@ -215,6 +229,308 @@ function repairShortcuts(raw: unknown, validCategories: ShortcutCategory[]): Sho
   return shortcuts
 }
 
+// --- 002-widget-dashboard additions ---------------------------------------
+//
+// Widget layout, the six ThemePreferences groups, background/wallpaper,
+// monitoring source, notes, and shortcut icon resolution. Same philosophy as
+// above: never throw, drop/fall back at the smallest possible granularity
+// (a single malformed widget, not the whole layout; a single invalid
+// ThemePreferences group, not the whole preference set) — see
+// specs/002-widget-dashboard/data-model.md for the per-entity validation
+// rules this mirrors.
+
+const WIDGET_TYPES: WidgetType[] = [
+  'clock',
+  'weather',
+  'server-status',
+  'docker-status',
+  'calendar',
+  'notes',
+  'shortcuts',
+]
+
+const WIDGET_COLUMNS: WidgetColumn[] = ['left', 'center', 'right']
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value))
+}
+
+function isWidgetType(value: unknown): value is WidgetType {
+  return typeof value === 'string' && (WIDGET_TYPES as string[]).includes(value)
+}
+
+function isWidgetColumn(value: unknown): value is WidgetColumn {
+  return typeof value === 'string' && (WIDGET_COLUMNS as string[]).includes(value)
+}
+
+/**
+ * `settings` is only checked for being a plain object, not an exact
+ * per-type shape: every `WidgetSettingsByType` entry is currently
+ * `Record<string, never>`, but a future widget type may add real fields,
+ * and repair shouldn't need to change again just because a settings object
+ * gained a key it doesn't yet read.
+ */
+function isWidget(value: unknown): value is Widget {
+  if (!isPlainObject(value)) {
+    return false
+  }
+  return (
+    isNonEmptyTrimmedString(value.id) &&
+    isWidgetType(value.type) &&
+    isBoolean(value.enabled) &&
+    isWidgetColumn(value.column) &&
+    isFiniteNumber(value.order) &&
+    isPlainObject(value.settings)
+  )
+}
+
+/**
+ * Repairs the widget layout array: drops malformed entries and duplicate
+ * types, then reassigns `order` sequentially within each column (stable on
+ * the original order) so every enabled widget has a unique column/order
+ * pair — this both satisfies the uniqueness validation rule and implements
+ * "append to end of column on conflict" without a separate pass. Falls back
+ * to `fallback` entirely if, after repair, both `clock` and `shortcuts`
+ * would be disabled (the dashboard must never render fully empty).
+ */
+function repairWidgetLayout(raw: unknown, fallback: WidgetLayout): WidgetLayout {
+  if (!isPlainObject(raw) || !Array.isArray(raw.widgets)) {
+    return fallback
+  }
+
+  const seenTypes = new Set<WidgetType>()
+  const candidates: Widget[] = []
+  for (const entry of raw.widgets) {
+    if (isWidget(entry) && !seenTypes.has(entry.type)) {
+      seenTypes.add(entry.type)
+      candidates.push(entry)
+    }
+  }
+
+  const clockEnabled = candidates.some((widget) => widget.type === 'clock' && widget.enabled)
+  const shortcutsEnabled = candidates.some((widget) => widget.type === 'shortcuts' && widget.enabled)
+  if (!clockEnabled && !shortcutsEnabled) {
+    return fallback
+  }
+
+  const widgets = WIDGET_COLUMNS.flatMap((column) =>
+    candidates
+      .filter((widget) => widget.column === column)
+      .sort((a, b) => a.order - b.order)
+      .map((widget, index) => ({ ...widget, order: index }) as Widget),
+  )
+
+  return {
+    widgets,
+    schemaVersion: isFiniteNumber(raw.schemaVersion) ? raw.schemaVersion : fallback.schemaVersion,
+  }
+}
+
+const BACKGROUND_SOURCES: BackgroundConfig['source'][] = ['default', 'custom-url', 'custom-upload']
+
+function isBackgroundGradient(value: unknown): value is BackgroundGradient {
+  if (!isPlainObject(value)) {
+    return false
+  }
+  return (
+    isNonEmptyTrimmedString(value.from) &&
+    isNonEmptyTrimmedString(value.to) &&
+    isFiniteNumber(value.angleDeg)
+  )
+}
+
+/**
+ * `blurPx`/`dimOverlay` are clamped rather than rejected, and an invalid
+ * `custom-url` falls back to `source: 'default'` specifically (not the
+ * whole config), per data-model.md's `BackgroundConfig` validation rules.
+ */
+function repairBackgroundConfig(raw: unknown, fallback: BackgroundConfig): BackgroundConfig {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const source = (BACKGROUND_SOURCES as string[]).includes(raw.source as string)
+    ? (raw.source as BackgroundConfig['source'])
+    : undefined
+  if (!source) {
+    return fallback
+  }
+  if (source === 'custom-url' && !isValidUrlString(raw.value)) {
+    return { ...fallback, source: 'default', value: null }
+  }
+  const value = raw.value === null || isNonEmptyTrimmedString(raw.value) ? raw.value : fallback.value
+  const dimOverlay = isFiniteNumber(raw.dimOverlay) ? clamp(raw.dimOverlay, 0, 1) : fallback.dimOverlay
+  const blurPx = isFiniteNumber(raw.blurPx) ? clamp(raw.blurPx, 0, 40) : fallback.blurPx
+  const gradient =
+    raw.gradient === null
+      ? null
+      : isBackgroundGradient(raw.gradient)
+        ? raw.gradient
+        : fallback.gradient
+
+  return { source, value: value as string | null, dimOverlay, blurPx, gradient }
+}
+
+const THEME_GROUP_MODES: ThemePreferences['theme']['mode'][] = ['light', 'dark', 'system']
+const DENSITIES: ThemePreferences['appearance']['density'][] = ['comfortable', 'compact']
+const GLASS_INTENSITIES: GlassIntensity[] = ['low', 'medium', 'high']
+const GLASS_BORDER_STRENGTHS: GlassBorderStrength[] = ['subtle', 'visible']
+const REDUCED_MOTION_MODES: ThemePreferences['animations']['reducedMotion'][] = [
+  'system',
+  'always',
+  'never',
+]
+const TRANSITION_SPEEDS: ThemePreferences['animations']['transitionSpeed'][] = [
+  'normal',
+  'fast',
+  'off',
+]
+const FOCUS_RING_STYLES: ThemePreferences['accessibility']['focusRingStyle'][] = [
+  'default',
+  'high-visibility',
+]
+
+function repairThemeGroup(
+  raw: unknown,
+  fallback: ThemePreferences['theme'],
+): ThemePreferences['theme'] {
+  if (!isPlainObject(raw) || !(THEME_GROUP_MODES as string[]).includes(raw.mode as string)) {
+    return fallback
+  }
+  return { mode: raw.mode as ThemePreferences['theme']['mode'] }
+}
+
+function repairAppearanceGroup(
+  raw: unknown,
+  fallback: ThemePreferences['appearance'],
+): ThemePreferences['appearance'] {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const accentColor = isNonEmptyTrimmedString(raw.accentColor) ? raw.accentColor : undefined
+  const density = (DENSITIES as string[]).includes(raw.density as string)
+    ? (raw.density as ThemePreferences['appearance']['density'])
+    : undefined
+  if (!accentColor || !density) {
+    return fallback
+  }
+  return { accentColor, density }
+}
+
+function repairGlassGroup(
+  raw: unknown,
+  fallback: ThemePreferences['glass'],
+): ThemePreferences['glass'] {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const intensity = (GLASS_INTENSITIES as string[]).includes(raw.intensity as string)
+    ? (raw.intensity as GlassIntensity)
+    : undefined
+  const borderStrength = (GLASS_BORDER_STRENGTHS as string[]).includes(raw.borderStrength as string)
+    ? (raw.borderStrength as GlassBorderStrength)
+    : undefined
+  if (!intensity || !borderStrength) {
+    return fallback
+  }
+  return { intensity, borderStrength }
+}
+
+function repairAnimationsGroup(
+  raw: unknown,
+  fallback: ThemePreferences['animations'],
+): ThemePreferences['animations'] {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const reducedMotion = (REDUCED_MOTION_MODES as string[]).includes(raw.reducedMotion as string)
+    ? (raw.reducedMotion as ThemePreferences['animations']['reducedMotion'])
+    : undefined
+  const transitionSpeed = (TRANSITION_SPEEDS as string[]).includes(raw.transitionSpeed as string)
+    ? (raw.transitionSpeed as ThemePreferences['animations']['transitionSpeed'])
+    : undefined
+  if (!reducedMotion || !transitionSpeed) {
+    return fallback
+  }
+  return { reducedMotion, transitionSpeed }
+}
+
+function repairAccessibilityGroup(
+  raw: unknown,
+  fallback: ThemePreferences['accessibility'],
+): ThemePreferences['accessibility'] {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const contrastBoost = isBoolean(raw.contrastBoost) ? raw.contrastBoost : undefined
+  const focusRingStyle = (FOCUS_RING_STYLES as string[]).includes(raw.focusRingStyle as string)
+    ? (raw.focusRingStyle as ThemePreferences['accessibility']['focusRingStyle'])
+    : undefined
+  if (contrastBoost === undefined || !focusRingStyle) {
+    return fallback
+  }
+  const fontScale = isFiniteNumber(raw.fontScale) ? clamp(raw.fontScale, 0.9, 1.5) : fallback.fontScale
+  return { contrastBoost, focusRingStyle, fontScale }
+}
+
+/** Each of the six groups validates/repairs independently — an invalid group never discards the other five. */
+function repairThemePreferences(raw: unknown, fallback: ThemePreferences): ThemePreferences {
+  const source = isPlainObject(raw) ? raw : {}
+  return {
+    theme: repairThemeGroup(source.theme, fallback.theme),
+    appearance: repairAppearanceGroup(source.appearance, fallback.appearance),
+    wallpaper: repairBackgroundConfig(source.wallpaper, fallback.wallpaper),
+    glass: repairGlassGroup(source.glass, fallback.glass),
+    animations: repairAnimationsGroup(source.animations, fallback.animations),
+    accessibility: repairAccessibilityGroup(source.accessibility, fallback.accessibility),
+  }
+}
+
+/** Bounds (poll 10-3600s, timeout 500-30000ms) are enforced by clamping, matching the rest of this module's repair-not-reject philosophy. */
+function repairMonitoringSourceConfig(
+  raw: unknown,
+  fallback: MonitoringSourceConfig,
+): MonitoringSourceConfig {
+  if (!isPlainObject(raw)) {
+    return fallback
+  }
+  const endpointUrl = raw.endpointUrl === null || isValidUrlString(raw.endpointUrl) ? raw.endpointUrl : null
+  const pollIntervalSeconds = isFiniteNumber(raw.pollIntervalSeconds)
+    ? clamp(raw.pollIntervalSeconds, 10, 3600)
+    : fallback.pollIntervalSeconds
+  const timeoutMs = isFiniteNumber(raw.timeoutMs) ? clamp(raw.timeoutMs, 500, 30000) : fallback.timeoutMs
+  return { endpointUrl: endpointUrl as string | null, pollIntervalSeconds, timeoutMs }
+}
+
+const NOTE_MAX_LENGTH = 20_000
+
+/** Oversized content is truncated (not dropped) per data-model.md's Note validation rule; the "visible notice" is `NotesWidget`'s concern, not this repair step. */
+function repairNote(raw: unknown, fallback: Note): Note {
+  if (!isPlainObject(raw) || typeof raw.content !== 'string' || !isNonEmptyTrimmedString(raw.updatedAt)) {
+    return fallback
+  }
+  const content = raw.content.length > NOTE_MAX_LENGTH ? raw.content.slice(0, NOTE_MAX_LENGTH) : raw.content
+  return { content, updatedAt: raw.updatedAt }
+}
+
+const ICON_PROVIDERS: IconProviderKind[] = ['lucide', 'simple-icons', 'custom-svg', 'favicon', 'fallback']
+
+/**
+ * Not yet wired into `repairDashboardConfig` — `Shortcut` doesn't carry an
+ * `icon: IconSource` field until the icon system lands (US3). Defined now,
+ * alongside the rest of this feature's schemas, so that extension only adds
+ * a call site here rather than a new validation function.
+ */
+export function isIconSource(value: unknown): value is IconSource {
+  if (!isPlainObject(value)) {
+    return false
+  }
+  return (
+    (ICON_PROVIDERS as string[]).includes(value.provider as string) &&
+    isNonEmptyTrimmedString(value.value) &&
+    isNonEmptyTrimmedString(value.resolvedAt)
+  )
+}
+
 /**
  * Validates and repairs an untrusted parsed value into a complete
  * `DashboardConfiguration`. Never throws.
@@ -239,5 +555,12 @@ export function repairDashboardConfig(raw: unknown): DashboardConfiguration {
     categories,
     shortcuts,
     updatedAt: isNonEmptyTrimmedString(raw.updatedAt) ? raw.updatedAt : defaults.updatedAt,
+    widgetLayout: repairWidgetLayout(raw.widgetLayout, defaults.widgetLayout),
+    themePreferences: repairThemePreferences(raw.themePreferences, defaults.themePreferences),
+    monitoringSourceConfig: repairMonitoringSourceConfig(
+      raw.monitoringSourceConfig,
+      defaults.monitoringSourceConfig,
+    ),
+    note: repairNote(raw.note, defaults.note),
   }
 }
