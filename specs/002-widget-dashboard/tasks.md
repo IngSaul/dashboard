@@ -42,16 +42,16 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Design tokens
 
-- [ ] T005 [P] Define spacing tokens in `src/design/spacing.ts`
-- [ ] T006 [P] Define radius tokens in `src/design/radius.ts`
-- [ ] T007 [P] Define color tokens in `src/design/colors.ts`
-- [ ] T008 [P] Define motion tokens (durations/easings, reduced-motion variants) in `src/design/motion.ts`
-- [ ] T009 [P] Define glass tokens (blur/translucency/border presets: low/medium/high intensity, subtle/visible border) in `src/design/glass.ts`
-- [ ] T010 [P] Define breakpoint thresholds (desktop/tablet/phone) in `src/design/breakpoints.ts`
-- [ ] T011 [P] Define typography scale tokens in `src/design/typography.ts`
-- [ ] T012 [P] Define shadow/elevation tokens in `src/design/shadows.ts`
-- [ ] T013 [P] Define the stacking-order scale (base, drawer, palette, dropdown, tooltip, dialog) in `src/design/zIndex.ts`
-- [ ] T014 Aggregate all tokens into a single export in `src/design/tokens.ts` (depends on T005-T013)
+- [x] T005 [P] Define spacing tokens in `src/design/spacing.ts`
+- [x] T006 [P] Define radius tokens in `src/design/radius.ts`
+- [x] T007 [P] Define color tokens in `src/design/colors.ts`
+- [x] T008 [P] Define motion tokens (durations/easings, reduced-motion variants) in `src/design/motion.ts`
+- [x] T009 [P] Define glass tokens (blur/translucency/border presets: low/medium/high intensity, subtle/visible border) in `src/design/glass.ts`
+- [x] T010 [P] Define breakpoint thresholds (desktop/tablet/phone) in `src/design/breakpoints.ts`
+- [x] T011 [P] Define typography scale tokens in `src/design/typography.ts`
+- [x] T012 [P] Define shadow/elevation tokens in `src/design/shadows.ts`
+- [x] T013 [P] Define the stacking-order scale (base, drawer, palette, dropdown, tooltip, dialog) in `src/design/zIndex.ts`
+- [x] T014 Aggregate all tokens into a single export in `src/design/tokens.ts` (depends on T005-T013)
 
 ### Glass* component family
 

@@ -28,9 +28,51 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
   --container-max: 72rem;
   --page-padding: clamp(1rem, 3vw, 2.5rem);
   --transition-fast: 160ms ease;
+
+  /* Glassmorphism material (002-widget-dashboard design tokens) */
+  --glass-blur-low: 8px;
+  --glass-blur-medium: 16px;
+  --glass-blur-high: 24px;
+  --glass-fill-low: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  --glass-fill-medium: color-mix(in srgb, var(--color-surface) 68%, transparent);
+  --glass-fill-high: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  --glass-border-subtle: color-mix(in srgb, var(--color-border) 45%, transparent);
+  --glass-border-visible: color-mix(in srgb, var(--color-border) 85%, transparent);
+
+  /* Elevation scale (002-widget-dashboard design tokens) */
+  --shadow-elevation-1: var(--shadow-soft);
+  --shadow-elevation-2: 0 22px 60px rgba(30, 37, 43, 0.12);
+  --shadow-elevation-3: 0 32px 80px rgba(30, 37, 43, 0.18);
+
+  /* Motion scale (002-widget-dashboard design tokens) */
+  --motion-duration-fast: 160ms;
+  --motion-duration-base: 220ms;
+  --motion-duration-slow: 320ms;
+  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Typography scale additions (002-widget-dashboard design tokens) */
+  --font-size-display: clamp(2.5rem, 6vw, 4.5rem);
+  --font-size-title: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-caption: 0.8125rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Stacking order scale (002-widget-dashboard design tokens) */
+  --z-background: 0;
+  --z-base: 1;
+  --z-drawer: 40;
+  --z-palette: 50;
+  --z-dropdown: 60;
+  --z-tooltip: 70;
+  --z-dialog: 80;
 
   color: var(--color-text);
   background: var(--color-bg);
@@ -56,6 +98,8 @@
     --color-accent-strong: #93c5fd;
     --color-focus: #5eead4;
     --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
+    --shadow-elevation-2: 0 22px 60px rgba(0, 0, 0, 0.38);
+    --shadow-elevation-3: 0 32px 80px rgba(0, 0, 0, 0.5);
 
     color-scheme: dark;
   }
@@ -78,6 +122,8 @@
   --color-accent-strong: #1d4ed8;
   --color-focus: #0f766e;
   --shadow-soft: 0 18px 45px rgba(30, 37, 43, 0.08);
+  --shadow-elevation-2: 0 22px 60px rgba(30, 37, 43, 0.12);
+  --shadow-elevation-3: 0 32px 80px rgba(30, 37, 43, 0.18);
 
   color-scheme: light;
 }
@@ -93,6 +139,8 @@
   --color-accent-strong: #93c5fd;
   --color-focus: #5eead4;
   --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.28);
+  --shadow-elevation-2: 0 22px 60px rgba(0, 0, 0, 0.38);
+  --shadow-elevation-3: 0 32px 80px rgba(0, 0, 0, 0.5);
 
   color-scheme: dark;
 }
