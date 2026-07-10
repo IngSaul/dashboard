@@ -93,9 +93,9 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Theme and background
 
-- [ ] T041 Extend `src/services/theme.ts` to persist/read the `theme` and `appearance` `ThemePreferences` groups via `configStore` (depends on T027, T031)
-- [ ] T042 Implement `backgroundEngine` (source resolution, dim-overlay/blur/gradient computation) in `src/services/backgroundEngine.ts` (depends on T027, T031)
-- [ ] T043 [P] Unit test `backgroundEngine` source switching and overlay/blur/gradient computation, including fallback on invalid config, in `tests/unit/backgroundEngine.test.ts` (depends on T042)
+- [X] T041 Extend `src/services/theme.ts` to persist/read the `theme` and `appearance` `ThemePreferences` groups via `configStore` (depends on T027, T031)
+- [X] T042 Implement `backgroundEngine` (source resolution, dim-overlay/blur/gradient computation) in `src/services/backgroundEngine.ts` (depends on T027, T031)
+- [X] T043 [P] Unit test `backgroundEngine` source switching and overlay/blur/gradient computation, including fallback on invalid config, in `tests/unit/backgroundEngine.test.ts` (depends on T042)
 
 ### State slices (React Context)
 
