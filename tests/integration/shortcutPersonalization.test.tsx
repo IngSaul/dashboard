@@ -16,9 +16,12 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * per shortcut, "Edit {label}"/"Remove {label}" controls.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054), which has zero widgets until User Story 1's widget plugins
- * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
- * tests are expected to stay red for that reason too until then.
+ * (T054); `ShortcutsWidget` (T068) is a deliberately read-only browse/
+ * launch view (per the UI contract's Shortcuts Widget Boundary) — add/
+ * edit/remove moved to `WidgetSettings`/`SettingsDrawer`
+ * (specs/002-widget-dashboard/tasks.md T076-T081), not this widget. These
+ * tests are expected to stay red until that later work composes an
+ * equivalent "Manage shortcuts" entry point somewhere in `SettingsDrawer`.
  */
 
 describe('Shortcut personalization (User Story 2)', () => {

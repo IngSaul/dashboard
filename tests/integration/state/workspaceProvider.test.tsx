@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
+import { WIDGET_CATALOG } from '../../../src/config/widgets'
 import { WorkspaceProvider, useWorkspaceState } from '../../../src/state/WorkspaceProvider'
 import { loadDashboardConfig } from '../../../src/services/configStore'
 import { defaultEventBus } from '../../../src/services/eventBus'
@@ -20,14 +21,26 @@ const notesDescriptor: WidgetDescriptor = {
   allowedColumns: ['left', 'center', 'right'],
 }
 
+function unregisterEverything(): void {
+  for (const type of WIDGET_CATALOG) {
+    defaultWidgetRegistry.unregister(type)
+  }
+}
+
 describe('WorkspaceProvider / useWorkspaceState', () => {
+  // `tests/setup.ts` registers every real built-in plugin once per test
+  // file (mirroring `main.tsx`'s app-init call); this file specifically
+  // tests `resolveLayout`'s registered-vs-not behavior, so every test here
+  // starts from a genuinely empty registry and registers only what it
+  // needs.
   beforeEach(() => {
     clearDashboardStorage()
+    unregisterEverything()
   })
 
   afterEach(() => {
     clearDashboardStorage()
-    defaultWidgetRegistry.unregister('notes')
+    unregisterEverything()
   })
 
   it('throws when used outside a WorkspaceProvider', () => {

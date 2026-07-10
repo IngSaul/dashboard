@@ -9,9 +9,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * these tests are expected to fail until that work lands.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054), which has zero widgets until User Story 1's widget plugins
- * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
- * tests are expected to stay red for that reason too until then.
+ * (T054); its widgets (T062-T069) are registered and render correctly, but
+ * `ThemeToggle` and the standalone `SearchBar` are not composed anywhere in
+ * `AppShell` yet — no task in tasks.md currently assigns either's
+ * placement (T078 only extends `ThemeToggle`'s own behavior, assuming a
+ * mount point already exists). Flagging for a future task/spec pass.
  */
 
 function mockMatchMedia(matches: boolean): void {

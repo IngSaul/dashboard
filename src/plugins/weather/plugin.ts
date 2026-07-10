@@ -4,7 +4,7 @@ export const weatherPlugin: WidgetDescriptor = {
   type: 'weather',
   metadata: {
     displayName: 'Weather',
-    description: 'Shows current conditions for your location.',
+    description: 'Muestra las condiciones actuales para tu ubicación.',
     requiresConfig: false,
   },
   component: () =>

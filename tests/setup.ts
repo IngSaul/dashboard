@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
+import { registerBuiltInPlugins } from '../src/plugins'
 
 /**
  * jsdom does not implement `window.matchMedia`. Components that read theme
@@ -46,6 +47,15 @@ if (typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototy
     this.dispatchEvent(new Event('close'))
   }
 }
+
+/**
+ * Mirrors `main.tsx`: real app init registers every built-in widget plugin
+ * before `AppShell` ever mounts. Tests render `Dashboard`/`AppShell`
+ * directly (never through `main.tsx`), so without this, every widget would
+ * be unregistered in every test — this runs it once per test file, exactly
+ * like the one real call site does.
+ */
+registerBuiltInPlugins()
 
 afterEach(() => {
   cleanup()

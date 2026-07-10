@@ -17,9 +17,12 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * reachable, logical tab order, not at a specific step count.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054), which has zero widgets until User Story 1's widget plugins
- * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
- * tests are expected to stay red for that reason too until then.
+ * (T054). The category-filter/shortcut-link test already passes again —
+ * `ShortcutsWidget`/`CategoryNav` (T068) restored that reachability. The
+ * search and theme-toggle tests still fail: neither `SearchBar` nor
+ * `ThemeToggle` is composed anywhere in `AppShell` yet, and no task in
+ * tasks.md currently assigns their placement (flagging for a future
+ * task/spec pass rather than guessing it here).
  */
 
 async function tabUntil(

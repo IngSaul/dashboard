@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
+import { WIDGET_CATALOG } from '../../../src/config/widgets'
 import { PluginProvider, usePluginState } from '../../../src/state/PluginProvider'
 import { defaultEventBus } from '../../../src/services/eventBus'
 import { defaultWidgetRegistry } from '../../../src/services/widgetRegistry'
@@ -18,10 +19,19 @@ const notesDescriptor: WidgetDescriptor = {
   allowedColumns: ['left', 'center', 'right'],
 }
 
+function unregisterEverything(): void {
+  for (const type of WIDGET_CATALOG) {
+    defaultWidgetRegistry.unregister(type)
+  }
+}
+
 describe('PluginProvider / usePluginState', () => {
-  afterEach(() => {
-    defaultWidgetRegistry.unregister('notes')
-  })
+  // `tests/setup.ts` registers every real built-in plugin once per test file
+  // (mirroring `main.tsx`'s app-init call); this file specifically tests
+  // registration/unregistration mechanics against a genuinely empty
+  // registry, so every test here clears all 7 real types first.
+  beforeEach(unregisterEverything)
+  afterEach(unregisterEverything)
 
   it('throws when used outside a PluginProvider', () => {
     expect(() => renderHook(() => usePluginState())).toThrow(

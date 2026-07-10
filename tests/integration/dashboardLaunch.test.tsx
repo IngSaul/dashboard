@@ -17,9 +17,15 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * a network request, keeping this test fast and offline-safe.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054), which has zero widgets until User Story 1's widget plugins
- * (specs/002-widget-dashboard/tasks.md T062-T071) are registered — these
- * tests are expected to stay red for that reason too until then.
+ * (T054). Widgets (clock/weather/shortcuts/etc., T062-T069) are registered
+ * and render correctly as of T069, but this file's search-bar assertions
+ * still fail — no task in tasks.md currently composes the standalone
+ * `SearchBar` chrome (as opposed to `CommandPalette`) anywhere in
+ * `AppShell`/`Workspace`; that placement decision looks like a gap between
+ * design-reference.md (which calls for an always-visible search pill) and
+ * tasks.md (T096 only wires `SearchBar`'s behavior, assuming it already
+ * exists somewhere). Flagging for a future task/spec pass rather than
+ * guessing its placement here.
  */
 
 function mockLocationAssign(): ReturnType<typeof vi.fn> {

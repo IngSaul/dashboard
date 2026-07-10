@@ -1,0 +1,32 @@
+.glass-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.glass-input-group__label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.glass-textarea {
+  min-height: 8rem;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border-subtle);
+  background: var(--glass-fill-medium);
+  color: var(--color-text);
+  font: inherit;
+  resize: vertical;
+  backdrop-filter: blur(var(--glass-blur-medium));
+  -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+  transition: border-color var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.glass-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.glass-textarea:focus-visible {
+  border-color: var(--color-focus);
+}

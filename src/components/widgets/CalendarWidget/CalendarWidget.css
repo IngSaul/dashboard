@@ -1,0 +1,41 @@
+.calendar-widget {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.calendar-widget__month {
+  caption-side: top;
+  padding-bottom: var(--space-3);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  /* No text-transform here: `Intl.DateTimeFormat` already capitalizes
+     correctly per-locale (e.g. English "July 2026"); forcing
+     `capitalize` would also uppercase small words a locale expects
+     lowercase (Spanish "julio de 2026" -> wrongly "Julio De 2026"). */
+}
+
+.calendar-widget__weekday {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-muted);
+  padding-bottom: var(--space-2);
+}
+
+.calendar-widget__day {
+  padding: var(--space-1);
+  font-size: var(--font-size-caption);
+  border-radius: var(--radius-sm);
+}
+
+.calendar-widget__day--outside {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.calendar-widget__day--today {
+  background: var(--glass-fill-high);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+}

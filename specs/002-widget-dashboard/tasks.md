@@ -140,12 +140,12 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 - [X] T063 [P] [US1] Create `WeatherWidget` (wraps existing `WeatherSummary`, `loading`/`ready`/`unavailable` states) in `src/components/widgets/WeatherWidget/` and register via `src/plugins/weather/plugin.ts`
 - [X] T064 [P] [US1] Create `ServerStatusWidget` (`loading`/`ready`/`unavailable`/`not-configured` states, consumes `monitoring`) in `src/components/widgets/ServerStatusWidget/` and register via `src/plugins/server-status/plugin.ts` (depends on T060)
 - [X] T065 [P] [US1] Create `DockerStatusWidget` (same state contract, consumes `monitoring`) in `src/components/widgets/DockerStatusWidget/` and register via `src/plugins/docker-status/plugin.ts` (depends on T060)
-- [ ] T066 [P] [US1] Create `CalendarWidget` (local read-only month view, no external sync) in `src/components/widgets/CalendarWidget/` and register via `src/plugins/calendar/plugin.ts`
-- [ ] T067 [P] [US1] Create `NotesWidget` (consumes `notes` service) in `src/components/widgets/NotesWidget/` and register via `src/plugins/notes/plugin.ts` (depends on T061)
-- [ ] T068 [US1] Create `ShortcutsWidget` (composes existing `ShortcutCard`/`CategoryNav`; icon resolution comes in US3) in `src/components/widgets/ShortcutsWidget/` and register via `src/plugins/shortcuts/plugin.ts`
-- [ ] T069 [US1] Wire all 7 plugin modules into `registerBuiltInPlugins()` in `src/plugins/index.ts` (depends on T062-T068)
-- [ ] T070 [US1] Wrap every widget surface in `GlassPanel` and confirm each renders exactly one of `loading`/`ready`/`unavailable`/`not-configured` via the existing `StatusMessage` component (verification pass across T062-T068)
-- [ ] T071 [US1] Verify Scenario 1 of [quickstart.md](./quickstart.md) manually (fresh load, then offline reload) and confirm no blocking network call delays first paint
+- [X] T066 [P] [US1] Create `CalendarWidget` (local read-only month view, no external sync) in `src/components/widgets/CalendarWidget/` and register via `src/plugins/calendar/plugin.ts`
+- [X] T067 [P] [US1] Create `NotesWidget` (consumes `notes` service) in `src/components/widgets/NotesWidget/` and register via `src/plugins/notes/plugin.ts` (depends on T061)
+- [X] T068 [US1] Create `ShortcutsWidget` (composes existing `ShortcutCard`/`CategoryNav`; icon resolution comes in US3) in `src/components/widgets/ShortcutsWidget/` and register via `src/plugins/shortcuts/plugin.ts`
+- [X] T069 [US1] Wire all 7 plugin modules into `registerBuiltInPlugins()` in `src/plugins/index.ts` (depends on T062-T068)
+- [X] T070 [US1] Wrap every widget surface in `GlassPanel` and confirm each renders exactly one of `loading`/`ready`/`unavailable`/`not-configured` via the existing `StatusMessage` component (verification pass across T062-T068)
+- [X] T071 [US1] Verify Scenario 1 of [quickstart.md](./quickstart.md) manually (fresh load, then offline reload) and confirm no blocking network call delays first paint
 
 **Checkpoint**: User Story 1 is fully functional and independently testable — the dashboard opens with a populated, glassmorphism widget grid.
 

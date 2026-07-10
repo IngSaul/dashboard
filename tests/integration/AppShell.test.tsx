@@ -6,11 +6,12 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
 
 /**
  * `AppShell` composition (T053): the five state Providers plus
- * `BackgroundLayer`/`Workspace`/`SettingsDrawer`/`CommandPalette`. No widget
- * plugins are registered in this test, so `Workspace` is expected to render
- * zero widgets — matching the Foundational-phase checkpoint in
- * specs/002-widget-dashboard/tasks.md ("AppShell renders an empty,
- * correctly-themed, responsive shell with zero widgets").
+ * `BackgroundLayer`/`Workspace`/`SettingsDrawer`/`CommandPalette`.
+ * `tests/setup.ts` registers every built-in widget plugin once per test
+ * file (mirroring `main.tsx`'s app-init call), so `Workspace` renders the
+ * two default-enabled widgets (clock + shortcuts) here — matching the User
+ * Story 1 checkpoint, not the earlier Foundational-phase "zero widgets"
+ * one.
  */
 describe('AppShell', () => {
   beforeEach(() => {
@@ -21,12 +22,14 @@ describe('AppShell', () => {
     clearDashboardStorage()
   })
 
-  it('renders the background layer, an empty workspace, and a closed settings drawer', () => {
+  it('renders the background layer, the default clock/shortcuts widgets, and a closed settings drawer', () => {
     render(<AppShell />)
 
     expect(document.querySelector('.background-layer')).not.toBeNull()
     expect(document.querySelectorAll('.workspace-column')).toHaveLength(3)
-    expect(document.querySelectorAll('.widget-slot')).toHaveLength(0)
+    expect(document.querySelector('.widget-slot[data-widget-type="clock"]')).not.toBeNull()
+    expect(document.querySelector('.widget-slot[data-widget-type="shortcuts"]')).not.toBeNull()
+    expect(document.querySelectorAll('.widget-slot')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Toggle settings' })).toBeInTheDocument()
   })
 

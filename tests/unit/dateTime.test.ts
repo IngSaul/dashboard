@@ -3,6 +3,7 @@ import {
   formatDashboardDate,
   formatDashboardTime,
   getMillisecondsUntilNextMinute,
+  getMonthGrid,
   isDifferentCalendarDay,
 } from '../../src/utils/dateTime'
 
@@ -60,5 +61,48 @@ describe('isDifferentCalendarDay', () => {
     const newYearsDay = new Date(2027, 0, 1, 0, 0, 0)
 
     expect(isDifferentCalendarDay(newYearsEve, newYearsDay)).toBe(true)
+  })
+})
+
+describe('getMonthGrid', () => {
+  it('returns a fixed 42-day (6-week) grid', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 15))
+
+    expect(grid).toHaveLength(42)
+  })
+
+  it('starts the grid on a Sunday', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 15))
+
+    expect(grid[0]?.date.getDay()).toBe(0)
+  })
+
+  it('marks every day belonging to the target month as isCurrentMonth', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 15))
+
+    const julyDays = grid.filter((day) => day.isCurrentMonth)
+    expect(julyDays).toHaveLength(31)
+    expect(julyDays.every((day) => day.date.getMonth() === 6)).toBe(true)
+  })
+
+  it('marks leading/trailing days from adjacent months as not isCurrentMonth', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 15))
+
+    expect(grid[0]?.isCurrentMonth).toBe(false)
+    expect(grid[grid.length - 1]?.isCurrentMonth).toBe(false)
+  })
+
+  it('marks exactly one day as isToday, matching the provided today', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 1), new Date(2026, 6, 15))
+
+    const todays = grid.filter((day) => day.isToday)
+    expect(todays).toHaveLength(1)
+    expect(todays[0]?.date.getDate()).toBe(15)
+  })
+
+  it('marks no day as isToday when today falls outside the displayed 6-week window', () => {
+    const grid = getMonthGrid(new Date(2026, 6, 1), new Date(2026, 9, 1))
+
+    expect(grid.some((day) => day.isToday)).toBe(false)
   })
 })
