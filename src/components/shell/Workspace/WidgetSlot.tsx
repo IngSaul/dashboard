@@ -44,7 +44,12 @@ export function WidgetSlot({ widget }: WidgetSlotProps) {
   }
 
   return (
-    <GlassCard as="section" className="widget-slot" aria-label={displayName}>
+    <GlassCard
+      as="section"
+      className="widget-slot"
+      aria-label={displayName}
+      data-widget-type={widget.type}
+    >
       <WidgetErrorBoundary>
         <Suspense fallback={<StatusMessage message="Loading…" />}>
           {/* eslint-disable-next-line react-hooks/static-components -- `LazyComponent` is a stable, module-scope-cached lookup (see `lazyComponentsByType` above), not created per render; the linter can't see through the Map lookup to that. */}

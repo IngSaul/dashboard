@@ -127,19 +127,19 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Tests for User Story 1
 
-- [ ] T056 [P] [US1] Unit test `monitoring` service fetch/timeout/malformed-response handling per [contracts/monitoring-api-contract.md](./contracts/monitoring-api-contract.md) in `tests/unit/monitoring.test.ts`
-- [ ] T057 [P] [US1] Unit test `notes` persistence and content size-bounding in `tests/unit/notes.test.ts`
-- [ ] T058 [P] [US1] Integration test: default load renders clock/shortcuts immediately, other default widgets show `loading` then `ready`/`unavailable`, never a blank gap, in `tests/integration/WidgetGrid.test.tsx`
-- [ ] T059 [P] [US1] Integration test: dashboard renders correctly with zero optional widgets enabled (clock + shortcuts only, no empty layout artifacts) in `tests/integration/WidgetGrid.test.tsx`
+- [X] T056 [P] [US1] Unit test `monitoring` service fetch/timeout/malformed-response handling per [contracts/monitoring-api-contract.md](./contracts/monitoring-api-contract.md) in `tests/unit/monitoring.test.ts`
+- [X] T057 [P] [US1] Unit test `notes` persistence and content size-bounding in `tests/unit/notes.test.ts`
+- [X] T058 [P] [US1] Integration test: default load renders clock/shortcuts immediately, other default widgets show `loading` then `ready`/`unavailable`, never a blank gap, in `tests/integration/WidgetGrid.test.tsx`
+- [X] T059 [P] [US1] Integration test: dashboard renders correctly with zero optional widgets enabled (clock + shortcuts only, no empty layout artifacts) in `tests/integration/WidgetGrid.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T060 [P] [US1] Implement `monitoring` service (non-blocking fetch, timeout, per-contract response parsing) in `src/services/monitoring.ts`
-- [ ] T061 [P] [US1] Implement `notes` service (local persistence via `configStore`, size-bounded content) in `src/services/notes.ts`
-- [ ] T062 [P] [US1] Create `ClockWidget` in `src/components/widgets/ClockWidget/` and register it via `src/plugins/clock/plugin.ts`
-- [ ] T063 [P] [US1] Create `WeatherWidget` (wraps existing `WeatherSummary`, `loading`/`ready`/`unavailable` states) in `src/components/widgets/WeatherWidget/` and register via `src/plugins/weather/plugin.ts`
-- [ ] T064 [P] [US1] Create `ServerStatusWidget` (`loading`/`ready`/`unavailable`/`not-configured` states, consumes `monitoring`) in `src/components/widgets/ServerStatusWidget/` and register via `src/plugins/server-status/plugin.ts` (depends on T060)
-- [ ] T065 [P] [US1] Create `DockerStatusWidget` (same state contract, consumes `monitoring`) in `src/components/widgets/DockerStatusWidget/` and register via `src/plugins/docker-status/plugin.ts` (depends on T060)
+- [X] T060 [P] [US1] Implement `monitoring` service (non-blocking fetch, timeout, per-contract response parsing) in `src/services/monitoring.ts`
+- [X] T061 [P] [US1] Implement `notes` service (local persistence via `configStore`, size-bounded content) in `src/services/notes.ts`
+- [X] T062 [P] [US1] Create `ClockWidget` in `src/components/widgets/ClockWidget/` and register it via `src/plugins/clock/plugin.ts`
+- [X] T063 [P] [US1] Create `WeatherWidget` (wraps existing `WeatherSummary`, `loading`/`ready`/`unavailable` states) in `src/components/widgets/WeatherWidget/` and register via `src/plugins/weather/plugin.ts`
+- [X] T064 [P] [US1] Create `ServerStatusWidget` (`loading`/`ready`/`unavailable`/`not-configured` states, consumes `monitoring`) in `src/components/widgets/ServerStatusWidget/` and register via `src/plugins/server-status/plugin.ts` (depends on T060)
+- [X] T065 [P] [US1] Create `DockerStatusWidget` (same state contract, consumes `monitoring`) in `src/components/widgets/DockerStatusWidget/` and register via `src/plugins/docker-status/plugin.ts` (depends on T060)
 - [ ] T066 [P] [US1] Create `CalendarWidget` (local read-only month view, no external sync) in `src/components/widgets/CalendarWidget/` and register via `src/plugins/calendar/plugin.ts`
 - [ ] T067 [P] [US1] Create `NotesWidget` (consumes `notes` service) in `src/components/widgets/NotesWidget/` and register via `src/plugins/notes/plugin.ts` (depends on T061)
 - [ ] T068 [US1] Create `ShortcutsWidget` (composes existing `ShortcutCard`/`CategoryNav`; icon resolution comes in US3) in `src/components/widgets/ShortcutsWidget/` and register via `src/plugins/shortcuts/plugin.ts`

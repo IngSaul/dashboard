@@ -1,0 +1,36 @@
+.docker-status-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docker-status-widget__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.docker-status-widget__name {
+  font-weight: var(--font-weight-medium);
+}
+
+.docker-status-widget__status {
+  font-size: var(--font-size-caption);
+  color: var(--color-status-neutral);
+}
+
+.docker-status-widget__status--running {
+  color: var(--color-status-positive);
+}
+
+.docker-status-widget__status--restarting {
+  color: var(--color-status-caution);
+}
+
+.docker-status-widget__status--stopped {
+  color: var(--color-status-negative);
+}

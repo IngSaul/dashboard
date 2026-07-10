@@ -501,7 +501,8 @@ function repairMonitoringSourceConfig(
   return { endpointUrl: endpointUrl as string | null, pollIntervalSeconds, timeoutMs }
 }
 
-const NOTE_MAX_LENGTH = 20_000
+/** Shared with `services/notes.ts`'s `saveNote`, which truncates on the write path (and reports it) rather than only here on the repair-on-load path. */
+export const NOTE_MAX_LENGTH = 20_000
 
 /** Oversized content is truncated (not dropped) per data-model.md's Note validation rule; the "visible notice" is `NotesWidget`'s concern, not this repair step. */
 function repairNote(raw: unknown, fallback: Note): Note {

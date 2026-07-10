@@ -1,0 +1,18 @@
+.clock-widget {
+  display: flex;
+  justify-content: center;
+}
+
+.clock-widget .date-time {
+  align-items: center;
+  text-align: center;
+}
+
+.clock-widget .date-time__time {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-regular);
+}
+
+.clock-widget .date-time__date {
+  font-size: var(--font-size-body);
+}

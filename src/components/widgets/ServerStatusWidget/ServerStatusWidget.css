@@ -1,0 +1,35 @@
+.server-status-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.server-status-widget__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.server-status-widget__row dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.server-status-widget__row dd {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+}
+
+.server-status-widget__status--up {
+  color: var(--color-status-positive);
+}
+
+.server-status-widget__status--degraded {
+  color: var(--color-status-caution);
+}
+
+.server-status-widget__status--down {
+  color: var(--color-status-negative);
+}
