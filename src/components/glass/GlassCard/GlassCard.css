@@ -1,0 +1,9 @@
+.glass-card {
+  padding: var(--space-4);
+  transition: box-shadow var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.glass-card--interactive:hover,
+.glass-card--interactive:focus-within {
+  box-shadow: var(--shadow-elevation-1);
+}

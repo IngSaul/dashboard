@@ -55,15 +55,15 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Glass* component family
 
-- [ ] T015 [P] Implement `GlassPanel` in `src/components/glass/GlassPanel/` reading tokens from `src/design/glass.ts`
-- [ ] T016 [P] Implement `GlassCard` in `src/components/glass/GlassCard/`
-- [ ] T017 [P] Implement `GlassButton` in `src/components/glass/GlassButton/`
-- [ ] T018 [P] Implement `GlassIconButton` in `src/components/glass/GlassIconButton/`
-- [ ] T019 [P] Implement `GlassInput` in `src/components/glass/GlassInput/`
-- [ ] T020 [P] Implement `GlassDialog` in `src/components/glass/GlassDialog/`, taking its stacking order from `src/design/zIndex.ts`
-- [ ] T021 [P] Implement `GlassTooltip` in `src/components/glass/GlassTooltip/`, taking its stacking order from `src/design/zIndex.ts`
-- [ ] T022 [P] Implement `GlassDropdown` in `src/components/glass/GlassDropdown/`, taking its stacking order from `src/design/zIndex.ts`
-- [ ] T023 [P] Implement `GlassBadge` in `src/components/glass/GlassBadge/`
+- [x] T015 [P] Implement `GlassPanel` in `src/components/glass/GlassPanel/` reading tokens from `src/design/glass.ts`
+- [x] T016 [P] Implement `GlassCard` in `src/components/glass/GlassCard/`
+- [x] T017 [P] Implement `GlassButton` in `src/components/glass/GlassButton/`
+- [x] T018 [P] Implement `GlassIconButton` in `src/components/glass/GlassIconButton/`
+- [x] T019 [P] Implement `GlassInput` in `src/components/glass/GlassInput/`
+- [x] T020 [P] Implement `GlassDialog` in `src/components/glass/GlassDialog/`, taking its stacking order from `src/design/zIndex.ts`
+- [x] T021 [P] Implement `GlassTooltip` in `src/components/glass/GlassTooltip/`, taking its stacking order from `src/design/zIndex.ts`
+- [x] T022 [P] Implement `GlassDropdown` in `src/components/glass/GlassDropdown/`, taking its stacking order from `src/design/zIndex.ts`
+- [x] T023 [P] Implement `GlassBadge` in `src/components/glass/GlassBadge/`
 
 ### Storage abstraction
 

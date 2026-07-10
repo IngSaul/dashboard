@@ -1,0 +1,27 @@
+.glass-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border-subtle);
+  background: var(--glass-fill-low);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+}
+
+.glass-badge--success {
+  color: var(--color-focus);
+  border-color: color-mix(in srgb, var(--color-focus) 45%, transparent);
+}
+
+.glass-badge--warning {
+  color: #b45309;
+  border-color: color-mix(in srgb, #b45309 45%, transparent);
+}
+
+.glass-badge--danger {
+  color: #b91c1c;
+  border-color: color-mix(in srgb, #b91c1c 45%, transparent);
+}

@@ -1,0 +1,34 @@
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-xl);
+  font: inherit;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  transition:
+    background var(--motion-duration-fast) var(--motion-easing-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.glass-button--solid {
+  background: var(--glass-fill-medium);
+  border: 1px solid var(--glass-border-subtle);
+  backdrop-filter: blur(var(--glass-blur-medium));
+  -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+}
+
+.glass-button--ghost {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.glass-button:hover,
+.glass-button:focus-visible {
+  background: var(--glass-fill-high);
+}
+
+.glass-button:active {
+  box-shadow: var(--shadow-elevation-1);
+}

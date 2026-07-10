@@ -1,0 +1,26 @@
+.glass-dialog {
+  z-index: var(--z-dialog);
+  max-width: min(32rem, calc(100vw - var(--space-6)));
+  padding: var(--space-5);
+  border: 1px solid var(--glass-border-visible);
+  border-radius: var(--radius-2xl);
+  background: var(--glass-fill-high);
+  color: var(--color-text);
+  box-shadow: var(--shadow-elevation-3);
+  backdrop-filter: blur(var(--glass-blur-high));
+  -webkit-backdrop-filter: blur(var(--glass-blur-high));
+}
+
+.glass-dialog::backdrop {
+  background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+}
+
+.glass-dialog__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+}
+
+.glass-dialog__body {
+  font-size: var(--font-size-body);
+}

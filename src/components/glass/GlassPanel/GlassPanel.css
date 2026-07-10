@@ -1,0 +1,19 @@
+.glass-panel {
+  background: var(--glass-fill-medium);
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(var(--glass-blur-medium));
+  -webkit-backdrop-filter: blur(var(--glass-blur-medium));
+  color: var(--color-text);
+}
+
+/*
+ * Fallback for browsers/settings without backdrop-filter support: a more
+ * opaque fill stands in for the blur so text stays readable against the
+ * background image (per research.md's glassmorphism decision).
+ */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel {
+    background: var(--color-surface);
+  }
+}
