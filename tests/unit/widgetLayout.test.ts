@@ -106,6 +106,28 @@ describe('widgetLayout mutations', () => {
 
       expect(result.ok).toBe(false)
     })
+
+    it('is a no-op (still ok, same layout reference) when already in the target column', () => {
+      const layout = createTestLayout()
+
+      const result = setWidgetColumn(layout, 'weather', 'left')
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(result.widgetLayout).toBe(layout)
+      }
+    })
+
+    it('reindexes the source column after removing a widget, leaving no order gap', () => {
+      const result = setWidgetColumn(createTestLayout(), 'clock', 'left')
+
+      expect(result.ok).toBe(true)
+      if (result.ok) {
+        expect(columnTypes(result.widgetLayout, 'center')).toEqual(['shortcuts'])
+        const shortcuts = result.widgetLayout.widgets.find((widget) => widget.type === 'shortcuts')
+        expect(shortcuts?.order).toBe(0)
+      }
+    })
   })
 
   describe('reorderWidgetsInColumn', () => {
@@ -120,6 +142,18 @@ describe('widgetLayout mutations', () => {
 
     it('rejects a sequence that is not an exact permutation of the column', () => {
       const result = reorderWidgetsInColumn(createTestLayout(), 'center', ['clock'])
+
+      expect(result.ok).toBe(false)
+    })
+
+    it('rejects a sequence with a duplicate type, even at the correct length', () => {
+      const result = reorderWidgetsInColumn(createTestLayout(), 'center', ['clock', 'clock'])
+
+      expect(result.ok).toBe(false)
+    })
+
+    it('rejects a sequence containing a type from a different column', () => {
+      const result = reorderWidgetsInColumn(createTestLayout(), 'center', ['clock', 'weather'])
 
       expect(result.ok).toBe(false)
     })
@@ -163,6 +197,15 @@ describe('widgetLayout mutations', () => {
       if (result.ok) {
         expect(columnTypes(result.widgetLayout, 'center')).toEqual(['clock', 'shortcuts'])
       }
+    })
+
+    it('rejects an unknown widget type', () => {
+      const layout = createTestLayout()
+      const withoutCalendar = { ...layout, widgets: layout.widgets.filter((w) => w.type !== 'calendar') }
+
+      const result = moveWidgetInColumn(withoutCalendar, 'calendar', 'down')
+
+      expect(result.ok).toBe(false)
     })
   })
 })

@@ -3,22 +3,15 @@ import { render, waitFor, within } from '@testing-library/react'
 import { Dashboard } from '../../src/features/dashboard/Dashboard'
 import { createDefaultDashboardConfig } from '../../src/config/defaults'
 import { saveDashboardConfig } from '../../src/services/configStore'
-import { clearDashboardStorage } from '../fixtures/dashboardConfig'
+import { clearDashboardStorage, DASHBOARD_STORAGE_KEY } from '../fixtures/dashboardConfig'
 import type { WidgetType } from '../../src/types/widgets'
 
 /**
  * WidgetGrid contract for User Story 1 — spec.md's acceptance scenarios 1
- * and 3, and quickstart.md's Scenario 1. No widget plugins are registered
- * yet (`registerBuiltInPlugins()` is an empty stub until T069), so
- * `Workspace` currently renders zero widgets regardless of what's enabled
- * in the persisted `WidgetLayout` (see `layoutEngine.resolveLayout`, which
- * only shows enabled widgets whose type is also registered) — these tests
- * are expected to fail until T062-T071 land.
- *
- * Widgets are located by the stable `data-widget-type` attribute
- * `WidgetSlot` sets on every rendered widget's `GlassCard` — not by display
- * name text, which these tests don't need to guess ahead of the plugins
- * that define it.
+ * and 3, and quickstart.md's Scenario 1, plus User Story 2's corrupted-
+ * config fallback (acceptance scenario 4). Widgets are located by the
+ * stable `data-widget-type` attribute `WidgetSlot` sets on every rendered
+ * widget's `GlassCard` — not by display name text.
  */
 
 function widgetSlot(type: WidgetType): HTMLElement | null {
@@ -112,6 +105,42 @@ describe('WidgetGrid (User Story 1)', () => {
       const right = document.querySelector('.workspace-column--right')
       expect(left?.querySelectorAll('.widget-slot')).toHaveLength(0)
       expect(right?.querySelectorAll('.widget-slot')).toHaveLength(0)
+    })
+  })
+
+  describe('corrupted persisted WidgetLayout (spec.md US2 acceptance scenario 4)', () => {
+    it('falls back to the default layout instead of failing to render when widgets is not an array', () => {
+      const config = createDefaultDashboardConfig()
+      window.localStorage.setItem(
+        DASHBOARD_STORAGE_KEY,
+        JSON.stringify({ ...config, widgetLayout: { widgets: 'not-an-array', schemaVersion: 1 } }),
+      )
+
+      render(<Dashboard />)
+
+      expect(widgetSlot('clock')).not.toBeNull()
+      expect(widgetSlot('shortcuts')).not.toBeNull()
+    })
+
+    it('falls back to the default layout when both clock and shortcuts would be disabled', () => {
+      const config = createDefaultDashboardConfig()
+      config.widgetLayout.widgets = config.widgetLayout.widgets.map((widget) =>
+        widget.type === 'clock' || widget.type === 'shortcuts' ? { ...widget, enabled: false } : widget,
+      )
+      window.localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify(config))
+
+      render(<Dashboard />)
+
+      expect(widgetSlot('clock')).not.toBeNull()
+      expect(widgetSlot('shortcuts')).not.toBeNull()
+    })
+
+    it('does not crash on completely unparsable JSON', () => {
+      window.localStorage.setItem(DASHBOARD_STORAGE_KEY, '{ not valid json')
+
+      expect(() => render(<Dashboard />)).not.toThrow()
+      expect(widgetSlot('clock')).not.toBeNull()
+      expect(widgetSlot('shortcuts')).not.toBeNull()
     })
   })
 })

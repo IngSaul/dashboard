@@ -159,10 +159,10 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Tests for User Story 2
 
-- [ ] T072 [P] [US2] Unit test `widgetLayout` enable/disable/reorder mutation and column-assignment validation in `tests/unit/widgetLayout.test.ts` (extends T036)
-- [ ] T073 [P] [US2] Integration test: `WidgetSettings` enable/disable/reorder controls update the dashboard and persist across reload in `tests/integration/WidgetSettings.test.tsx`
-- [ ] T074 [P] [US2] Integration test: switching a `ThemePreferences` group (e.g. `glass` intensity) updates all widgets and chrome consistently in `tests/integration/WidgetSettings.test.tsx`
-- [ ] T075 [P] [US2] Integration test: corrupted persisted `WidgetLayout` falls back to the default layout instead of failing to render in `tests/integration/WidgetGrid.test.tsx`
+- [X] T072 [P] [US2] Unit test `widgetLayout` enable/disable/reorder mutation and column-assignment validation in `tests/unit/widgetLayout.test.ts` (extends T036)
+- [X] T073 [P] [US2] Integration test: `WidgetSettings` enable/disable/reorder controls update the dashboard and persist across reload in `tests/integration/WidgetSettings.test.tsx`
+- [X] T074 [P] [US2] Integration test: switching a `ThemePreferences` group (e.g. `glass` intensity) updates all widgets and chrome consistently in `tests/integration/WidgetSettings.test.tsx`
+- [X] T075 [P] [US2] Integration test: corrupted persisted `WidgetLayout` falls back to the default layout instead of failing to render in `tests/integration/WidgetGrid.test.tsx`
 
 ### Implementation for User Story 2
 
