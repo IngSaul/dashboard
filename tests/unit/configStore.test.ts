@@ -91,9 +91,8 @@ describe('configStore', () => {
     it('persists the configuration under the dashboard storage key', () => {
       const config: DashboardConfiguration = { ...defaultDashboardConfigFixture }
 
-      const succeeded = saveDashboardConfig(config)
+      saveDashboardConfig(config)
 
-      expect(succeeded).toBe(true)
       const stored = window.localStorage.getItem(DASHBOARD_CONFIG_STORAGE_KEY)
       expect(stored).not.toBeNull()
       const parsed = JSON.parse(stored ?? '{}') as DashboardConfiguration
@@ -113,11 +112,12 @@ describe('configStore', () => {
       expect(parsed.updatedAt).not.toBe('2000-01-01T00:00:00.000Z')
     })
 
-    it('returns false without throwing when storage access fails', () => {
+    it('does not throw when storage access fails, and the value survives via the in-memory fallback', () => {
       withUnavailableLocalStorage(() => {
-        const succeeded = saveDashboardConfig(defaultDashboardConfigFixture)
+        expect(() => saveDashboardConfig(defaultDashboardConfigFixture)).not.toThrow()
 
-        expect(succeeded).toBe(false)
+        const result = loadDashboardConfig()
+        expect(result.shortcuts).toHaveLength(defaultDashboardConfigFixture.shortcuts.length)
       })
     })
   })

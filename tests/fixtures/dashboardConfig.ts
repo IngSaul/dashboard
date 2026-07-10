@@ -1,4 +1,5 @@
 import { DASHBOARD_CONFIG_STORAGE_KEY } from '../../src/services/configStore'
+import { defaultStorageProvider } from '../../src/services/storage/LocalStorageProvider'
 import type {
   DashboardConfiguration,
   Shortcut,
@@ -160,7 +161,13 @@ export function seedDashboardStorage(
   window.localStorage.setItem(DASHBOARD_STORAGE_KEY, serializedConfig)
 }
 
-/** Removes any dashboard configuration from `window.localStorage`. */
+/**
+ * Removes any dashboard configuration from `window.localStorage` and from
+ * `defaultStorageProvider`'s in-memory fallback (in case a prior test in the
+ * same run wrote to it while real storage was unavailable) so tests stay
+ * isolated from one another.
+ */
 export function clearDashboardStorage(): void {
   window.localStorage.removeItem(DASHBOARD_STORAGE_KEY)
+  defaultStorageProvider.remove(DASHBOARD_STORAGE_KEY)
 }

@@ -67,10 +67,10 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Storage abstraction
 
-- [ ] T024 Define the `StorageProvider` interface (`get`/`set`/`remove`) in `src/services/storage/StorageProvider.ts` per [contracts/storage-provider-contract.md](./contracts/storage-provider-contract.md)
-- [ ] T025 Implement `LocalStorageProvider` (wraps `window.localStorage`, in-memory fallback when unavailable) in `src/services/storage/LocalStorageProvider.ts` (depends on T024)
-- [ ] T026 [P] Unit test `LocalStorageProvider` get/set/remove and unavailable-storage fallback in `tests/unit/storageProvider.test.ts` (depends on T025)
-- [ ] T027 Refactor `src/services/configStore.ts` to depend on an injected `StorageProvider` (default `LocalStorageProvider`) instead of calling `localStorage` directly (depends on T025)
+- [x] T024 Define the `StorageProvider` interface (`get`/`set`/`remove`) in `src/services/storage/StorageProvider.ts` per [contracts/storage-provider-contract.md](./contracts/storage-provider-contract.md)
+- [x] T025 Implement `LocalStorageProvider` (wraps `window.localStorage`, in-memory fallback when unavailable) in `src/services/storage/LocalStorageProvider.ts` (depends on T024)
+- [x] T026 [P] Unit test `LocalStorageProvider` get/set/remove and unavailable-storage fallback in `tests/unit/storageProvider.test.ts` (depends on T025)
+- [x] T027 Refactor `src/services/configStore.ts` to depend on an injected `StorageProvider` (default `LocalStorageProvider`) instead of calling `localStorage` directly (depends on T025)
 
 ### Widget/layout/theme types and schema
 
