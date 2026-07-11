@@ -55,7 +55,8 @@
 }
 
 .shortcut-card__label {
-  font-weight: 600;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
 }
 
 .shortcut-card__description {

@@ -1,5 +1,5 @@
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
-import { getInitials } from '../../services/iconProvider'
+import { resolveShortcutIcon } from '../../services/iconResolver'
 import type { Shortcut } from '../../types/dashboard'
 import './ShortcutCard.css'
 
@@ -16,51 +16,52 @@ export interface ShortcutCardProps {
 }
 
 /**
- * Renders `shortcut.icon` (resolved via `iconProvider`, see T085/T088) with
- * no layout difference by provider — every branch renders inside the same
- * fixed-size `.shortcut-card__icon` wrapper (UI contract's Icon System
- * section). A shortcut created before the icon system existed, or whose
- * resolution hasn't run yet, has no `icon` at all — that's treated the
- * same as an explicit `fallback` (initials tile), never a broken image.
+ * Renders the shortcut's icon with no layout difference by provider — every
+ * branch renders inside the same fixed-size `.shortcut-card__icon` wrapper
+ * (UI contract's Icon System section). A manually-chosen `lucide`/`custom-svg`
+ * icon (set via the shortcut editor, T085/T088) always wins, since that's an
+ * explicit user override; everything else is derived fresh from the
+ * shortcut's URL via `iconResolver` on every render — real colored brand
+ * icon when the destination is recognized, generic Globe glyph otherwise —
+ * so a shortcut's icon never depends on stale editor-time favicon/initials
+ * resolution and never relies on the shortcut's title.
  */
 function ShortcutIcon({ shortcut }: { shortcut: Shortcut }) {
   const icon = shortcut.icon
 
-  if (!icon || icon.provider === 'fallback') {
-    return (
-      <span className="shortcut-card__icon" data-icon-provider="fallback" aria-hidden="true">
-        {icon?.value ?? getInitials(shortcut.label)}
+  if (icon && (icon.provider === 'lucide' || icon.provider === 'custom-svg')) {
+    return icon.provider === 'lucide' ? (
+      <span className="shortcut-card__icon" data-icon-provider="lucide" aria-hidden="true">
+        <DynamicIcon name={icon.value as IconName} />
       </span>
+    ) : (
+      <span
+        className="shortcut-card__icon"
+        data-icon-provider="custom-svg"
+        aria-hidden="true"
+        // custom-svg has no authoring UI yet (a future task), so this path
+        // isn't reachable from user input in this feature.
+        dangerouslySetInnerHTML={{ __html: icon.value }}
+      />
     )
   }
 
-  switch (icon.provider) {
-    case 'lucide':
-      return (
-        <span className="shortcut-card__icon" data-icon-provider="lucide" aria-hidden="true">
-          <DynamicIcon name={icon.value as IconName} />
-        </span>
-      )
-    case 'simple-icons':
-    case 'custom-svg':
-      return (
-        <span
-          className="shortcut-card__icon"
-          data-icon-provider={icon.provider}
-          aria-hidden="true"
-          // Simple Icons SVGs come from a trusted bundled dependency;
-          // custom-svg has no authoring UI yet (a future task), so this
-          // path isn't reachable from user input in this feature.
-          dangerouslySetInnerHTML={{ __html: icon.value }}
-        />
-      )
-    case 'favicon':
-      return (
-        <span className="shortcut-card__icon" data-icon-provider="favicon" aria-hidden="true">
-          <img src={icon.value} alt="" />
-        </span>
-      )
-  }
+  const resolved = resolveShortcutIcon(shortcut.url)
+  return (
+    <span
+      className="shortcut-card__icon"
+      data-icon-provider={resolved.match}
+      style={{ color: resolved.color }}
+      title={resolved.label}
+      aria-hidden="true"
+    >
+      {resolved.svg ? (
+        <span dangerouslySetInnerHTML={{ __html: resolved.svg }} />
+      ) : resolved.Icon ? (
+        <resolved.Icon color={resolved.color} />
+      ) : null}
+    </span>
+  )
 }
 
 export function ShortcutCard({
