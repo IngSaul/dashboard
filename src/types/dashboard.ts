@@ -1,4 +1,4 @@
-import type { MonitoringSourceConfig, Note, ThemePreferences, WidgetLayout } from './widgets'
+import type { IconSource, MonitoringSourceConfig, Note, ThemePreferences, WidgetLayout } from './widgets'
 
 /**
  * Dashboard domain types.
@@ -61,7 +61,8 @@ export interface Shortcut {
   url: string
   categoryId?: string
   description?: string
-  icon?: string
+  /** Resolved via `iconProvider` (002-widget-dashboard) — only ever set by an explicit create/(re)save, never during dashboard render. */
+  icon?: IconSource
   order: number
   createdAt: string
   updatedAt: string

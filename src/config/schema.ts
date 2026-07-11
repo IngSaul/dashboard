@@ -101,7 +101,7 @@ export function isShortcut(value: unknown): value is Shortcut {
   if (value.description !== undefined && typeof value.description !== 'string') {
     return false
   }
-  if (value.icon !== undefined && typeof value.icon !== 'string') {
+  if (value.icon !== undefined && !isIconSource(value.icon)) {
     return false
   }
   return true
@@ -515,12 +515,7 @@ function repairNote(raw: unknown, fallback: Note): Note {
 
 const ICON_PROVIDERS: IconProviderKind[] = ['lucide', 'simple-icons', 'custom-svg', 'favicon', 'fallback']
 
-/**
- * Not yet wired into `repairDashboardConfig` — `Shortcut` doesn't carry an
- * `icon: IconSource` field until the icon system lands (US3). Defined now,
- * alongside the rest of this feature's schemas, so that extension only adds
- * a call site here rather than a new validation function.
- */
+/** Validates a `Shortcut.icon` field (002-widget-dashboard, US3) — used by `isShortcut` above. */
 export function isIconSource(value: unknown): value is IconSource {
   if (!isPlainObject(value)) {
     return false

@@ -7,6 +7,8 @@ import {
   type CategoryMutationResult,
 } from '../../../services/categories'
 import { loadDashboardConfig, saveDashboardConfig } from '../../../services/configStore'
+import { defaultEventBus } from '../../../services/eventBus'
+import { resolveIcon } from '../../../services/iconProvider'
 import {
   addShortcut,
   removeShortcut,
@@ -29,7 +31,19 @@ import './ShortcutSettings.css'
  * `shortcuts`/`categories` have no owning 002 state slice (same situation
  * as `weatherPreference`/`monitoringSourceConfig`), so this reads/writes
  * them directly through `configStore`, re-reading the full config at save
- * time so a concurrent edit to an unrelated field is never clobbered.
+ * time so a concurrent edit to an unrelated field is never clobbered. Every
+ * persist also emits `eventBus`'s `shortcuts:changed` — `ShortcutsWidget`
+ * only loads shortcuts/categories once on mount (like `WeatherWidget` does
+ * for its own preference), so without this it would keep showing stale
+ * data in the same session until a full reload.
+ *
+ * Icon resolution (T085/T088) runs only from here, only on an explicit
+ * create or (re)save — never during normal dashboard render — per
+ * contracts/icon-provider-contract.md. It runs in the background (the
+ * save itself never blocks on it) and re-reads/re-saves shortcuts at
+ * completion time rather than closing over a possibly-stale array, so a
+ * second save that happens before the first resolution finishes is never
+ * clobbered.
  */
 export function ShortcutSettings() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>(() => loadDashboardConfig().shortcuts)
@@ -42,12 +56,37 @@ export function ShortcutSettings() {
     const config = loadDashboardConfig()
     saveDashboardConfig({ ...config, shortcuts: next })
     setShortcuts(next)
+    defaultEventBus.emit('shortcuts:changed', {})
   }
 
   function persistCategories(next: ShortcutCategory[]): void {
     const config = loadDashboardConfig()
     saveDashboardConfig({ ...config, categories: next })
     setCategories(next)
+    defaultEventBus.emit('shortcuts:changed', {})
+  }
+
+  /**
+   * Resolves the icon for `shortcutId` in the background and persists it
+   * once resolved. Re-reads shortcuts from `configStore` at completion
+   * time (not from a closed-over array) so this never clobbers a save
+   * that happened while resolution was in flight.
+   */
+  function resolveAndPersistIcon(
+    shortcutId: string,
+    url: string,
+    label: string,
+    currentIcon: Shortcut['icon'],
+  ): void {
+    void resolveIcon(url, label, currentIcon !== undefined ? { currentIcon } : {}).then((icon) => {
+      const config = loadDashboardConfig()
+      const nextShortcuts = config.shortcuts.map((entry) =>
+        entry.id === shortcutId ? { ...entry, icon } : entry,
+      )
+      saveDashboardConfig({ ...config, shortcuts: nextShortcuts })
+      setShortcuts(nextShortcuts)
+      defaultEventBus.emit('shortcuts:changed', {})
+    })
   }
 
   function handleSubmit(input: ShortcutInput): ShortcutMutationResult {
@@ -56,6 +95,11 @@ export function ShortcutSettings() {
       : addShortcut(shortcuts, input)
     if (result.ok) {
       persistShortcuts(result.shortcuts)
+      const savedId = editingShortcutId ?? result.shortcuts.at(-1)?.id
+      const saved = result.shortcuts.find((entry) => entry.id === savedId)
+      if (saved) {
+        resolveAndPersistIcon(saved.id, saved.url, saved.label, saved.icon)
+      }
       setEditingShortcutId(null)
     }
     return result

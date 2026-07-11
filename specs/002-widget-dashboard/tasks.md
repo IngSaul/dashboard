@@ -191,12 +191,12 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Implementation for User Story 3
 
-- [ ] T085 [P] [US3] Implement `iconProvider` (Lucide/Simple Icons/custom SVG/favicon-discovery/fallback chain, resolved-icon caching) in `src/services/iconProvider.ts`
-- [ ] T086 [US3] Extend the existing `Shortcut` type with the optional `icon: IconSource` field in `src/types/dashboard.ts` (depends on T028, T085)
-- [ ] T087 [US3] Extend `ShortcutCard` to render the `iconProvider`-resolved icon (or fallback tile) with no layout difference by provider in `src/components/ShortcutCard/` (depends on T086)
-- [ ] T088 [US3] Add icon resolution/re-check trigger to the shortcut editor inside `WidgetSettings`, only on explicit save (never during dashboard render) in `src/components/WidgetSettings/` (depends on T076, T085)
-- [ ] T089 [US3] Confirm category grouping (`CategoryNav`) organizes business/dev/personal shortcuts visually within `ShortcutsWidget` (depends on T068)
-- [ ] T090 [US3] Verify Scenario 3 and Scenario 4b of [quickstart.md](./quickstart.md) manually (business shortcut boundary check, icon auto-discovery, CORS-blocked fallback)
+- [X] T085 [P] [US3] Implement `iconProvider` (Lucide/Simple Icons/custom SVG/favicon-discovery/fallback chain, resolved-icon caching) in `src/services/iconProvider.ts`
+- [X] T086 [US3] Extend the existing `Shortcut` type with the optional `icon: IconSource` field in `src/types/dashboard.ts` (depends on T028, T085)
+- [X] T087 [US3] Extend `ShortcutCard` to render the `iconProvider`-resolved icon (or fallback tile) with no layout difference by provider in `src/components/ShortcutCard/` (depends on T086)
+- [X] T088 [US3] Add icon resolution/re-check trigger to the shortcut editor inside `WidgetSettings`, only on explicit save (never during dashboard render) in `src/components/WidgetSettings/` (depends on T076, T085)
+- [X] T089 [US3] Confirm category grouping (`CategoryNav`) organizes business/dev/personal shortcuts visually within `ShortcutsWidget` (depends on T068)
+- [X] T090 [US3] Verify Scenario 3 and Scenario 4b of [quickstart.md](./quickstart.md) manually (business shortcut boundary check, icon auto-discovery, CORS-blocked fallback)
 
 **Checkpoint**: All three user stories are independently functional. This is the full spec-scoped feature.
 

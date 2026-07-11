@@ -6,7 +6,6 @@ export interface ShortcutInput {
   url: string
   categoryId?: string
   description?: string
-  icon?: string
 }
 
 export type ShortcutMutationResult =
@@ -29,7 +28,6 @@ function buildShortcutFields(input: ShortcutInput) {
     url: input.url.trim(),
     ...(input.categoryId !== undefined ? { categoryId: input.categoryId } : {}),
     ...(input.description !== undefined ? { description: input.description } : {}),
-    ...(input.icon !== undefined ? { icon: input.icon } : {}),
   }
 }
 
@@ -75,6 +73,10 @@ export function updateShortcut(
     order: existing.order,
     createdAt: existing.createdAt,
     updatedAt: new Date().toISOString(),
+    // Editing label/URL/category must not silently wipe a previously
+    // resolved icon — re-resolving it (`iconProvider.resolveIcon`, T088) is
+    // a separate, explicit step the caller performs after this succeeds.
+    ...(existing.icon !== undefined ? { icon: existing.icon } : {}),
     ...buildShortcutFields(input),
   }
   return {
