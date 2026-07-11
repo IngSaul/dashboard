@@ -75,8 +75,8 @@ describe('WidgetGrid (User Story 1)', () => {
 
       // jsdom has no `navigator.geolocation`, so this settles to `unavailable`
       // without making a network request (matches dashboardLaunch.test.tsx's
-      // existing weather precedent).
-      await within(weather as HTMLElement).findByText(/unavailable/i)
+      // existing weather precedent). Weather copy is in Spanish.
+      await within(weather as HTMLElement).findByText(/no est[aá] disponible/i)
     })
   })
 

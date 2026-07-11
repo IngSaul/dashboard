@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { resolveWeatherSummary } from '../../src/services/weather'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fetchWeatherSummary, resolveWeatherSummary } from '../../src/services/weather'
 import type { WeatherPreference } from '../../src/types/dashboard'
 
 /**
@@ -65,5 +65,76 @@ describe('resolveWeatherSummary', () => {
 
     expect(result.status).toBe('unavailable')
     expect(result.message).toBeTruthy()
+  })
+
+  it('returns a permission-specific message when geolocation access was denied', () => {
+    const generic = resolveWeatherSummary(configuredPreference, { kind: 'error', reason: 'unavailable' })
+    const permissionDenied = resolveWeatherSummary(configuredPreference, {
+      kind: 'error',
+      reason: 'permission-denied',
+    })
+
+    expect(permissionDenied.status).toBe('unavailable')
+    expect(permissionDenied.message).not.toBe(generic.message)
+    expect(permissionDenied.message).toMatch(/ubicaci[oó]n/i)
+  })
+})
+
+describe('fetchWeatherSummary', () => {
+  const browserLocationPreference: WeatherPreference = {
+    mode: 'browserLocation',
+    units: 'metric',
+    enabled: true,
+  }
+
+  const openMeteoResponse = {
+    current_weather: { temperature: 21, weathercode: 0, time: '2026-07-10T12:00:00.000Z' },
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('falls back to IP-based location and still returns real weather when the browser denies geolocation', async () => {
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        getCurrentPosition: (
+          _success: PositionCallback,
+          error?: PositionErrorCallback,
+        ) => error?.({ code: 1, message: 'denied' } as GeolocationPositionError),
+      },
+    })
+    const fetchMock = vi.fn(async (url: string) => {
+      if (url.includes('ipwho.is')) {
+        return new Response(JSON.stringify({ success: true, latitude: 1, longitude: 2 }), { status: 200 })
+      }
+      return new Response(JSON.stringify(openMeteoResponse), { status: 200 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchWeatherSummary(browserLocationPreference)
+
+    expect(result.status).toBe('available')
+    expect(result.temperature).toBe(21)
+  })
+
+  it('reports a permission-denied reason when both geolocation and the IP fallback fail', async () => {
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        getCurrentPosition: (
+          _success: PositionCallback,
+          error?: PositionErrorCallback,
+        ) => error?.({ code: 1, message: 'denied' } as GeolocationPositionError),
+      },
+    })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('', { status: 500 })),
+    )
+
+    const result = await fetchWeatherSummary(browserLocationPreference)
+
+    expect(result.status).toBe('unavailable')
+    expect(result.message).toMatch(/ubicaci[oó]n/i)
   })
 })

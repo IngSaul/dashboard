@@ -26,10 +26,10 @@ function buildWeatherMessage(summary: WeatherSummaryData): string {
       return `${location}${temperature} ${condition}`.trim()
     }
     case 'loading':
-      return 'Loading weather…'
+      return 'Cargando el widget de clima…'
     case 'disabled':
-      return summary.message ?? 'Weather is turned off.'
+      return summary.message ?? 'El clima está desactivado.'
     case 'unavailable':
-      return summary.message ?? 'Weather is unavailable right now.'
+      return summary.message ?? 'El clima no está disponible en este momento.'
   }
 }

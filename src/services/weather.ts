@@ -4,13 +4,17 @@ import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
  * Outcome of a weather fetch attempt, decoupled from how the fetch itself
  * happens so the mapping to a `WeatherSummary` stays pure and unit-testable.
  */
+export type WeatherErrorReason = 'permission-denied' | 'unavailable'
+
 export type WeatherFetchOutcome =
   | { kind: 'success'; temperature: number; condition: string; observedAt: string }
-  | { kind: 'error' }
+  | { kind: 'error'; reason?: WeatherErrorReason }
 
-const DISABLED_MESSAGE = 'Weather is turned off.'
-const SETUP_NEEDED_MESSAGE = 'Set a location to see weather.'
-const UNAVAILABLE_MESSAGE = 'Weather is unavailable right now.'
+const DISABLED_MESSAGE = 'El clima está desactivado.'
+const SETUP_NEEDED_MESSAGE = 'Configura una ubicación para ver el clima.'
+const UNAVAILABLE_MESSAGE = 'El clima no está disponible en este momento.'
+const PERMISSION_DENIED_MESSAGE =
+  'El acceso a la ubicación está bloqueado. Actívalo en la configuración de tu navegador para ver el clima.'
 
 /**
  * Maps a weather preference plus a fetch outcome (or `'loading'`) to the
@@ -38,7 +42,8 @@ export function resolveWeatherSummary(
   }
 
   if (outcome.kind === 'error') {
-    return { status: 'unavailable', message: UNAVAILABLE_MESSAGE, ...locationLabel }
+    const message = outcome.reason === 'permission-denied' ? PERMISSION_DENIED_MESSAGE : UNAVAILABLE_MESSAGE
+    return { status: 'unavailable', message, ...locationLabel }
   }
 
   return {
@@ -62,35 +67,103 @@ interface OpenMeteoResponse {
 
 /** WMO weather codes (subset) used by Open-Meteo's `current_weather` field. */
 const WEATHER_CODE_DESCRIPTIONS: Record<number, string> = {
-  0: 'Clear sky',
-  1: 'Mostly clear',
-  2: 'Partly cloudy',
-  3: 'Overcast',
-  45: 'Fog',
-  48: 'Fog',
-  51: 'Light drizzle',
-  53: 'Drizzle',
-  55: 'Dense drizzle',
-  61: 'Light rain',
-  63: 'Rain',
-  65: 'Heavy rain',
-  71: 'Light snow',
-  73: 'Snow',
-  75: 'Heavy snow',
-  80: 'Rain showers',
-  81: 'Rain showers',
-  82: 'Violent rain showers',
-  95: 'Thunderstorm',
+  0: 'Cielo despejado',
+  1: 'Mayormente despejado',
+  2: 'Parcialmente nublado',
+  3: 'Nublado',
+  45: 'Niebla',
+  48: 'Niebla',
+  51: 'Llovizna ligera',
+  53: 'Llovizna',
+  55: 'Llovizna intensa',
+  61: 'Lluvia ligera',
+  63: 'Lluvia',
+  65: 'Lluvia intensa',
+  71: 'Nieve ligera',
+  73: 'Nieve',
+  75: 'Nieve intensa',
+  80: 'Chubascos',
+  81: 'Chubascos',
+  82: 'Chubascos violentos',
+  95: 'Tormenta eléctrica',
 }
 
 function describeWeatherCode(code: number): string {
-  return WEATHER_CODE_DESCRIPTIONS[code] ?? 'Unknown conditions'
+  return WEATHER_CODE_DESCRIPTIONS[code] ?? 'Condiciones desconocidas'
 }
 
 function getCurrentPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
   })
+}
+
+/** Standard `GeolocationPositionError.PERMISSION_DENIED` code (Geolocation API spec) — hardcoded rather than read off the global constructor, which jsdom/test environments don't provide. */
+const GEOLOCATION_PERMISSION_DENIED_CODE = 1
+
+function isPositionErrorLike(error: unknown): error is { code: number } {
+  return typeof error === 'object' && error !== null && typeof (error as { code?: unknown }).code === 'number'
+}
+
+function resolveGeolocationErrorReason(error: unknown): WeatherErrorReason {
+  return isPositionErrorLike(error) && error.code === GEOLOCATION_PERMISSION_DENIED_CODE
+    ? 'permission-denied'
+    : 'unavailable'
+}
+
+interface IpLocationResponse {
+  success?: boolean
+  latitude?: number
+  longitude?: number
+}
+
+/**
+ * Best-effort IP-based location lookup, used as a fallback when browser
+ * geolocation is denied/unavailable so the widget can still show real
+ * weather instead of giving up. No API key, no permission prompt; never
+ * throws — resolves to `null` on any failure.
+ */
+async function fetchIpLocation(): Promise<{ latitude: number; longitude: number } | null> {
+  try {
+    const response = await fetch('https://ipwho.is/')
+    if (!response.ok) {
+      return null
+    }
+    const data = (await response.json()) as IpLocationResponse
+    if (data.success === false || typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
+      return null
+    }
+    return { latitude: data.latitude, longitude: data.longitude }
+  } catch {
+    return null
+  }
+}
+
+async function fetchOpenMeteoCurrentWeather(
+  latitude: number,
+  longitude: number,
+): Promise<WeatherFetchOutcome> {
+  try {
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
+    )
+    if (!response.ok) {
+      return { kind: 'error' }
+    }
+    const data = (await response.json()) as OpenMeteoResponse
+    const current = data.current_weather
+    if (!current) {
+      return { kind: 'error' }
+    }
+    return {
+      kind: 'success',
+      temperature: current.temperature,
+      condition: describeWeatherCode(current.weathercode),
+      observedAt: current.time,
+    }
+  } catch {
+    return { kind: 'error' }
+  }
 }
 
 /**
@@ -101,8 +174,10 @@ function getCurrentPosition(): Promise<GeolocationPosition> {
  * `configuredLocation` mode only stores a display label
  * (`WeatherPreference.locationLabel`), not coordinates, so live lookup for
  * it would need a geocoding step that is out of scope here; it resolves to
- * `unavailable` rather than fabricating data. `browserLocation` mode uses
- * the Geolocation API with the Open-Meteo forecast API (no key required).
+ * `unavailable` rather than fabricating data. `browserLocation` mode tries
+ * the Geolocation API first, then falls back to IP-based location
+ * (`fetchIpLocation`) if that's denied/unavailable, so a blocked permission
+ * doesn't leave the widget with nothing to show.
  */
 export async function fetchWeatherSummary(preference: WeatherPreference): Promise<WeatherSummary> {
   if (!preference.enabled) {
@@ -117,29 +192,22 @@ export async function fetchWeatherSummary(preference: WeatherPreference): Promis
   }
 
   if (typeof navigator === 'undefined' || !navigator.geolocation) {
-    return resolveWeatherSummary(preference, { kind: 'error' })
+    return resolveWeatherSummary(preference, { kind: 'error', reason: 'unavailable' })
   }
 
   try {
     const position = await getCurrentPosition()
-    const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&current_weather=true`,
+    return resolveWeatherSummary(
+      preference,
+      await fetchOpenMeteoCurrentWeather(position.coords.latitude, position.coords.longitude),
     )
-    if (!response.ok) {
-      return resolveWeatherSummary(preference, { kind: 'error' })
+  } catch (error) {
+    const reason = resolveGeolocationErrorReason(error)
+    const ipLocation = await fetchIpLocation()
+    if (!ipLocation) {
+      return resolveWeatherSummary(preference, { kind: 'error', reason })
     }
-    const data = (await response.json()) as OpenMeteoResponse
-    const current = data.current_weather
-    if (!current) {
-      return resolveWeatherSummary(preference, { kind: 'error' })
-    }
-    return resolveWeatherSummary(preference, {
-      kind: 'success',
-      temperature: current.temperature,
-      condition: describeWeatherCode(current.weathercode),
-      observedAt: current.time,
-    })
-  } catch {
-    return resolveWeatherSummary(preference, { kind: 'error' })
+    const outcome = await fetchOpenMeteoCurrentWeather(ipLocation.latitude, ipLocation.longitude)
+    return resolveWeatherSummary(preference, outcome.kind === 'success' ? outcome : { kind: 'error', reason })
   }
 }
