@@ -8,9 +8,9 @@ export interface ThemeToggleProps {
 }
 
 const THEME_LABELS: Record<ThemeMode, string> = {
-  system: 'System',
-  light: 'Light',
-  dark: 'Dark',
+  system: 'Sistema',
+  light: 'Claro',
+  dark: 'Oscuro',
 }
 
 /** Cycles system -> light -> dark on activation. Persistence is the caller's responsibility. */
@@ -19,7 +19,7 @@ export function ThemeToggle({ mode, onChange }: ThemeToggleProps) {
     <button
       type="button"
       className="theme-toggle"
-      aria-label={`Toggle theme, currently ${THEME_LABELS[mode]}`}
+      aria-label={`Cambiar tema, actualmente ${THEME_LABELS[mode]}`}
       onClick={() => onChange(getNextThemeMode(mode))}
     >
       {THEME_LABELS[mode]}

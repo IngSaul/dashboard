@@ -82,7 +82,7 @@ export function CommandPalette() {
     <dialog
       ref={dialogRef}
       className="command-palette"
-      aria-label="Command palette"
+      aria-label="Paleta de comandos"
       onClose={closePalette}
       onCancel={closePalette}
       onClick={(event) => {
@@ -92,9 +92,9 @@ export function CommandPalette() {
       }}
     >
       <GlassInput
-        label="Search or run a command"
+        label="Buscar o ejecutar un comando"
         hideLabel
-        placeholder="Search or run a command…"
+        placeholder="Buscar o ejecutar un comando…"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         onKeyDown={handleInputKeyDown}
@@ -108,10 +108,10 @@ export function CommandPalette() {
         className="command-palette__results"
         role="listbox"
         id={listboxId}
-        aria-label="Results"
+        aria-label="Resultados"
       >
         {results.length === 0 ? (
-          <StatusMessage message={query === '' ? 'Type to search…' : 'No results found.'} />
+          <StatusMessage message={query === '' ? 'Escribe para buscar…' : 'No se encontraron resultados.'} />
         ) : (
           results.map((result, index) => (
             <button

@@ -49,12 +49,12 @@ export function SearchBar({ searchPreference }: SearchBarProps) {
   }
 
   return (
-    <form role="search" aria-label="Site search" className="search-bar" onSubmit={handleSubmit}>
+    <form role="search" aria-label="Buscar en el sitio" className="search-bar" onSubmit={handleSubmit}>
       <div className="search-bar__field">
         <input
           type="text"
-          aria-label="Search"
-          placeholder={`Search with ${searchPreference.providerName}`}
+          aria-label="Buscar"
+          placeholder={`Buscar con ${searchPreference.providerName}`}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value)
@@ -67,11 +67,11 @@ export function SearchBar({ searchPreference }: SearchBarProps) {
           aria-activedescendant={results.length > 0 ? `${listboxId}-${activeIndex}` : undefined}
         />
         <button type="submit" className="search-bar__submit">
-          Search
+          Buscar
         </button>
       </div>
       {results.length > 0 ? (
-        <ul className="search-bar__suggestions" role="listbox" id={listboxId} aria-label="Suggestions">
+        <ul className="search-bar__suggestions" role="listbox" id={listboxId} aria-label="Sugerencias">
           {results.map((result, index) => (
             <li
               key={result.id}

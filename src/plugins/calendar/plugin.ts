@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const calendarPlugin: WidgetDescriptor = {
   type: 'calendar',
   metadata: {
-    displayName: 'Calendar',
+    displayName: 'Calendario',
     description: 'Muestra el mes actual, sin sincronización externa.',
     requiresConfig: false,
   },

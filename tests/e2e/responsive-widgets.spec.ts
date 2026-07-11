@@ -21,7 +21,7 @@ test.describe('Desktop layout', () => {
     await page.goto('/')
 
     await expect(page.getByRole('search')).toBeVisible()
-    await expect(page.getByRole('button', { name: /toggle settings/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /alternar configuración/i })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
     await expect(page.locator('.workspace-column')).toHaveCount(3)
 
@@ -39,7 +39,7 @@ test.describe('Tablet layout', () => {
     await page.goto('/')
 
     await expect(page.getByRole('search')).toBeVisible()
-    await expect(page.getByRole('button', { name: /toggle settings/i })).toBeVisible()
+    await expect(page.getByRole('button', { name: /alternar configuración/i })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
 
     const hasHorizontalOverflow = await page.evaluate(
@@ -66,7 +66,7 @@ test.describe('Tablet layout', () => {
     await page.goto('/')
 
     const searchBox = await page.getByRole('search').boundingBox()
-    const toggleBox = await page.getByRole('button', { name: /toggle settings/i }).boundingBox()
+    const toggleBox = await page.getByRole('button', { name: /alternar configuración/i }).boundingBox()
     expect(searchBox).not.toBeNull()
     expect(toggleBox).not.toBeNull()
     if (!searchBox || !toggleBox) return
@@ -97,11 +97,11 @@ test.describe('Reduced motion', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
 
-    const toggle = page.getByRole('button', { name: /toggle settings/i })
+    const toggle = page.getByRole('button', { name: /alternar configuración/i })
     await toggle.click()
     await expect(page.locator('.settings-drawer')).toHaveAttribute('data-open', 'true')
 
-    await page.getByRole('button', { name: /close settings/i }).click()
+    await page.getByRole('button', { name: /cerrar configuración/i }).click()
     await expect(page.locator('.settings-drawer')).toHaveAttribute('data-open', 'false')
   })
 })

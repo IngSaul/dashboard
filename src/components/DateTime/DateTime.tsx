@@ -30,7 +30,7 @@ export function DateTime() {
   }, [])
 
   return (
-    <div className="date-time" role="group" aria-label="Current date and time">
+    <div className="date-time" role="group" aria-label="Fecha y hora actual">
       <span className="date-time__date">{formatDashboardDate(now)}</span>
       <span className="date-time__time">{formatDashboardTime(now)}</span>
     </div>

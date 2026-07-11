@@ -51,7 +51,7 @@ export function WidgetSlot({ widget }: WidgetSlotProps) {
       data-widget-type={widget.type}
     >
       <WidgetErrorBoundary>
-        <Suspense fallback={<StatusMessage message="Loading…" />}>
+        <Suspense fallback={<StatusMessage message="Cargando…" />}>
           {/* eslint-disable-next-line react-hooks/static-components -- `LazyComponent` is a stable, module-scope-cached lookup (see `lazyComponentsByType` above), not created per render; the linter can't see through the Map lookup to that. */}
           <LazyComponent widget={widget} />
         </Suspense>

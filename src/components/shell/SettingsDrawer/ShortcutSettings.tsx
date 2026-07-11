@@ -143,8 +143,8 @@ export function ShortcutSettings() {
   const editingShortcut = shortcuts.find((entry) => entry.id === editingShortcutId) ?? null
 
   return (
-    <section className="settings-section" aria-label="Shortcuts">
-      <h3 className="settings-section__heading">Shortcuts</h3>
+    <section className="settings-section" aria-label="Accesos directos">
+      <h3 className="settings-section__heading">Accesos directos</h3>
       <Settings
         key={editingShortcut?.id ?? 'new'}
         categories={categories}

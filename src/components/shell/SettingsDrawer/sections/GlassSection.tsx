@@ -2,12 +2,12 @@ import { useThemeState } from '../../../../state/ThemeProvider'
 import { GlassDropdown } from '../../../glass/GlassDropdown/GlassDropdown'
 
 const INTENSITY_OPTIONS = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
+  { value: 'low', label: 'Baja' },
+  { value: 'medium', label: 'Media' },
+  { value: 'high', label: 'Alta' },
 ]
 const BORDER_OPTIONS = [
-  { value: 'subtle', label: 'Subtle' },
+  { value: 'subtle', label: 'Sutil' },
   { value: 'visible', label: 'Visible' },
 ]
 
@@ -24,16 +24,16 @@ export function GlassSection() {
   const { glass, setGlass } = useThemeState()
 
   return (
-    <section className="settings-section" id="settings-section-glass" aria-label="Glass" tabIndex={-1}>
-      <h3 className="settings-section__heading">Glass</h3>
+    <section className="settings-section" id="settings-section-glass" aria-label="Vidrio" tabIndex={-1}>
+      <h3 className="settings-section__heading">Vidrio</h3>
       <GlassDropdown
-        label="Intensity"
+        label="Intensidad"
         options={INTENSITY_OPTIONS}
         value={glass.intensity}
         onChange={(value) => setGlass({ ...glass, intensity: value as typeof glass.intensity })}
       />
       <GlassDropdown
-        label="Border strength"
+        label="Grosor del borde"
         options={BORDER_OPTIONS}
         value={glass.borderStrength}
         onChange={(value) =>

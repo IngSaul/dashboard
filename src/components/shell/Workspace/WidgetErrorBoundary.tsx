@@ -23,7 +23,7 @@ export class WidgetErrorBoundary extends Component<WidgetErrorBoundaryProps, Wid
 
   override render() {
     if (this.state.hasError) {
-      return <StatusMessage message="This widget is unavailable." tone="notice" />
+      return <StatusMessage message="Este widget no está disponible." tone="notice" />
     }
     return this.props.children
   }

@@ -12,7 +12,7 @@ export type CategoryMutationResult =
 
 function validateCategoryInput(input: CategoryInput): string | null {
   if (!isNonEmptyString(input.name)) {
-    return 'Name is required.'
+    return 'El nombre es obligatorio.'
   }
   return null
 }
@@ -46,7 +46,7 @@ export function updateCategory(
 ): CategoryMutationResult {
   const existing = categories.find((category) => category.id === id)
   if (!existing) {
-    return { ok: false, error: 'Category not found.' }
+    return { ok: false, error: 'Categoría no encontrada.' }
   }
   const error = validateCategoryInput(input)
   if (error) {
@@ -70,7 +70,7 @@ export function removeCategory(
   id: string,
 ): CategoryMutationResult {
   if (!categories.some((category) => category.id === id)) {
-    return { ok: false, error: 'Category not found.' }
+    return { ok: false, error: 'Categoría no encontrada.' }
   }
   return { ok: true, categories: categories.filter((category) => category.id !== id) }
 }

@@ -7,5 +7,5 @@ export interface RightColumnProps {
 
 /** Secondary column (calendar, notes, and future widgets) — see design-reference.md. */
 export function RightColumn({ widgets }: RightColumnProps) {
-  return <WorkspaceColumn widgets={widgets} className="workspace-column--right" label="Secondary widgets" />
+  return <WorkspaceColumn widgets={widgets} className="workspace-column--right" label="Widgets secundarios" />
 }

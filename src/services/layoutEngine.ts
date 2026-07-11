@@ -53,6 +53,36 @@ export function resolveLayout(
   }
 }
 
+/**
+ * Which of `left`/`right` have widgets, as a `Workspace.css` track-layout
+ * key (`center` always renders `CenterColumn`'s fixed `SearchBar` chrome,
+ * so it's never actually empty and is never left out of the key).
+ * `grid-template-columns` is a fixed explicit track list, so an empty
+ * column (`.workspace-column:empty { display: none }`) would otherwise
+ * still reserve its `minmax()` min width — and because grid tracks are
+ * positional, a plain "how many columns" count can't tell `left+center`
+ * apart from `center+right` (same count, different track widths needed).
+ * This key lets `Workspace.css` size each real combination explicitly.
+ * Reflow (tablet/phone) already empties `right`/`left` in `resolveLayout`
+ * above, so this stays accurate across breakpoints without extra input.
+ */
+export type WorkspaceColumnsKey = 'center' | 'left-center' | 'center-right' | 'left-center-right'
+
+export function resolveWorkspaceColumnsKey(resolved: ResolvedLayout): WorkspaceColumnsKey {
+  const hasLeft = resolved.left.length > 0
+  const hasRight = resolved.right.length > 0
+  if (hasLeft && hasRight) {
+    return 'left-center-right'
+  }
+  if (hasLeft) {
+    return 'left-center'
+  }
+  if (hasRight) {
+    return 'center-right'
+  }
+  return 'center'
+}
+
 function getBreakpointFromMatchMedia(): Breakpoint {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
     return 'desktop'

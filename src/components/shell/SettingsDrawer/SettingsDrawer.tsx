@@ -70,7 +70,7 @@ export function SettingsDrawer() {
     <>
       <GlassIconButton
         className="settings-drawer__toggle"
-        aria-label="Toggle settings"
+        aria-label="Alternar configuración"
         aria-expanded={isOpen}
         onClick={() => (isOpen ? close() : open())}
       >
@@ -92,12 +92,12 @@ export function SettingsDrawer() {
         inert={!isOpen}
         aria-hidden={!isOpen}
         role="dialog"
-        aria-label="Settings"
+        aria-label="Configuración"
       >
         <GlassPanel as="aside" className="settings-drawer__panel">
           <div className="settings-drawer__header">
-            <h2 className="settings-drawer__title">Settings</h2>
-            <GlassIconButton aria-label="Close settings" onClick={close}>
+            <h2 className="settings-drawer__title">Configuración</h2>
+            <GlassIconButton aria-label="Cerrar configuración" onClick={close}>
               <X aria-hidden="true" />
             </GlassIconButton>
           </div>

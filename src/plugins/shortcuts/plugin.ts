@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const shortcutsPlugin: WidgetDescriptor = {
   type: 'shortcuts',
   metadata: {
-    displayName: 'Shortcuts',
+    displayName: 'Accesos directos',
     description: 'Acceso rápido a tus sitios y apps favoritas.',
     requiresConfig: false,
   },

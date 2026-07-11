@@ -2,10 +2,18 @@ import { StatusMessage } from '../../StatusMessage/StatusMessage'
 import { useMonitoringSnapshot } from '../useMonitoringSnapshot'
 import './DockerStatusWidget.css'
 
-const NOT_CONFIGURED_MESSAGE = 'Set a monitoring endpoint in Settings to see Docker containers.'
-const UNAVAILABLE_MESSAGE = 'Docker container status is unavailable right now.'
-const LOADING_MESSAGE = 'Loading Docker containers…'
-const NO_CONTAINERS_MESSAGE = 'No containers found.'
+const NOT_CONFIGURED_MESSAGE =
+  'Configura un endpoint de monitorización en Configuración para ver los contenedores de Docker.'
+const UNAVAILABLE_MESSAGE = 'El estado de los contenedores de Docker no está disponible en este momento.'
+const LOADING_MESSAGE = 'Cargando contenedores de Docker…'
+const NO_CONTAINERS_MESSAGE = 'No se encontraron contenedores.'
+
+const CONTAINER_STATUS_LABELS: Record<string, string> = {
+  running: 'En ejecución',
+  stopped: 'Detenido',
+  restarting: 'Reiniciando',
+  unknown: 'Desconocido',
+}
 
 /**
  * Docker-container widget: same `loading`/`ready`/`unavailable`/
@@ -44,7 +52,7 @@ export function DockerStatusWidget() {
           <span
             className={`docker-status-widget__status docker-status-widget__status--${container.status}`}
           >
-            {container.status}
+            {CONTAINER_STATUS_LABELS[container.status] ?? container.status}
           </span>
         </li>
       ))}

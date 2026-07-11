@@ -40,7 +40,7 @@ function widgetCheckbox(name: string): HTMLElement {
 }
 
 async function openSettings(user: ReturnType<typeof userEvent.setup>): Promise<void> {
-  await user.click(screen.getByRole('button', { name: 'Toggle settings' }))
+  await user.click(screen.getByRole('button', { name: 'Alternar configuración' }))
 }
 
 describe('WidgetSettings (User Story 2)', () => {
@@ -59,9 +59,9 @@ describe('WidgetSettings (User Story 2)', () => {
 
       await openSettings(user)
 
-      expect(widgetCheckbox('Clock')).toBeChecked()
-      expect(widgetCheckbox('Shortcuts')).toBeChecked()
-      expect(widgetCheckbox('Weather')).not.toBeChecked()
+      expect(widgetCheckbox('Reloj')).toBeChecked()
+      expect(widgetCheckbox('Accesos directos')).toBeChecked()
+      expect(widgetCheckbox('Clima')).not.toBeChecked()
     })
 
     it('enabling a widget via its checkbox makes it render on the dashboard', async () => {
@@ -69,7 +69,7 @@ describe('WidgetSettings (User Story 2)', () => {
       render(<Dashboard />)
 
       await openSettings(user)
-      await user.click(widgetCheckbox('Weather'))
+      await user.click(widgetCheckbox('Clima'))
 
       expect(document.querySelector('.widget-slot[data-widget-type="weather"]')).not.toBeNull()
     })
@@ -79,7 +79,7 @@ describe('WidgetSettings (User Story 2)', () => {
       render(<Dashboard />)
 
       await openSettings(user)
-      await user.click(widgetCheckbox('Shortcuts'))
+      await user.click(widgetCheckbox('Accesos directos'))
 
       expect(document.querySelector('.widget-slot[data-widget-type="shortcuts"]')).toBeNull()
       // The never-fully-empty guarantee means clock alone is enough to satisfy it.
@@ -92,7 +92,7 @@ describe('WidgetSettings (User Story 2)', () => {
 
       await openSettings(user)
       const settingsBody = document.querySelector('.settings-drawer__body') as HTMLElement
-      await user.click(within(settingsBody).getByRole('button', { name: 'Move Shortcuts up' }))
+      await user.click(within(settingsBody).getByRole('button', { name: 'Subir Accesos directos' }))
 
       const center = document.querySelector('.workspace-column--center') as HTMLElement
       const slots = Array.from(center.querySelectorAll('.widget-slot')).map((slot) =>
@@ -106,7 +106,7 @@ describe('WidgetSettings (User Story 2)', () => {
       const { unmount } = render(<Dashboard />)
 
       await openSettings(user)
-      await user.click(widgetCheckbox('Weather'))
+      await user.click(widgetCheckbox('Clima'))
       unmount()
 
       render(<Dashboard />)

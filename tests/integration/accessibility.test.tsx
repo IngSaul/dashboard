@@ -66,10 +66,10 @@ describe('Accessibility (User Story 3)', () => {
   it('exposes accessible names for primary interactive controls', () => {
     render(<Dashboard />)
 
-    expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /manage shortcuts/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /buscar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /buscar/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /cambiar tema/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /gestionar accesos directos/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Gmail' })).toBeInTheDocument()
   })
 
@@ -77,7 +77,7 @@ describe('Accessibility (User Story 3)', () => {
     enableWeather()
     render(<Dashboard />)
 
-    expect(await screen.findByRole('group', { name: /current date and time/i })).toBeInTheDocument()
+    expect(await screen.findByRole('group', { name: /fecha y hora actual/i })).toBeInTheDocument()
     expect(await screen.findByRole('status')).toBeInTheDocument()
   })
 
@@ -85,10 +85,10 @@ describe('Accessibility (User Story 3)', () => {
     render(<Dashboard />)
 
     const controls = [
-      screen.getByRole('textbox', { name: /search/i }),
-      screen.getByRole('button', { name: /search/i }),
-      screen.getByRole('button', { name: /toggle theme/i }),
-      screen.getByRole('button', { name: /manage shortcuts/i }),
+      screen.getByRole('textbox', { name: /buscar/i }),
+      screen.getByRole('button', { name: /buscar/i }),
+      screen.getByRole('button', { name: /cambiar tema/i }),
+      screen.getByRole('button', { name: /gestionar accesos directos/i }),
       screen.getByRole('link', { name: 'Gmail' }),
     ]
 

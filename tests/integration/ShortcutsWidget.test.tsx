@@ -74,7 +74,7 @@ describe('ShortcutsWidget (User Story 3)', () => {
     const categoryButtons = Array.from(document.querySelectorAll('.category-nav__item')).map(
       (button) => button.textContent,
     )
-    expect(categoryButtons).toEqual(['All', 'General'])
+    expect(categoryButtons).toEqual(['Todas', 'General'])
   })
 
   it('opens a shortcut via standard navigation — a real <a href>, not a click handler', async () => {

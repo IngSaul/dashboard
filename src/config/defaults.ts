@@ -109,7 +109,7 @@ export function createDefaultDashboardConfig(): DashboardConfiguration {
       resolvedMode: 'light',
     },
     searchPreference: {
-      providerName: 'Web Search',
+      providerName: 'Google',
       searchUrlTemplate: 'https://www.google.com/search?q={query}',
       openBehavior: 'currentTab',
     },
@@ -140,7 +140,7 @@ export function createDefaultDashboardConfig(): DashboardConfiguration {
       },
       {
         id: 'shortcut-calendar',
-        label: 'Calendar',
+        label: 'Calendario',
         url: 'https://calendar.google.com/',
         categoryId: GENERAL_CATEGORY_ID,
         order: 1,

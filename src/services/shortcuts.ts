@@ -17,10 +17,10 @@ export type ShortcutMutationResult =
 
 function validateShortcutInput(input: ShortcutInput): string | null {
   if (!isNonEmptyString(input.label)) {
-    return 'Label is required.'
+    return 'El nombre es obligatorio.'
   }
   if (!isValidUrl(input.url)) {
-    return 'A valid URL is required.'
+    return 'Se requiere una URL válida.'
   }
   return null
 }
@@ -65,7 +65,7 @@ export function updateShortcut(
 ): ShortcutMutationResult {
   const existing = shortcuts.find((shortcut) => shortcut.id === id)
   if (!existing) {
-    return { ok: false, error: 'Shortcut not found.' }
+    return { ok: false, error: 'Acceso directo no encontrado.' }
   }
   const error = validateShortcutInput(input)
   if (error) {
@@ -91,7 +91,7 @@ export function updateShortcut(
 /** Removes the shortcut matching `id`. Rejects an unknown id. */
 export function removeShortcut(shortcuts: Shortcut[], id: string): ShortcutMutationResult {
   if (!shortcuts.some((shortcut) => shortcut.id === id)) {
-    return { ok: false, error: 'Shortcut not found.' }
+    return { ok: false, error: 'Acceso directo no encontrado.' }
   }
   return { ok: true, shortcuts: shortcuts.filter((shortcut) => shortcut.id !== id) }
 }
@@ -107,7 +107,7 @@ export function reorderShortcuts(
     new Set(orderedIds).size === orderedIds.length &&
     orderedIds.every((id) => currentIds.has(id))
   if (!isPermutation) {
-    return { ok: false, error: 'orderedIds must match the existing shortcut ids exactly.' }
+    return { ok: false, error: 'orderedIds debe coincidir exactamente con los ids de accesos directos existentes.' }
   }
   const byId = new Map(shortcuts.map((shortcut) => [shortcut.id, shortcut]))
   const reordered: Shortcut[] = []
@@ -129,7 +129,7 @@ export function reorderShortcuts(
 export function registerShortcutSearchSource(): void {
   defaultSearchEngine.registerSource({
     id: 'shortcuts',
-    label: 'Shortcuts',
+    label: 'Accesos directos',
     kind: 'shortcut',
     match(query) {
       const lowerQuery = query.trim().toLowerCase()

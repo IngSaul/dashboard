@@ -30,7 +30,7 @@ describe('AppShell', () => {
     expect(document.querySelector('.widget-slot[data-widget-type="clock"]')).not.toBeNull()
     expect(document.querySelector('.widget-slot[data-widget-type="shortcuts"]')).not.toBeNull()
     expect(document.querySelectorAll('.widget-slot')).toHaveLength(2)
-    expect(screen.getByRole('button', { name: 'Toggle settings' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Alternar configuración' })).toBeInTheDocument()
   })
 
   it('applies a resolved light/dark theme to the document root', () => {
@@ -43,10 +43,10 @@ describe('AppShell', () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: 'Toggle settings' }))
-    expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'true')
+    await user.click(screen.getByRole('button', { name: 'Alternar configuración' }))
+    expect(screen.getByRole('dialog', { name: 'Configuración' })).toHaveAttribute('data-open', 'true')
 
-    await user.click(screen.getByRole('button', { name: 'Close settings' }))
+    await user.click(screen.getByRole('button', { name: 'Cerrar configuración' }))
     // `aria-hidden` (paired with `inert`) removes the closed drawer from
     // the accessibility tree — by design, so its content (e.g. a shortcut
     // link duplicated from the main widget) never shadows the main
@@ -59,8 +59,8 @@ describe('AppShell', () => {
     const user = userEvent.setup()
     render(<AppShell />)
 
-    await user.click(screen.getByRole('button', { name: 'Toggle settings' }))
-    expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'true')
+    await user.click(screen.getByRole('button', { name: 'Alternar configuración' }))
+    expect(screen.getByRole('dialog', { name: 'Configuración' })).toHaveAttribute('data-open', 'true')
 
     await user.keyboard('{Escape}')
     expect(document.querySelector('.settings-drawer')).toHaveAttribute('data-open', 'false')
@@ -72,7 +72,7 @@ describe('AppShell', () => {
 
     await user.keyboard('{Control>}k{/Control}')
 
-    expect(screen.getByRole('dialog', { name: 'Command palette' })).toHaveAttribute('open')
-    expect(screen.getByText('Type to search…')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Paleta de comandos' })).toHaveAttribute('open')
+    expect(screen.getByText('Escribe para buscar…')).toBeInTheDocument()
   })
 })

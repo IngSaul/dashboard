@@ -5,13 +5,21 @@
  * everything into center (phone) at the data level — this stylesheet only
  * needs to stop reserving a track for a column that's now permanently
  * empty at that breakpoint, via `:empty`.
+ *
+ * `grid-template-columns` is only defined per `data-columns` value
+ * (`layoutEngine.resolveWorkspaceColumnsKey`), not once for all three
+ * tracks: `:empty` hides an unpopulated column's box, but its `minmax()`
+ * track (fixed 220-320px bounds, independent of content) would otherwise
+ * still be reserved. This matters most for the default configuration
+ * (only `clock`+`shortcuts`, both center), where without this the center
+ * column would be squeezed to `1fr` of a width minus two phantom sidebars
+ * nobody sees.
  */
 
 .workspace {
   position: relative;
   z-index: var(--z-base);
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 320px);
   gap: var(--space-5);
   width: min(100%, var(--container-max));
   margin-inline: auto;
@@ -19,18 +27,40 @@
   align-items: start;
 }
 
+.workspace[data-columns='left-center-right'] {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 320px);
+}
+
+.workspace[data-columns='left-center'] {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.workspace[data-columns='center-right'] {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+}
+
+.workspace[data-columns='center'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .workspace-column {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .workspace-column:empty {
   display: none;
 }
 
+/*
+ * Same specificity as the `data-columns` value rules above
+ * (`.workspace[attr]` either way) — the tablet/phone single-column stack
+ * wins on source order at this breakpoint regardless of which columns are
+ * populated.
+ */
 @media (max-width: 1024px) {
-  .workspace {
+  .workspace[data-columns] {
     grid-template-columns: 1fr;
     padding: var(--space-6) var(--page-padding);
   }

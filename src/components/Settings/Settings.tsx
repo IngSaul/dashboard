@@ -67,10 +67,10 @@ export function Settings({
   }
 
   return (
-    <section className="settings" aria-label="Manage shortcuts">
+    <section className="settings" aria-label="Gestionar accesos directos">
       <form className="settings__form" onSubmit={handleSubmit}>
         <label className="settings__field">
-          Label
+          Nombre
           <input type="text" value={label} onChange={(event) => setLabel(event.target.value)} />
         </label>
         <label className="settings__field">
@@ -78,9 +78,9 @@ export function Settings({
           <input type="text" value={url} onChange={(event) => setUrl(event.target.value)} />
         </label>
         <label className="settings__field">
-          Category
+          Categoría
           <select value={categoryId} onChange={(event) => setCategoryId(event.target.value)}>
-            <option value="">None</option>
+            <option value="">Ninguna</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -94,10 +94,10 @@ export function Settings({
           </p>
         ) : null}
         <div className="settings__actions">
-          <button type="submit">{editingShortcut ? 'Save shortcut' : 'Add shortcut'}</button>
+          <button type="submit">{editingShortcut ? 'Guardar acceso directo' : 'Añadir acceso directo'}</button>
           {editingShortcut ? (
             <button type="button" onClick={onCancelEdit}>
-              Cancel
+              Cancelar
             </button>
           ) : null}
         </div>
@@ -105,7 +105,7 @@ export function Settings({
 
       <form className="settings__form settings__form--category" onSubmit={handleAddCategory}>
         <label className="settings__field">
-          New category
+          Nueva categoría
           <input
             type="text"
             value={categoryName}
@@ -118,7 +118,7 @@ export function Settings({
           </p>
         ) : null}
         <div className="settings__actions">
-          <button type="submit">Add category</button>
+          <button type="submit">Añadir categoría</button>
         </div>
       </form>
     </section>

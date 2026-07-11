@@ -70,7 +70,7 @@ describe('Dashboard launch (User Story 1)', () => {
     render(<Dashboard />)
 
     expect(screen.getByRole('search')).toBeInTheDocument()
-    expect(await screen.findByRole('group', { name: /current date and time/i })).toBeInTheDocument()
+    expect(await screen.findByRole('group', { name: /fecha y hora actual/i })).toBeInTheDocument()
     expect(await screen.findByRole('status')).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Gmail' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'GitHub' })).toBeInTheDocument()
@@ -81,8 +81,8 @@ describe('Dashboard launch (User Story 1)', () => {
     const user = userEvent.setup()
 
     render(<Dashboard />)
-    await user.type(screen.getByRole('textbox', { name: /search/i }), 'react hooks')
-    await user.click(screen.getByRole('button', { name: /search/i }))
+    await user.type(screen.getByRole('textbox', { name: /buscar/i }), 'react hooks')
+    await user.click(screen.getByRole('button', { name: /buscar/i }))
 
     expect(assignMock).toHaveBeenCalledTimes(1)
     expect(String(assignMock.mock.calls[0]?.[0])).toContain(encodeURIComponent('react hooks'))
@@ -93,7 +93,7 @@ describe('Dashboard launch (User Story 1)', () => {
     const user = userEvent.setup()
 
     render(<Dashboard />)
-    await user.click(screen.getByRole('button', { name: /search/i }))
+    await user.click(screen.getByRole('button', { name: /buscar/i }))
 
     expect(assignMock).not.toHaveBeenCalled()
   })

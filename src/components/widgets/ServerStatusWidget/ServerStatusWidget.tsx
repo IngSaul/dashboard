@@ -2,9 +2,16 @@ import { StatusMessage } from '../../StatusMessage/StatusMessage'
 import { useMonitoringSnapshot } from '../useMonitoringSnapshot'
 import './ServerStatusWidget.css'
 
-const NOT_CONFIGURED_MESSAGE = 'Set a monitoring endpoint in Settings to see server status.'
-const UNAVAILABLE_MESSAGE = 'Server status is unavailable right now.'
-const LOADING_MESSAGE = 'Loading server status…'
+const NOT_CONFIGURED_MESSAGE =
+  'Configura un endpoint de monitorización en Configuración para ver el estado del servidor.'
+const UNAVAILABLE_MESSAGE = 'El estado del servidor no está disponible en este momento.'
+const LOADING_MESSAGE = 'Cargando estado del servidor…'
+
+const HOST_STATUS_LABELS: Record<string, string> = {
+  up: 'Activo',
+  degraded: 'Degradado',
+  down: 'Caído',
+}
 
 /**
  * Server-status widget: `loading`/`ready`/`unavailable`/`not-configured`
@@ -38,9 +45,9 @@ export function ServerStatusWidget() {
         <dd>{host.name}</dd>
       </div>
       <div className="server-status-widget__row">
-        <dt>Status</dt>
+        <dt>Estado</dt>
         <dd className={`server-status-widget__status server-status-widget__status--${host.status}`}>
-          {host.status}
+          {HOST_STATUS_LABELS[host.status] ?? host.status}
         </dd>
       </div>
       {host.cpuPercent !== undefined ? (
@@ -51,7 +58,7 @@ export function ServerStatusWidget() {
       ) : null}
       {host.memoryPercent !== undefined ? (
         <div className="server-status-widget__row">
-          <dt>Memory</dt>
+          <dt>Memoria</dt>
           <dd>{Math.round(host.memoryPercent)}%</dd>
         </div>
       ) : null}

@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const weatherPlugin: WidgetDescriptor = {
   type: 'weather',
   metadata: {
-    displayName: 'Weather',
+    displayName: 'Clima',
     description: 'Muestra las condiciones actuales para tu ubicación.',
     requiresConfig: false,
   },

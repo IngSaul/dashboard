@@ -19,14 +19,14 @@ export function CategoryNav({ categories, activeCategoryId, onSelectCategory }: 
   }
 
   return (
-    <nav className="category-nav" aria-label="Shortcut categories">
+    <nav className="category-nav" aria-label="Categorías de accesos directos">
       <button
         type="button"
         className="category-nav__item"
         aria-pressed={activeCategoryId === null}
         onClick={() => onSelectCategory(null)}
       >
-        All
+        Todas
       </button>
       {categories.map((category) => (
         <button

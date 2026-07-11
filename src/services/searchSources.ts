@@ -6,13 +6,13 @@ import type { SettingsSectionId } from '../types/events'
 import type { SearchResult } from '../types/search'
 
 const SETTINGS_COMMANDS: { section: SettingsSectionId; label: string }[] = [
-  { section: 'widgets', label: 'Open Widget Settings' },
-  { section: 'theme', label: 'Open Theme Settings' },
-  { section: 'appearance', label: 'Open Appearance Settings' },
-  { section: 'wallpaper', label: 'Open Wallpaper Settings' },
-  { section: 'glass', label: 'Open Glass Settings' },
-  { section: 'animations', label: 'Open Animation Settings' },
-  { section: 'accessibility', label: 'Open Accessibility Settings' },
+  { section: 'widgets', label: 'Abrir configuración de widgets' },
+  { section: 'theme', label: 'Abrir configuración de tema' },
+  { section: 'appearance', label: 'Abrir configuración de apariencia' },
+  { section: 'wallpaper', label: 'Abrir configuración de fondo de pantalla' },
+  { section: 'glass', label: 'Abrir configuración de vidrio' },
+  { section: 'animations', label: 'Abrir configuración de animaciones' },
+  { section: 'accessibility', label: 'Abrir configuración de accesibilidad' },
 ]
 
 /**
@@ -25,7 +25,7 @@ const SETTINGS_COMMANDS: { section: SettingsSectionId; label: string }[] = [
 function registerSettingsCommandSource(): void {
   defaultSearchEngine.registerSource({
     id: 'commands',
-    label: 'Commands',
+    label: 'Comandos',
     kind: 'command',
     match(query): SearchResult[] {
       const lowerQuery = query.trim().toLowerCase()

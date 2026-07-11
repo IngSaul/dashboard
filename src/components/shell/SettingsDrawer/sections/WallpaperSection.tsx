@@ -5,9 +5,9 @@ import { GlassInput } from '../../../glass/GlassInput/GlassInput'
 import type { BackgroundConfig } from '../../../../types/widgets'
 
 const SOURCE_OPTIONS = [
-  { value: 'default', label: 'Default' },
-  { value: 'custom-url', label: 'Custom URL' },
-  { value: 'custom-upload', label: 'Custom upload' },
+  { value: 'default', label: 'Predeterminado' },
+  { value: 'custom-url', label: 'URL personalizada' },
+  { value: 'custom-upload', label: 'Subida personalizada' },
 ]
 
 const DEFAULT_GRADIENT = { from: '#0f172a', to: '#1e293b', angleDeg: 135 }
@@ -51,10 +51,10 @@ export function WallpaperSection() {
   }
 
   return (
-    <section className="settings-section" id="settings-section-wallpaper" aria-label="Wallpaper" tabIndex={-1}>
-      <h3 className="settings-section__heading">Wallpaper</h3>
+    <section className="settings-section" id="settings-section-wallpaper" aria-label="Fondo de pantalla" tabIndex={-1}>
+      <h3 className="settings-section__heading">Fondo de pantalla</h3>
       <GlassDropdown
-        label="Source"
+        label="Origen"
         options={SOURCE_OPTIONS}
         value={wallpaper.source}
         onChange={handleSourceChange}
@@ -64,12 +64,12 @@ export function WallpaperSection() {
         type="file"
         accept="image/*"
         className="sr-only"
-        aria-label="Upload wallpaper image"
+        aria-label="Subir imagen de fondo"
         onChange={handleFileChange}
       />
       {wallpaper.source === 'custom-url' ? (
         <GlassInput
-          label="Image URL"
+          label="URL de la imagen"
           type="url"
           value={wallpaper.value ?? ''}
           placeholder="https://…"
@@ -77,7 +77,7 @@ export function WallpaperSection() {
         />
       ) : null}
       <label className="settings-section__row">
-        Blur ({wallpaper.blurPx}px)
+        Desenfoque ({wallpaper.blurPx}px)
         <input
           type="range"
           min={0}
@@ -87,7 +87,7 @@ export function WallpaperSection() {
         />
       </label>
       <label className="settings-section__row">
-        Dim overlay ({Math.round(wallpaper.dimOverlay * 100)}%)
+        Superposición de oscurecimiento ({Math.round(wallpaper.dimOverlay * 100)}%)
         <input
           type="range"
           min={0}
@@ -103,18 +103,18 @@ export function WallpaperSection() {
           checked={gradient !== null}
           onChange={(event) => update({ gradient: event.target.checked ? DEFAULT_GRADIENT : null })}
         />
-        Gradient overlay
+        Superposición de degradado
       </label>
       {gradient ? (
         <>
           <GlassInput
-            label="Gradient from"
+            label="Degradado desde"
             type="color"
             value={gradient.from}
             onChange={(event) => update({ gradient: { ...gradient, from: event.target.value } })}
           />
           <GlassInput
-            label="Gradient to"
+            label="Degradado hasta"
             type="color"
             value={gradient.to}
             onChange={(event) => update({ gradient: { ...gradient, to: event.target.value } })}

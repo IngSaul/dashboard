@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const serverStatusPlugin: WidgetDescriptor = {
   type: 'server-status',
   metadata: {
-    displayName: 'Server Status',
+    displayName: 'Estado del servidor',
     description: 'Shows host CPU/memory and status from your monitoring endpoint.',
     requiresConfig: true,
   },

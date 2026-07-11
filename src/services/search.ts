@@ -36,7 +36,7 @@ function navigateTo(url: string, preference: SearchPreference): void {
 export function registerWebSearchSource(): void {
   defaultSearchEngine.registerSource({
     id: 'web',
-    label: 'Web Search',
+    label: 'Búsqueda web',
     kind: 'web',
     match(query): SearchResult[] {
       const preference = loadDashboardConfig().searchPreference
@@ -48,7 +48,7 @@ export function registerWebSearchSource(): void {
         {
           id: 'web-search',
           sourceId: 'web',
-          label: `Search the web for "${query.trim()}"`,
+          label: `Buscar en la web "${query.trim()}"`,
           onSelect: () => navigateTo(url, preference),
         },
       ]

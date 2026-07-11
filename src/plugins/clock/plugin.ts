@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const clockPlugin: WidgetDescriptor = {
   type: 'clock',
   metadata: {
-    displayName: 'Clock',
+    displayName: 'Reloj',
     description: 'Shows the current date and time.',
     requiresConfig: false,
   },

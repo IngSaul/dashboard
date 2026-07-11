@@ -27,12 +27,12 @@ describe('SearchBar and CommandPalette consistency', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.type(screen.getByRole('textbox', { name: /search/i }), 'gmail')
+    await user.type(screen.getByRole('textbox', { name: /buscar/i }), 'gmail')
     expect(await screen.findByRole('option', { name: 'Gmail' })).toBeInTheDocument()
-    await user.clear(screen.getByRole('textbox', { name: /search/i }))
+    await user.clear(screen.getByRole('textbox', { name: /buscar/i }))
 
     await user.keyboard('{Control>}k{/Control}')
-    await user.type(screen.getByRole('combobox', { name: /search or run a command/i }), 'gmail')
+    await user.type(screen.getByRole('combobox', { name: /buscar o ejecutar un comando/i }), 'gmail')
 
     expect(await screen.findByRole('option', { name: 'Gmail' })).toBeInTheDocument()
   })
@@ -41,18 +41,18 @@ describe('SearchBar and CommandPalette consistency', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.type(screen.getByRole('textbox', { name: /search/i }), 'wallpaper settings')
+    await user.type(screen.getByRole('textbox', { name: /buscar/i }), 'fondo de pantalla')
     await waitFor(() => {
-      expect(screen.queryByRole('option', { name: 'Open Wallpaper Settings' })).toBeNull()
+      expect(screen.queryByRole('option', { name: 'Abrir configuración de fondo de pantalla' })).toBeNull()
     })
 
     await user.keyboard('{Control>}k{/Control}')
     await user.type(
-      screen.getByRole('combobox', { name: /search or run a command/i }),
-      'wallpaper settings',
+      screen.getByRole('combobox', { name: /buscar o ejecutar un comando/i }),
+      'fondo de pantalla',
     )
 
-    expect(await screen.findByRole('option', { name: 'Open Wallpaper Settings' })).toBeInTheDocument()
+    expect(await screen.findByRole('option', { name: 'Abrir configuración de fondo de pantalla' })).toBeInTheDocument()
   })
 
   it('activating a command result opens SettingsDrawer to the correct section via eventBus', async () => {
@@ -61,10 +61,10 @@ describe('SearchBar and CommandPalette consistency', () => {
 
     await user.keyboard('{Control>}k{/Control}')
     await user.type(
-      screen.getByRole('combobox', { name: /search or run a command/i }),
-      'wallpaper settings',
+      screen.getByRole('combobox', { name: /buscar o ejecutar un comando/i }),
+      'fondo de pantalla',
     )
-    await user.click(await screen.findByRole('option', { name: 'Open Wallpaper Settings' }))
+    await user.click(await screen.findByRole('option', { name: 'Abrir configuración de fondo de pantalla' }))
 
     await waitFor(() => {
       expect(document.querySelector('.settings-drawer')).toHaveAttribute('data-open', 'true')

@@ -8,9 +8,9 @@ import type { MonitoringSourceConfig, WidgetColumn, WidgetType } from '../../typ
 import './WidgetSettings.css'
 
 const COLUMN_OPTIONS = [
-  { value: 'left', label: 'Left' },
-  { value: 'center', label: 'Center' },
-  { value: 'right', label: 'Right' },
+  { value: 'left', label: 'Izquierda' },
+  { value: 'center', label: 'Centro' },
+  { value: 'right', label: 'Derecha' },
 ]
 
 /**
@@ -72,7 +72,7 @@ export function WidgetSettings() {
                 {displayName}
               </label>
               <GlassDropdown
-                label={`${displayName} column`}
+                label={`Columna de ${displayName}`}
                 options={COLUMN_OPTIONS}
                 value={widget?.column ?? 'center'}
                 onChange={(value) => setWidgetColumn(type, value as WidgetColumn)}
@@ -80,19 +80,19 @@ export function WidgetSettings() {
               <div className="widget-settings__move">
                 <button
                   type="button"
-                  aria-label={`Move ${displayName} up`}
+                  aria-label={`Subir ${displayName}`}
                   disabled={!canMoveUp}
                   onClick={() => moveWidgetInColumn(type, 'up')}
                 >
-                  Up
+                  Subir
                 </button>
                 <button
                   type="button"
-                  aria-label={`Move ${displayName} down`}
+                  aria-label={`Bajar ${displayName}`}
                   disabled={!canMoveDown}
                   onClick={() => moveWidgetInColumn(type, 'down')}
                 >
-                  Down
+                  Bajar
                 </button>
               </div>
             </li>
@@ -120,9 +120,9 @@ function MonitoringSourceSettings() {
 
   return (
     <div className="widget-settings__monitoring">
-      <h3 className="widget-settings__heading">Monitoring endpoint</h3>
+      <h3 className="widget-settings__heading">Endpoint de monitorización</h3>
       <GlassInput
-        label="Endpoint URL"
+        label="URL del endpoint"
         type="url"
         value={config.endpointUrl ?? ''}
         placeholder="https://…"
@@ -131,7 +131,7 @@ function MonitoringSourceSettings() {
         }
       />
       <GlassInput
-        label="Poll interval (seconds)"
+        label="Intervalo de sondeo (segundos)"
         type="number"
         min={10}
         max={3600}
@@ -141,7 +141,7 @@ function MonitoringSourceSettings() {
         }
       />
       <GlassInput
-        label="Timeout (ms)"
+        label="Tiempo de espera (ms)"
         type="number"
         min={500}
         max={30000}

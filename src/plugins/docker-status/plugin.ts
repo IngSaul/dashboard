@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const dockerStatusPlugin: WidgetDescriptor = {
   type: 'docker-status',
   metadata: {
-    displayName: 'Docker Containers',
+    displayName: 'Contenedores de Docker',
     description: 'Shows container status from your monitoring endpoint.',
     requiresConfig: true,
   },

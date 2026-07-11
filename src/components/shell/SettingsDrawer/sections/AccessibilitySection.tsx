@@ -3,8 +3,8 @@ import { GlassDropdown } from '../../../glass/GlassDropdown/GlassDropdown'
 import { GlassInput } from '../../../glass/GlassInput/GlassInput'
 
 const FOCUS_RING_OPTIONS = [
-  { value: 'default', label: 'Default' },
-  { value: 'high-visibility', label: 'High visibility' },
+  { value: 'default', label: 'Predeterminado' },
+  { value: 'high-visibility', label: 'Alta visibilidad' },
 ]
 
 /** Accessibility group: contrast boost, focus ring style, and font scale — extends feature 001's existing accessibility support. */
@@ -12,8 +12,8 @@ export function AccessibilitySection() {
   const { accessibility, setAccessibility } = useThemeState()
 
   return (
-    <section className="settings-section" id="settings-section-accessibility" aria-label="Accessibility" tabIndex={-1}>
-      <h3 className="settings-section__heading">Accessibility</h3>
+    <section className="settings-section" id="settings-section-accessibility" aria-label="Accesibilidad" tabIndex={-1}>
+      <h3 className="settings-section__heading">Accesibilidad</h3>
       <label className="settings-section__row">
         <input
           type="checkbox"
@@ -22,10 +22,10 @@ export function AccessibilitySection() {
             setAccessibility({ ...accessibility, contrastBoost: event.target.checked })
           }
         />
-        Contrast boost
+        Aumentar contraste
       </label>
       <GlassDropdown
-        label="Focus ring style"
+        label="Estilo del foco"
         options={FOCUS_RING_OPTIONS}
         value={accessibility.focusRingStyle}
         onChange={(value) =>
@@ -36,7 +36,7 @@ export function AccessibilitySection() {
         }
       />
       <GlassInput
-        label="Font scale"
+        label="Escala de fuente"
         type="number"
         min={0.9}
         max={1.5}

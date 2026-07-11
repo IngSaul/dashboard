@@ -53,7 +53,7 @@ export function ShortcutsWidget() {
         onSelectCategory={setActiveCategoryId}
       />
       {visibleShortcuts.length === 0 ? (
-        <StatusMessage message="No shortcuts yet." />
+        <StatusMessage message="Aún no hay accesos directos." />
       ) : (
         <div className="shortcuts-widget__grid">
           {visibleShortcuts.map((shortcut) => (

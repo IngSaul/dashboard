@@ -3,7 +3,7 @@ import type { WidgetDescriptor } from '../../types/widgets'
 export const notesPlugin: WidgetDescriptor = {
   type: 'notes',
   metadata: {
-    displayName: 'Notes',
+    displayName: 'Notas',
     description: 'Guarda notas rápidas localmente en este dispositivo.',
     requiresConfig: false,
   },

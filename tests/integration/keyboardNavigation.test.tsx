@@ -66,7 +66,7 @@ describe('Keyboard navigation (User Story 3)', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    const searchBox = screen.getByRole('textbox', { name: /search/i })
+    const searchBox = screen.getByRole('textbox', { name: /buscar/i })
     await tabUntil(user, (el) => el === searchBox)
     await user.keyboard('react hooks{Enter}')
 

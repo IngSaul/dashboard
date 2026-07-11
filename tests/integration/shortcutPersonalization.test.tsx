@@ -37,10 +37,10 @@ describe('Shortcut personalization (User Story 2)', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
-    await user.type(screen.getByRole('textbox', { name: /label/i }), 'Docs')
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
+    await user.type(screen.getByRole('textbox', { name: /nombre/i }), 'Docs')
     await user.type(screen.getByRole('textbox', { name: /url/i }), 'https://docs.example.com')
-    await user.click(screen.getByRole('button', { name: /add shortcut/i }))
+    await user.click(screen.getByRole('button', { name: /añadir acceso directo/i }))
 
     expect(screen.getByRole('link', { name: 'Docs' })).toBeInTheDocument()
   })
@@ -49,12 +49,12 @@ describe('Shortcut personalization (User Story 2)', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
-    await user.click(screen.getByRole('button', { name: 'Edit Gmail' }))
-    const labelInput = screen.getByRole('textbox', { name: /label/i })
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
+    await user.click(screen.getByRole('button', { name: 'Editar Gmail' }))
+    const labelInput = screen.getByRole('textbox', { name: /nombre/i })
     await user.clear(labelInput)
     await user.type(labelInput, 'Mail')
-    await user.click(screen.getByRole('button', { name: /save shortcut/i }))
+    await user.click(screen.getByRole('button', { name: /guardar acceso directo/i }))
 
     expect(screen.getByRole('link', { name: 'Mail' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Gmail' })).not.toBeInTheDocument()
@@ -64,8 +64,8 @@ describe('Shortcut personalization (User Story 2)', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
-    await user.click(screen.getByRole('button', { name: 'Remove Gmail' }))
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
+    await user.click(screen.getByRole('button', { name: 'Eliminar Gmail' }))
 
     expect(screen.queryByRole('link', { name: 'Gmail' })).not.toBeInTheDocument()
   })
@@ -74,31 +74,31 @@ describe('Shortcut personalization (User Story 2)', () => {
     const user = userEvent.setup()
     const { unmount } = render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
-    await user.click(screen.getByRole('button', { name: 'Remove Gmail' }))
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
+    await user.click(screen.getByRole('button', { name: 'Eliminar Gmail' }))
     unmount()
 
     render(<Dashboard />)
 
     expect(screen.queryByRole('link', { name: 'Gmail' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Calendar' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Calendario' })).toBeInTheDocument()
   })
 
   it('reorders a shortcut and persists the new order after reload (FR-008)', async () => {
     const user = userEvent.setup()
     const { unmount } = render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
     const links = () => screen.getAllByRole('link').map((link) => link.textContent)
-    expect(links()).toEqual(['Gmail', 'Calendar', 'YouTube', 'GitHub'])
+    expect(links()).toEqual(['Gmail', 'Calendario', 'YouTube', 'GitHub'])
 
-    await user.click(screen.getByRole('button', { name: 'Move Calendar up' }))
-    expect(links()).toEqual(['Calendar', 'Gmail', 'YouTube', 'GitHub'])
+    await user.click(screen.getByRole('button', { name: 'Subir Calendario' }))
+    expect(links()).toEqual(['Calendario', 'Gmail', 'YouTube', 'GitHub'])
     unmount()
 
     render(<Dashboard />)
     expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual([
-      'Calendar',
+      'Calendario',
       'Gmail',
       'YouTube',
       'GitHub',
@@ -109,18 +109,18 @@ describe('Shortcut personalization (User Story 2)', () => {
     const user = userEvent.setup()
     const { unmount } = render(<Dashboard />)
 
-    await user.click(screen.getByRole('button', { name: /manage shortcuts/i }))
-    await user.type(screen.getByRole('textbox', { name: /new category/i }), 'Dev Tools')
-    await user.click(screen.getByRole('button', { name: /add category/i }))
+    await user.click(screen.getByRole('button', { name: /gestionar accesos directos/i }))
+    await user.type(screen.getByRole('textbox', { name: /nueva categoría/i }), 'Dev Tools')
+    await user.click(screen.getByRole('button', { name: /añadir categoría/i }))
 
     expect(
       screen.getByRole('option', { name: 'Dev Tools' }),
     ).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'Dev Tools')
-    await user.type(screen.getByRole('textbox', { name: /label/i }), 'Docs')
+    await user.selectOptions(screen.getByRole('combobox', { name: /categoría/i }), 'Dev Tools')
+    await user.type(screen.getByRole('textbox', { name: /nombre/i }), 'Docs')
     await user.type(screen.getByRole('textbox', { name: /url/i }), 'https://docs.example.com')
-    await user.click(screen.getByRole('button', { name: /add shortcut/i }))
+    await user.click(screen.getByRole('button', { name: /añadir acceso directo/i }))
     unmount()
 
     render(<Dashboard />)

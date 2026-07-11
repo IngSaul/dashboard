@@ -2,14 +2,14 @@ import { useThemeState } from '../../../../state/ThemeProvider'
 import { GlassDropdown } from '../../../glass/GlassDropdown/GlassDropdown'
 
 const REDUCED_MOTION_OPTIONS = [
-  { value: 'system', label: 'System' },
-  { value: 'always', label: 'Always' },
-  { value: 'never', label: 'Never' },
+  { value: 'system', label: 'Sistema' },
+  { value: 'always', label: 'Siempre' },
+  { value: 'never', label: 'Nunca' },
 ]
 const TRANSITION_SPEED_OPTIONS = [
   { value: 'normal', label: 'Normal' },
-  { value: 'fast', label: 'Fast' },
-  { value: 'off', label: 'Off' },
+  { value: 'fast', label: 'Rápida' },
+  { value: 'off', label: 'Desactivada' },
 ]
 
 /** Animations group: reduced-motion mode + functional-transition speed dial. */
@@ -17,10 +17,10 @@ export function AnimationsSection() {
   const { animations, setAnimations } = useThemeState()
 
   return (
-    <section className="settings-section" id="settings-section-animations" aria-label="Animations" tabIndex={-1}>
-      <h3 className="settings-section__heading">Animations</h3>
+    <section className="settings-section" id="settings-section-animations" aria-label="Animaciones" tabIndex={-1}>
+      <h3 className="settings-section__heading">Animaciones</h3>
       <GlassDropdown
-        label="Reduced motion"
+        label="Movimiento reducido"
         options={REDUCED_MOTION_OPTIONS}
         value={animations.reducedMotion}
         onChange={(value) =>
@@ -28,7 +28,7 @@ export function AnimationsSection() {
         }
       />
       <GlassDropdown
-        label="Transition speed"
+        label="Velocidad de transición"
         options={TRANSITION_SPEED_OPTIONS}
         value={animations.transitionSpeed}
         onChange={(value) =>

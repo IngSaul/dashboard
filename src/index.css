@@ -299,6 +299,24 @@ pre {
   }
 }
 
+/*
+ * Widen the reading measure on desktop-and-up monitors instead of leaving
+ * a 72rem column centered in unused side margins — a dashboard wants the
+ * extra width turned into more visible content (shortcut columns, taller
+ * widget lists), not whitespace.
+ */
+@media (min-width: 1440px) {
+  :root {
+    --container-max: 84rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --container-max: 96rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

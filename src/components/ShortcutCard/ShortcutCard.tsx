@@ -86,33 +86,33 @@ export function ShortcutCard({
         <div className="shortcut-card__actions">
           <button
             type="button"
-            aria-label={`Move ${shortcut.label} up`}
+            aria-label={`Subir ${shortcut.label}`}
             disabled={!canMoveUp}
             onClick={() => onMoveUp?.(shortcut)}
           >
-            Up
+            Subir
           </button>
           <button
             type="button"
-            aria-label={`Move ${shortcut.label} down`}
+            aria-label={`Bajar ${shortcut.label}`}
             disabled={!canMoveDown}
             onClick={() => onMoveDown?.(shortcut)}
           >
-            Down
+            Bajar
           </button>
           <button
             type="button"
-            aria-label={`Edit ${shortcut.label}`}
+            aria-label={`Editar ${shortcut.label}`}
             onClick={() => onEdit?.(shortcut)}
           >
-            Edit
+            Editar
           </button>
           <button
             type="button"
-            aria-label={`Remove ${shortcut.label}`}
+            aria-label={`Eliminar ${shortcut.label}`}
             onClick={() => onRemove?.(shortcut)}
           >
-            Remove
+            Eliminar
           </button>
         </div>
       ) : null}

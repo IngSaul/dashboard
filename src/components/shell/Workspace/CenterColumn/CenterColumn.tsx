@@ -22,7 +22,7 @@ export function CenterColumn({ widgets }: CenterColumnProps) {
   const [searchPreference] = useState(() => loadDashboardConfig().searchPreference)
 
   return (
-    <WorkspaceColumn widgets={widgets} className="workspace-column--center" label="Primary widgets">
+    <WorkspaceColumn widgets={widgets} className="workspace-column--center" label="Widgets principales">
       <SearchBar searchPreference={searchPreference} />
     </WorkspaceColumn>
   )
