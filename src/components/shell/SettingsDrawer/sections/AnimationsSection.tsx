@@ -17,7 +17,7 @@ export function AnimationsSection() {
   const { animations, setAnimations } = useThemeState()
 
   return (
-    <section className="settings-section" aria-label="Animations">
+    <section className="settings-section" id="settings-section-animations" aria-label="Animations" tabIndex={-1}>
       <h3 className="settings-section__heading">Animations</h3>
       <GlassDropdown
         label="Reduced motion"

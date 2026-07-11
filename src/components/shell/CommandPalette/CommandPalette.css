@@ -48,6 +48,7 @@
 }
 
 .command-palette__result:hover,
-.command-palette__result:focus-visible {
+.command-palette__result:focus-visible,
+.command-palette__result--active {
   background: var(--glass-fill-low);
 }

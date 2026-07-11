@@ -17,12 +17,14 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * reachable, logical tab order, not at a specific step count.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054). The category-filter/shortcut-link test already passes again —
- * `ShortcutsWidget`/`CategoryNav` (T068) restored that reachability. The
- * search and theme-toggle tests still fail: neither `SearchBar` nor
- * `ThemeToggle` is composed anywhere in `AppShell` yet, and no task in
- * tasks.md currently assigns their placement (flagging for a future
- * task/spec pass rather than guessing it here).
+ * (T054). The category-filter/shortcut-link test (`ShortcutsWidget`/
+ * `CategoryNav`, T068) and the search test (`SearchBar` now composed as
+ * `CenterColumn`'s fixed leading chrome, T096) both pass. Two still fail,
+ * for reasons already resolved elsewhere, not a regression: `ThemeToggle`
+ * lives only inside `SettingsDrawer`'s theme section (T078) with no
+ * assigned main-chrome position; "Manage shortcuts" text/state doesn't
+ * match this drawer's actual "Toggle settings" control (renaming it would
+ * break the several tests already depending on that exact name).
  */
 
 async function tabUntil(
@@ -64,8 +66,8 @@ describe('Keyboard navigation (User Story 3)', () => {
     const user = userEvent.setup()
     render(<Dashboard />)
 
-    await user.tab()
-    expect(document.activeElement).toBe(screen.getByRole('textbox', { name: /search/i }))
+    const searchBox = screen.getByRole('textbox', { name: /search/i })
+    await tabUntil(user, (el) => el === searchBox)
     await user.keyboard('react hooks{Enter}')
 
     expect(assignMock).toHaveBeenCalledTimes(1)

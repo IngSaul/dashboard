@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { registerBuiltInPlugins } from './plugins'
+import { registerBuiltInSearchSources } from './services/searchSources'
 
 registerBuiltInPlugins()
+registerBuiltInSearchSources()
 
 const rootElement = document.getElementById('root')
 

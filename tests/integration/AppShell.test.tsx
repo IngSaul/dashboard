@@ -47,7 +47,12 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'true')
 
     await user.click(screen.getByRole('button', { name: 'Close settings' }))
-    expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'false')
+    // `aria-hidden` (paired with `inert`) removes the closed drawer from
+    // the accessibility tree — by design, so its content (e.g. a shortcut
+    // link duplicated from the main widget) never shadows the main
+    // dashboard's own accessible elements. Query the DOM node directly for
+    // its closed-state attribute instead of by role.
+    expect(document.querySelector('.settings-drawer')).toHaveAttribute('data-open', 'false')
   })
 
   it('closes the settings drawer on Escape', async () => {
@@ -58,7 +63,7 @@ describe('AppShell', () => {
     expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'true')
 
     await user.keyboard('{Escape}')
-    expect(screen.getByRole('dialog', { name: 'Settings' })).toHaveAttribute('data-open', 'false')
+    expect(document.querySelector('.settings-drawer')).toHaveAttribute('data-open', 'false')
   })
 
   it('opens the command palette via the keyboard shortcut and shows an empty result state', async () => {

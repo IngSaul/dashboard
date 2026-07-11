@@ -12,7 +12,7 @@ export function AccessibilitySection() {
   const { accessibility, setAccessibility } = useThemeState()
 
   return (
-    <section className="settings-section" aria-label="Accessibility">
+    <section className="settings-section" id="settings-section-accessibility" aria-label="Accessibility" tabIndex={-1}>
       <h3 className="settings-section__heading">Accessibility</h3>
       <label className="settings-section__row">
         <input

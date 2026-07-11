@@ -54,7 +54,7 @@ export function WidgetSettings() {
     registeredTypes.includes('server-status') || registeredTypes.includes('docker-status')
 
   return (
-    <div className="widget-settings">
+    <div className="widget-settings" id="settings-section-widgets" tabIndex={-1}>
       <h3 className="widget-settings__heading">Widgets</h3>
       <ul className="widget-settings__list">
         {registeredTypes.map((type) => {

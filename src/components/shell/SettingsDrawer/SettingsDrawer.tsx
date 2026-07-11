@@ -21,9 +21,16 @@ import './SettingsDrawer.css'
  * editable `ThemePreferences` group sections — every one of them persists
  * immediately through its own state slice/service, with no separate save
  * step (T081).
+ *
+ * Scrolls to `activeSection` (each section has a matching
+ * `#settings-section-{id}` element) whenever it opens or changes — this is
+ * what makes a `CommandPalette`/quick-action command like "Open Wallpaper
+ * Settings" (T095), which only emits `eventBus`'s `settings:open-section`,
+ * actually land the user on that section rather than just opening the
+ * drawer to wherever it happened to be scrolled.
  */
 export function SettingsDrawer() {
-  const { isOpen, open, close } = useSettingsState()
+  const { isOpen, activeSection, open, close } = useSettingsState()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
 
@@ -36,6 +43,15 @@ export function SettingsDrawer() {
       previousFocusRef.current = null
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen || !activeSection) {
+      return
+    }
+    const section = document.getElementById(`settings-section-${activeSection}`)
+    section?.scrollIntoView({ block: 'start' })
+    section?.focus()
+  }, [isOpen, activeSection])
 
   useEffect(() => {
     if (!isOpen) {
@@ -74,6 +90,7 @@ export function SettingsDrawer() {
         className="settings-drawer"
         data-open={isOpen}
         inert={!isOpen}
+        aria-hidden={!isOpen}
         role="dialog"
         aria-label="Settings"
       >

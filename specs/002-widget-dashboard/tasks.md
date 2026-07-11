@@ -206,19 +206,19 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 **Purpose**: Unify `SearchBar`/`CommandPalette` behind `searchEngine` (per the architecture review), plus verification/hardening that spans multiple stories. Not required for any single user story to be complete.
 
-- [ ] T091 [P] Implement `searchEngine` (`registerSource`/`query`, synchronous per-source matching, per-source failure isolation) in `src/services/searchEngine.ts`
-- [ ] T092 [P] Unit test `searchEngine` source registration, ranking/merging, duplicate-id handling, and per-source failure isolation per [contracts/search-engine-contract.md](./contracts/search-engine-contract.md) in `tests/unit/searchEngine.test.ts` (depends on T091)
-- [ ] T093 Register the existing web-search behavior from `src/services/search.ts` as a `"web"` `SearchSource` (depends on T091)
-- [ ] T094 Register a jump-to-shortcut `SearchSource` from `src/services/shortcuts.ts` (depends on T091)
-- [ ] T095 [P] Register static navigation `SearchSource`s (e.g. "Open Wallpaper Settings") in `AppShell`'s bootstrap, emitting `eventBus` events consumed by `SettingsState` (depends on T039, T047, T091)
-- [ ] T096 Wire `SearchBar` to call `searchEngine.query(input, { kinds: ["web", "shortcut"] })`, preserving existing Enter-to-search behavior (depends on T093, T094)
-- [ ] T097 Wire `CommandPalette` to call `searchEngine.query(input)` unscoped, reusing `utils/keyboard.ts` navigation, executing `onSelect()` (navigation or `eventBus` emit) (depends on T052, T095, T096)
-- [ ] T098 [P] Integration test: `SearchBar` and `CommandPalette` return consistent results for the same query, and a command result opens the correct `SettingsDrawer` section via `eventBus` in `tests/integration/SearchAndCommandPalette.test.tsx` (depends on T097)
-- [ ] T099 [P] e2e test: three-column desktop → tablet responsive reflow and reduced-motion behavior in `tests/e2e/responsive-widgets.spec.ts`
-- [ ] T100 [P] TypeScript strictness audit confirming no new `any` across `src/design/`, `src/state/`, `src/plugins/`, and all new `src/services/`
-- [ ] T101 Bundle/performance check: confirm disabled widgets are not downloaded (`WidgetRegistry.lazyLoad()` code-splitting) and initial dashboard usability stays under one second, per quickstart Scenario 4c
-- [ ] T102 Run the full [quickstart.md](./quickstart.md) validation guide end to end (all 7 scenarios)
-- [ ] T103 Code cleanup pass: remove any now-unused feature-001 fixed-section layout code superseded by `AppShell`/`Workspace`
+- [X] T091 [P] Implement `searchEngine` (`registerSource`/`query`, synchronous per-source matching, per-source failure isolation) in `src/services/searchEngine.ts`
+- [X] T092 [P] Unit test `searchEngine` source registration, ranking/merging, duplicate-id handling, and per-source failure isolation per [contracts/search-engine-contract.md](./contracts/search-engine-contract.md) in `tests/unit/searchEngine.test.ts` (depends on T091)
+- [X] T093 Register the existing web-search behavior from `src/services/search.ts` as a `"web"` `SearchSource` (depends on T091)
+- [X] T094 Register a jump-to-shortcut `SearchSource` from `src/services/shortcuts.ts` (depends on T091)
+- [X] T095 [P] Register static navigation `SearchSource`s (e.g. "Open Wallpaper Settings") in `AppShell`'s bootstrap, emitting `eventBus` events consumed by `SettingsState` (depends on T039, T047, T091)
+- [X] T096 Wire `SearchBar` to call `searchEngine.query(input, { kinds: ["web", "shortcut"] })`, preserving existing Enter-to-search behavior (depends on T093, T094)
+- [X] T097 Wire `CommandPalette` to call `searchEngine.query(input)` unscoped, reusing `utils/keyboard.ts` navigation, executing `onSelect()` (navigation or `eventBus` emit) (depends on T052, T095, T096)
+- [X] T098 [P] Integration test: `SearchBar` and `CommandPalette` return consistent results for the same query, and a command result opens the correct `SettingsDrawer` section via `eventBus` in `tests/integration/SearchAndCommandPalette.test.tsx` (depends on T097)
+- [X] T099 [P] e2e test: three-column desktop → tablet responsive reflow and reduced-motion behavior in `tests/e2e/responsive-widgets.spec.ts`
+- [X] T100 [P] TypeScript strictness audit confirming no new `any` across `src/design/`, `src/state/`, `src/plugins/`, and all new `src/services/`
+- [X] T101 Bundle/performance check: confirm disabled widgets are not downloaded (`WidgetRegistry.lazyLoad()` code-splitting) and initial dashboard usability stays under one second, per quickstart Scenario 4c
+- [X] T102 Run the full [quickstart.md](./quickstart.md) validation guide end to end (all 7 scenarios)
+- [X] T103 Code cleanup pass: remove any now-unused feature-001 fixed-section layout code superseded by `AppShell`/`Workspace`
 
 ---
 

@@ -6,7 +6,7 @@ export function ThemeSection() {
   const { theme, setTheme } = useThemeState()
 
   return (
-    <section className="settings-section" aria-label="Theme">
+    <section className="settings-section" id="settings-section-theme" aria-label="Theme" tabIndex={-1}>
       <h3 className="settings-section__heading">Theme</h3>
       <ThemeToggle mode={theme.mode} onChange={(mode) => setTheme({ mode })} />
     </section>

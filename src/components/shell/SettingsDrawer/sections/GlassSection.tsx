@@ -24,7 +24,7 @@ export function GlassSection() {
   const { glass, setGlass } = useThemeState()
 
   return (
-    <section className="settings-section" aria-label="Glass">
+    <section className="settings-section" id="settings-section-glass" aria-label="Glass" tabIndex={-1}>
       <h3 className="settings-section__heading">Glass</h3>
       <GlassDropdown
         label="Intensity"

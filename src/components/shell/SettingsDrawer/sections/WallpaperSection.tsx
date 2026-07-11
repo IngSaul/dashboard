@@ -51,7 +51,7 @@ export function WallpaperSection() {
   }
 
   return (
-    <section className="settings-section" aria-label="Wallpaper">
+    <section className="settings-section" id="settings-section-wallpaper" aria-label="Wallpaper" tabIndex={-1}>
       <h3 className="settings-section__heading">Wallpaper</h3>
       <GlassDropdown
         label="Source"

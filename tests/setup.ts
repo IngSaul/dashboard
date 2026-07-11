@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { registerBuiltInPlugins } from '../src/plugins'
+import { registerBuiltInSearchSources } from '../src/services/searchSources'
 
 /**
  * jsdom does not implement `window.matchMedia`. Components that read theme
@@ -49,6 +50,15 @@ if (typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototy
 }
 
 /**
+ * jsdom does not implement `Element.prototype.scrollIntoView` at all.
+ * `SettingsDrawer` calls it when a search command opens a specific section
+ * (T095/T098), so every test that triggers that path needs it to exist.
+ */
+if (typeof Element !== 'undefined' && typeof Element.prototype.scrollIntoView !== 'function') {
+  Element.prototype.scrollIntoView = function () {}
+}
+
+/**
  * Mirrors `main.tsx`: real app init registers every built-in widget plugin
  * before `AppShell` ever mounts. Tests render `Dashboard`/`AppShell`
  * directly (never through `main.tsx`), so without this, every widget would
@@ -56,6 +66,7 @@ if (typeof HTMLDialogElement !== 'undefined' && typeof HTMLDialogElement.prototy
  * like the one real call site does.
  */
 registerBuiltInPlugins()
+registerBuiltInSearchSources()
 
 afterEach(() => {
   cleanup()

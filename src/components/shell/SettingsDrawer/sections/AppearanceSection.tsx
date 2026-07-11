@@ -12,7 +12,7 @@ export function AppearanceSection() {
   const { appearance, setAppearance } = useThemeState()
 
   return (
-    <section className="settings-section" aria-label="Appearance">
+    <section className="settings-section" id="settings-section-appearance" aria-label="Appearance" tabIndex={-1}>
       <h3 className="settings-section__heading">Appearance</h3>
       <GlassInput
         label="Accent color"

@@ -6,38 +6,26 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { IconSource } from '../types/widgets'
+import { defaultSearchEngine } from '../services/searchEngine'
+import type { SearchResult } from '../types/search'
 
 /**
- * Mirrors data-model.md's `SearchSource`/`SearchResult` shapes ahead of
- * `searchEngine` itself, which lands in Polish (see tasks.md — wiring
- * `SearchBar`/`CommandPalette` to real sources "enhances stories already
- * delivered," it isn't required by any user story on its own). Defining the
- * result shape now means this slice's state shape doesn't change when that
- * work lands — only `results`' population does.
- */
-export interface SearchResult {
-  id: string
-  sourceId: string
-  label: string
-  description?: string
-  icon?: IconSource
-  onSelect: () => void
-}
-
-const EMPTY_RESULTS: SearchResult[] = []
-
-/**
- * `SearchState` slice skeleton: current query, `CommandPalette` open/closed,
- * and (for now, always empty) results — no `SearchSource` is registered yet.
+ * `SearchState` slice: `CommandPalette`'s query, computed `searchEngine`
+ * results (unscoped — every registered source), open/closed state, and the
+ * keyboard-navigable selection index. `SearchBar` is a separate, always-
+ * visible, single-instance control with its own local query state (scoped
+ * to `web`/`shortcut` kinds) — it doesn't need this shared slice the way
+ * `CommandPalette` does (invoked from anywhere, via a keyboard shortcut).
  * Ephemeral: never persisted.
  */
 export interface SearchState {
   query: string
-  /** Always empty until `searchEngine` is wired in (Polish phase). */
   results: SearchResult[]
   isPaletteOpen: boolean
+  /** Keyboard-navigable index into `results`, per `utils/keyboard.ts`'s roving pattern. */
+  selectedIndex: number
   setQuery(query: string): void
+  setSelectedIndex(index: number): void
   openPalette(): void
   closePalette(): void
   togglePalette(): void
@@ -50,14 +38,26 @@ export interface SearchProviderProps {
 }
 
 export function SearchProvider({ children }: SearchProviderProps) {
-  const [query, setQuery] = useState('')
+  const [query, setQueryState] = useState('')
   const [isPaletteOpen, setIsPaletteOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const results = useMemo<SearchResult[]>(
+    () => (query.trim() === '' ? [] : defaultSearchEngine.query(query)),
+    [query],
+  )
+
+  const setQuery = useCallback((next: string) => {
+    setQueryState(next)
+    setSelectedIndex(0)
+  }, [])
 
   const openPalette = useCallback(() => setIsPaletteOpen(true), [])
 
   const closePalette = useCallback(() => {
     setIsPaletteOpen(false)
-    setQuery('')
+    setQueryState('')
+    setSelectedIndex(0)
   }, [])
 
   const togglePalette = useCallback(() => setIsPaletteOpen((previous) => !previous), [])
@@ -65,14 +65,16 @@ export function SearchProvider({ children }: SearchProviderProps) {
   const value = useMemo<SearchState>(
     () => ({
       query,
-      results: EMPTY_RESULTS,
+      results,
       isPaletteOpen,
+      selectedIndex,
       setQuery,
+      setSelectedIndex,
       openPalette,
       closePalette,
       togglePalette,
     }),
-    [query, isPaletteOpen, openPalette, closePalette, togglePalette],
+    [query, results, isPaletteOpen, selectedIndex, setQuery, openPalette, closePalette, togglePalette],
   )
 
   return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>

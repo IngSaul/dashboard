@@ -75,7 +75,7 @@ export function ShortcutCard({
 }: ShortcutCardProps) {
   return (
     <div className="shortcut-card">
-      <a href={shortcut.url} className="shortcut-card__link">
+      <a href={shortcut.url} className="shortcut-card__link" target="_blank" rel="noopener noreferrer">
         <ShortcutIcon shortcut={shortcut} />
         <span className="shortcut-card__label">{shortcut.label}</span>
         {shortcut.description ? (

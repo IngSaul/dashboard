@@ -22,7 +22,7 @@ describe('SearchProvider / useSearchState', () => {
     expect(result.current.isPaletteOpen).toBe(false)
   })
 
-  it('updates the query but always returns empty results (no sources wired yet)', () => {
+  it('updates the query and computes results via searchEngine (unscoped — every registered source)', () => {
     const { result } = renderHook(() => useSearchState(), { wrapper })
 
     act(() => {
@@ -30,6 +30,34 @@ describe('SearchProvider / useSearchState', () => {
     })
 
     expect(result.current.query).toBe('gmail')
+    // `tests/setup.ts` registers the real built-in sources (web/shortcuts/
+    // commands), so a query matching a default shortcut's label returns at
+    // least that result — this is no longer the pre-searchEngine skeleton.
+    expect(result.current.results.some((r) => r.label === 'Gmail')).toBe(true)
+  })
+
+  it('resets the selection index whenever the query changes', () => {
+    const { result } = renderHook(() => useSearchState(), { wrapper })
+
+    act(() => {
+      result.current.setQuery('gmail')
+      result.current.setSelectedIndex(2)
+    })
+    expect(result.current.selectedIndex).toBe(2)
+
+    act(() => {
+      result.current.setQuery('calendar')
+    })
+    expect(result.current.selectedIndex).toBe(0)
+  })
+
+  it('returns no results for an empty or whitespace-only query', () => {
+    const { result } = renderHook(() => useSearchState(), { wrapper })
+
+    act(() => {
+      result.current.setQuery('   ')
+    })
+
     expect(result.current.results).toEqual([])
   })
 

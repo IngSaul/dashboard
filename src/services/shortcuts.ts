@@ -1,5 +1,8 @@
+import { loadDashboardConfig } from './configStore'
+import { defaultSearchEngine } from './searchEngine'
 import { isNonEmptyString, isValidUrl } from '../utils/validation'
 import type { Shortcut } from '../types/dashboard'
+import type { SearchResult } from '../types/search'
 
 export interface ShortcutInput {
   label: string
@@ -115,4 +118,36 @@ export function reorderShortcuts(
     }
   })
   return { ok: true, shortcuts: reordered }
+}
+
+/**
+ * Registers the "jump to shortcut" `SearchSource` (T094): matches
+ * shortcuts whose label contains the query (case-insensitive), reading
+ * `configStore` fresh on every call so a shortcut added/edited/removed via
+ * `ShortcutSettings` is reflected on the very next keystroke.
+ */
+export function registerShortcutSearchSource(): void {
+  defaultSearchEngine.registerSource({
+    id: 'shortcuts',
+    label: 'Shortcuts',
+    kind: 'shortcut',
+    match(query) {
+      const lowerQuery = query.trim().toLowerCase()
+      if (lowerQuery.length === 0) {
+        return []
+      }
+      return loadDashboardConfig()
+        .shortcuts.filter((shortcut) => shortcut.label.toLowerCase().includes(lowerQuery))
+        .map(
+          (shortcut): SearchResult => ({
+            id: `shortcut-${shortcut.id}`,
+            sourceId: 'shortcuts',
+            label: shortcut.label,
+            ...(shortcut.description !== undefined ? { description: shortcut.description } : {}),
+            ...(shortcut.icon !== undefined ? { icon: shortcut.icon } : {}),
+            onSelect: () => window.open(shortcut.url, '_blank', 'noopener'),
+          }),
+        )
+    },
+  })
 }
