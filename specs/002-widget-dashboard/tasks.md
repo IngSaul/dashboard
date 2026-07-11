@@ -186,8 +186,8 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 ### Tests for User Story 3
 
-- [ ] T083 [P] [US3] Unit test `iconProvider` fallback chain order (Lucide → Simple Icons → custom SVG → favicon → fallback), caching, and CORS/timeout fallthrough per [contracts/icon-provider-contract.md](./contracts/icon-provider-contract.md) in `tests/unit/iconProvider.test.ts`
-- [ ] T084 [P] [US3] Integration test: shortcut card renders only name/icon/category (no business data), grouped by category, and opens via standard navigation without dashboard-side network calls in `tests/integration/ShortcutsWidget.test.tsx`
+- [X] T083 [P] [US3] Unit test `iconProvider` fallback chain order (Lucide → Simple Icons → custom SVG → favicon → fallback), caching, and CORS/timeout fallthrough per [contracts/icon-provider-contract.md](./contracts/icon-provider-contract.md) in `tests/unit/iconProvider.test.ts`
+- [X] T084 [P] [US3] Integration test: shortcut card renders only name/icon/category (no business data), grouped by category, and opens via standard navigation without dashboard-side network calls in `tests/integration/ShortcutsWidget.test.tsx`
 
 ### Implementation for User Story 3
 
