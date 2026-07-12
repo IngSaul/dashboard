@@ -1,11 +1,11 @@
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
-import { resolveShortcutIcon } from '../../services/iconResolver'
+import { ShortcutIcon } from '../ShortcutIcon/ShortcutIcon'
+import { ShortcutActionsMenu } from '../ShortcutActionsMenu/ShortcutActionsMenu'
 import type { Shortcut } from '../../types/dashboard'
 import './ShortcutCard.css'
 
 export interface ShortcutCardProps {
   shortcut: Shortcut
-  /** Shows Edit/Remove/Move actions when true (User Story 2 management mode). */
+  /** Shows the inline Subir/Bajar/Editar/Eliminar row (Settings drawer's management list) instead of the hover corner menu. */
   editable?: boolean
   canMoveUp?: boolean
   canMoveDown?: boolean
@@ -16,54 +16,12 @@ export interface ShortcutCardProps {
 }
 
 /**
- * Renders the shortcut's icon with no layout difference by provider — every
- * branch renders inside the same fixed-size `.shortcut-card__icon` wrapper
- * (UI contract's Icon System section). A manually-chosen `lucide`/`custom-svg`
- * icon (set via the shortcut editor, T085/T088) always wins, since that's an
- * explicit user override; everything else is derived fresh from the
- * shortcut's URL via `iconResolver` on every render — real colored brand
- * icon when the destination is recognized, generic Globe glyph otherwise —
- * so a shortcut's icon never depends on stale editor-time favicon/initials
- * resolution and never relies on the shortcut's title.
+ * `editable` (Settings drawer) keeps the original always-visible
+ * Subir/Bajar/Editar/Eliminar row. Everywhere else (the main dashboard
+ * grid), passing `onEdit`/`onRemove` without `editable` renders the
+ * hover-revealed corner `ShortcutActionsMenu` instead — the card itself
+ * only picks which actions UI to show, it owns no menu/modal state.
  */
-function ShortcutIcon({ shortcut }: { shortcut: Shortcut }) {
-  const icon = shortcut.icon
-
-  if (icon && (icon.provider === 'lucide' || icon.provider === 'custom-svg')) {
-    return icon.provider === 'lucide' ? (
-      <span className="shortcut-card__icon" data-icon-provider="lucide" aria-hidden="true">
-        <DynamicIcon name={icon.value as IconName} />
-      </span>
-    ) : (
-      <span
-        className="shortcut-card__icon"
-        data-icon-provider="custom-svg"
-        aria-hidden="true"
-        // custom-svg has no authoring UI yet (a future task), so this path
-        // isn't reachable from user input in this feature.
-        dangerouslySetInnerHTML={{ __html: icon.value }}
-      />
-    )
-  }
-
-  const resolved = resolveShortcutIcon(shortcut.url)
-  return (
-    <span
-      className="shortcut-card__icon"
-      data-icon-provider={resolved.match}
-      style={{ color: resolved.color }}
-      title={resolved.label}
-      aria-hidden="true"
-    >
-      {resolved.svg ? (
-        <span dangerouslySetInnerHTML={{ __html: resolved.svg }} />
-      ) : resolved.Icon ? (
-        <resolved.Icon color={resolved.color} />
-      ) : null}
-    </span>
-  )
-}
-
 export function ShortcutCard({
   shortcut,
   editable = false,
@@ -74,6 +32,8 @@ export function ShortcutCard({
   onMoveUp,
   onMoveDown,
 }: ShortcutCardProps) {
+  const showCornerMenu = !editable && (onEdit !== undefined || onRemove !== undefined)
+
   return (
     <div className="shortcut-card">
       <a href={shortcut.url} className="shortcut-card__link" target="_blank" rel="noopener noreferrer">
@@ -116,6 +76,13 @@ export function ShortcutCard({
             Eliminar
           </button>
         </div>
+      ) : null}
+      {showCornerMenu ? (
+        <ShortcutActionsMenu
+          label={shortcut.label}
+          onEdit={() => onEdit?.(shortcut)}
+          onDelete={() => onRemove?.(shortcut)}
+        />
       ) : null}
     </div>
   )

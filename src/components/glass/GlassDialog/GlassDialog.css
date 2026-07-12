@@ -9,10 +9,44 @@
   box-shadow: var(--shadow-elevation-3);
   backdrop-filter: blur(var(--glass-blur-high));
   -webkit-backdrop-filter: blur(var(--glass-blur-high));
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity var(--motion-duration-base) var(--motion-easing-standard),
+    transform var(--motion-duration-base) var(--motion-easing-decelerate),
+    overlay var(--motion-duration-base) allow-discrete,
+    display var(--motion-duration-base) allow-discrete;
+}
+
+.glass-dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  .glass-dialog[open] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
 }
 
 .glass-dialog::backdrop {
   background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+  opacity: 0;
+  transition:
+    opacity var(--motion-duration-base) var(--motion-easing-standard),
+    overlay var(--motion-duration-base) allow-discrete,
+    display var(--motion-duration-base) allow-discrete;
+}
+
+.glass-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .glass-dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 .glass-dialog__title {

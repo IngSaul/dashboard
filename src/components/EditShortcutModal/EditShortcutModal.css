@@ -1,0 +1,6 @@
+.edit-shortcut-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: min(24rem, 80vw);
+}

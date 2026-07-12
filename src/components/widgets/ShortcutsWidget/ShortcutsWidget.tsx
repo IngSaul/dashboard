@@ -1,40 +1,28 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CategoryNav } from '../../CategoryNav/CategoryNav'
 import { ShortcutCard } from '../../ShortcutCard/ShortcutCard'
 import { StatusMessage } from '../../StatusMessage/StatusMessage'
+import { EditShortcutModal } from '../../EditShortcutModal/EditShortcutModal'
+import { GlassConfirmDialog } from '../../glass/GlassConfirmDialog/GlassConfirmDialog'
 import { filterShortcutsByCategory, getNonEmptyCategories } from '../../../services/categories'
-import { loadDashboardConfig } from '../../../services/configStore'
-import { defaultEventBus } from '../../../services/eventBus'
-import type { Shortcut, ShortcutCategory } from '../../../types/dashboard'
+import { useShortcutLibrary } from '../../../state/useShortcutLibrary'
+import type { Shortcut } from '../../../types/dashboard'
 import './ShortcutsWidget.css'
 
 /**
- * Read-only shortcuts grid: category filtering (existing `CategoryNav`) +
- * launch cards (existing `ShortcutCard`) per the UI contract's Shortcuts
- * Widget Boundary. Add/edit/remove/reorder happens through
- * `ShortcutSettings`/`SettingsDrawer` (T077), not here.
- *
- * Re-reads `configStore` on `eventBus`'s `shortcuts:changed` — shortcuts/
- * categories have no owning state slice (like `weatherPreference`), so
- * without this, an edit made in the settings drawer would only appear here
- * after a full reload, not immediately in the same session.
+ * Shortcuts grid: category filtering (`CategoryNav`) + launch cards
+ * (`ShortcutCard`). Unlike before, cards here aren't read-only — hovering a
+ * card reveals its corner menu (Editar/Eliminar), wired to
+ * `useShortcutLibrary`'s mutation helpers, `EditShortcutModal`, and a
+ * `GlassConfirmDialog` for delete. `ShortcutSettings`/`SettingsDrawer`'s
+ * add form and Subir/Bajar row still exist unchanged alongside this — this
+ * widget just stops being launch-only.
  */
 export function ShortcutsWidget() {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
-  const [shortcuts, setShortcuts] = useState<Shortcut[]>(() => loadDashboardConfig().shortcuts)
-  const [categories, setCategories] = useState<ShortcutCategory[]>(
-    () => loadDashboardConfig().categories,
-  )
-
-  useEffect(
-    () =>
-      defaultEventBus.on('shortcuts:changed', () => {
-        const config = loadDashboardConfig()
-        setShortcuts(config.shortcuts)
-        setCategories(config.categories)
-      }),
-    [],
-  )
+  const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null)
+  const [pendingDeleteShortcut, setPendingDeleteShortcut] = useState<Shortcut | null>(null)
+  const { shortcuts, categories, editShortcut, deleteShortcut } = useShortcutLibrary()
 
   const visibleCategories = useMemo(
     () => getNonEmptyCategories(categories, shortcuts),
@@ -44,6 +32,14 @@ export function ShortcutsWidget() {
     () => filterShortcutsByCategory(shortcuts, activeCategoryId),
     [shortcuts, activeCategoryId],
   )
+
+  function handleConfirmDelete() {
+    if (!pendingDeleteShortcut) {
+      return
+    }
+    deleteShortcut(pendingDeleteShortcut.id)
+    setPendingDeleteShortcut(null)
+  }
 
   return (
     <div className="shortcuts-widget">
@@ -57,10 +53,30 @@ export function ShortcutsWidget() {
       ) : (
         <div className="shortcuts-widget__grid">
           {visibleShortcuts.map((shortcut) => (
-            <ShortcutCard key={shortcut.id} shortcut={shortcut} />
+            <ShortcutCard
+              key={shortcut.id}
+              shortcut={shortcut}
+              onEdit={setEditingShortcut}
+              onRemove={setPendingDeleteShortcut}
+            />
           ))}
         </div>
       )}
+      <EditShortcutModal
+        key={editingShortcut?.id ?? 'edit-shortcut-modal'}
+        open={editingShortcut !== null}
+        shortcut={editingShortcut}
+        categories={categories}
+        onClose={() => setEditingShortcut(null)}
+        onSave={editShortcut}
+      />
+      <GlassConfirmDialog
+        open={pendingDeleteShortcut !== null}
+        title="Eliminar acceso directo"
+        message={`¿Eliminar "${pendingDeleteShortcut?.label ?? ''}"? Esta acción no se puede deshacer.`}
+        onCancel={() => setPendingDeleteShortcut(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   )
 }

@@ -1,0 +1,21 @@
+.glass-confirm-dialog__message {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+}
+
+.glass-confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.glass-confirm-dialog__confirm {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+.glass-confirm-dialog__confirm:hover,
+.glass-confirm-dialog__confirm:focus-visible {
+  background: #991b1b;
+}
