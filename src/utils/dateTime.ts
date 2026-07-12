@@ -26,6 +26,11 @@ export function formatDashboardTime(date: Date): string {
   return timeFormatter.format(date)
 }
 
+/** Hour label for a forecast slot (e.g. "1:00", "13:00") — built manually rather than via `Intl` so the `:00` minutes stay fixed regardless of locale. */
+export function formatHourLabel(date: Date): string {
+  return `${date.getHours()}:00`
+}
+
 /** Milliseconds until the start of the next minute, for scheduling clock updates. */
 export function getMillisecondsUntilNextMinute(date: Date): number {
   const secondsIntoMinute = date.getSeconds()

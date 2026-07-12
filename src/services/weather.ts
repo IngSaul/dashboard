@@ -1,4 +1,4 @@
-import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
+import type { HourlyForecastEntry, WeatherPreference, WeatherSummary } from '../types/dashboard'
 
 /**
  * Outcome of a weather fetch attempt, decoupled from how the fetch itself
@@ -7,7 +7,20 @@ import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
 export type WeatherErrorReason = 'permission-denied' | 'unavailable'
 
 export type WeatherFetchOutcome =
+<<<<<<< Updated upstream
   | { kind: 'success'; temperature: number; condition: string; observedAt: string }
+=======
+  | {
+      kind: 'success'
+      temperature: number
+      temperatureMax?: number
+      temperatureMin?: number
+      condition: string
+      weatherCode: number
+      observedAt: string
+      hourlyForecast?: HourlyForecastEntry[]
+    }
+>>>>>>> Stashed changes
   | { kind: 'error'; reason?: WeatherErrorReason }
 
 const DISABLED_MESSAGE = 'El clima está desactivado.'
@@ -46,9 +59,25 @@ export function resolveWeatherSummary(
     return { status: 'unavailable', message, ...locationLabel }
   }
 
+<<<<<<< Updated upstream
   return {
     status: 'available',
     ...locationLabel,
+=======
+  const temperatureMax = outcome.temperatureMax !== undefined ? { temperatureMax: outcome.temperatureMax } : {}
+  const temperatureMin = outcome.temperatureMin !== undefined ? { temperatureMin: outcome.temperatureMin } : {}
+  const hourlyForecast =
+    outcome.hourlyForecast !== undefined && outcome.hourlyForecast.length > 0
+      ? { hourlyForecast: outcome.hourlyForecast }
+      : {}
+
+  return {
+    status: 'available',
+    ...locationLabel,
+    ...temperatureMax,
+    ...temperatureMin,
+    ...hourlyForecast,
+>>>>>>> Stashed changes
     temperature: outcome.temperature,
     condition: outcome.condition,
     observedAt: outcome.observedAt,
@@ -61,8 +90,67 @@ interface OpenMeteoCurrentWeather {
   time: string
 }
 
+<<<<<<< Updated upstream
 interface OpenMeteoResponse {
   current_weather?: OpenMeteoCurrentWeather
+=======
+interface OpenMeteoDaily {
+  temperature_2m_max: number[]
+  temperature_2m_min: number[]
+}
+
+interface OpenMeteoHourly {
+  time: string[]
+  temperature_2m: number[]
+  weathercode: number[]
+}
+
+interface OpenMeteoResponse {
+  current_weather?: OpenMeteoCurrentWeather
+  daily?: OpenMeteoDaily
+  hourly?: OpenMeteoHourly
+}
+
+/** Matches the `YYYY-MM-DD` prefix Open-Meteo uses for both `current_weather.time` and `hourly.time` entries (all returned in the location's local time thanks to `timezone=auto`). */
+function extractCalendarDate(isoTime: string): string {
+  return isoTime.slice(0, 10)
+}
+
+const MAX_HOURLY_FORECAST_ENTRIES = 5
+
+/**
+ * Narrows the provider's full hourly series down to the remaining hours of
+ * *today* (per the widget's "pronóstico del tiempo para hoy" section) —
+ * strictly after `current.time` and on the same calendar date, capped at
+ * `MAX_HOURLY_FORECAST_ENTRIES` so the row never overflows. Returns `[]`
+ * rather than throwing when `hourly` is missing or the day is nearly over.
+ */
+function buildHourlyForecast(
+  current: OpenMeteoCurrentWeather,
+  hourly: OpenMeteoHourly | undefined,
+): HourlyForecastEntry[] {
+  if (!hourly) {
+    return []
+  }
+  const today = extractCalendarDate(current.time)
+  const entries: HourlyForecastEntry[] = []
+  for (let index = 0; index < hourly.time.length; index += 1) {
+    const time = hourly.time[index]
+    if (time === undefined || time <= current.time || extractCalendarDate(time) !== today) {
+      continue
+    }
+    const temperature = hourly.temperature_2m[index]
+    const weatherCode = hourly.weathercode[index]
+    if (temperature === undefined || weatherCode === undefined) {
+      continue
+    }
+    entries.push({ time, temperature, weatherCode })
+    if (entries.length >= MAX_HOURLY_FORECAST_ENTRIES) {
+      break
+    }
+  }
+  return entries
+>>>>>>> Stashed changes
 }
 
 /** WMO weather codes (subset) used by Open-Meteo's `current_weather` field. */
@@ -145,7 +233,11 @@ async function fetchOpenMeteoCurrentWeather(
 ): Promise<WeatherFetchOutcome> {
   try {
     const response = await fetch(
+<<<<<<< Updated upstream
       `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
+=======
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weathercode&timezone=auto`,
+>>>>>>> Stashed changes
     )
     if (!response.ok) {
       return { kind: 'error' }
@@ -155,9 +247,21 @@ async function fetchOpenMeteoCurrentWeather(
     if (!current) {
       return { kind: 'error' }
     }
+<<<<<<< Updated upstream
     return {
       kind: 'success',
       temperature: current.temperature,
+=======
+    const temperatureMax = data.daily?.temperature_2m_max[0]
+    const temperatureMin = data.daily?.temperature_2m_min[0]
+    const hourlyForecast = buildHourlyForecast(current, data.hourly)
+    return {
+      kind: 'success',
+      temperature: current.temperature,
+      ...(temperatureMax !== undefined ? { temperatureMax } : {}),
+      ...(temperatureMin !== undefined ? { temperatureMin } : {}),
+      ...(hourlyForecast.length > 0 ? { hourlyForecast } : {}),
+>>>>>>> Stashed changes
       condition: describeWeatherCode(current.weathercode),
       observedAt: current.time,
     }

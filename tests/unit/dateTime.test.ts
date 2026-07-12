@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   formatDashboardDate,
   formatDashboardTime,
+  formatHourLabel,
   getMillisecondsUntilNextMinute,
   getMonthGrid,
   isDifferentCalendarDay,
@@ -18,6 +19,20 @@ describe('formatDashboardDate / formatDashboardTime', () => {
     const date = new Date(2026, 6, 8, 9, 5, 0, 0)
 
     expect(formatDashboardTime(date).length).toBeGreaterThan(0)
+  })
+})
+
+describe('formatHourLabel', () => {
+  it('formats an hour with fixed :00 minutes', () => {
+    const date = new Date(2026, 6, 8, 9, 45, 0, 0)
+
+    expect(formatHourLabel(date)).toBe('9:00')
+  })
+
+  it('does not pad single-digit hours', () => {
+    const date = new Date(2026, 6, 8, 1, 0, 0, 0)
+
+    expect(formatHourLabel(date)).toBe('1:00')
   })
 })
 

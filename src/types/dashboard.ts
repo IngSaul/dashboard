@@ -44,6 +44,12 @@ export interface WeatherPreference {
 
 export type WeatherStatus = 'loading' | 'available' | 'unavailable' | 'disabled'
 
+export interface HourlyForecastEntry {
+  time: string
+  temperature: number
+  weatherCode: number
+}
+
 export interface WeatherSummary {
   status: WeatherStatus
   locationLabel?: string
@@ -51,6 +57,8 @@ export interface WeatherSummary {
   condition?: string
   observedAt?: string
   message?: string
+  /** Remaining hours of the current day, nearest-first — empty/absent when the provider has no hourly data left for today (e.g. late at night). */
+  hourlyForecast?: HourlyForecastEntry[]
 }
 
 // Shortcuts
