@@ -47,6 +47,8 @@ describe('resolveWeatherSummary', () => {
     const result = resolveWeatherSummary(configuredPreference, {
       kind: 'success',
       temperature: 21,
+      temperatureMax: 24,
+      temperatureMin: 12,
       condition: 'Clear',
       weatherCode: 0,
       observedAt: '2026-07-08T09:00:00.000Z',
@@ -56,6 +58,8 @@ describe('resolveWeatherSummary', () => {
       status: 'available',
       locationLabel: 'Example City',
       temperature: 21,
+      temperatureMax: 24,
+      temperatureMin: 12,
       condition: 'Clear',
       weatherCode: 0,
       observedAt: '2026-07-08T09:00:00.000Z',
@@ -91,6 +95,7 @@ describe('fetchWeatherSummary', () => {
 
   const openMeteoResponse = {
     current_weather: { temperature: 21, weathercode: 0, time: '2026-07-10T12:00:00.000Z' },
+    daily: { temperature_2m_max: [24], temperature_2m_min: [12] },
   }
 
   afterEach(() => {
@@ -118,6 +123,8 @@ describe('fetchWeatherSummary', () => {
 
     expect(result.status).toBe('available')
     expect(result.temperature).toBe(21)
+    expect(result.temperatureMax).toBe(24)
+    expect(result.temperatureMin).toBe(12)
     expect(result.weatherCode).toBe(0)
   })
 

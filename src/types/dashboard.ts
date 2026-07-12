@@ -48,6 +48,8 @@ export interface WeatherSummary {
   status: WeatherStatus
   locationLabel?: string
   temperature?: number
+  temperatureMax?: number
+  temperatureMin?: number
   condition?: string
   /** Raw WMO weather code from the provider, used by `WeatherIllustration` to pick an illustration — kept separate from `condition`'s human-readable text. */
   weatherCode?: number

@@ -23,9 +23,14 @@ export function WeatherSummary({ summary }: WeatherSummaryProps) {
     return message
   }
 
+  const range = buildWeatherRangeMessage(summary)
+
   return (
     <div className="weather-summary">
-      {message}
+      <div className="weather-summary__details">
+        {message}
+        {range && <p className="weather-summary__range">{range}</p>}
+      </div>
       <WeatherIllustration code={summary.weatherCode} className="weather-summary__illustration" />
     </div>
   )
@@ -47,4 +52,12 @@ function buildWeatherMessage(summary: WeatherSummaryData): string {
     case 'unavailable':
       return summary.message ?? 'El clima no está disponible en este momento.'
   }
+}
+
+/** Empty when either bound is missing (e.g. `configuredLocation` mode never supplies daily data) so the card doesn't show a broken "↑°" fragment. */
+function buildWeatherRangeMessage(summary: WeatherSummaryData): string {
+  if (summary.temperatureMax === undefined || summary.temperatureMin === undefined) {
+    return ''
+  }
+  return `↑ ${Math.round(summary.temperatureMax)}° ↓ ${Math.round(summary.temperatureMin)}°`
 }

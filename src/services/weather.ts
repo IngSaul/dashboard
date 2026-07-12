@@ -7,7 +7,15 @@ import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
 export type WeatherErrorReason = 'permission-denied' | 'unavailable'
 
 export type WeatherFetchOutcome =
-  | { kind: 'success'; temperature: number; condition: string; weatherCode: number; observedAt: string }
+  | {
+      kind: 'success'
+      temperature: number
+      temperatureMax?: number
+      temperatureMin?: number
+      condition: string
+      weatherCode: number
+      observedAt: string
+    }
   | { kind: 'error'; reason?: WeatherErrorReason }
 
 const DISABLED_MESSAGE = 'El clima está desactivado.'
@@ -46,9 +54,14 @@ export function resolveWeatherSummary(
     return { status: 'unavailable', message, ...locationLabel }
   }
 
+  const temperatureMax = outcome.temperatureMax !== undefined ? { temperatureMax: outcome.temperatureMax } : {}
+  const temperatureMin = outcome.temperatureMin !== undefined ? { temperatureMin: outcome.temperatureMin } : {}
+
   return {
     status: 'available',
     ...locationLabel,
+    ...temperatureMax,
+    ...temperatureMin,
     temperature: outcome.temperature,
     condition: outcome.condition,
     weatherCode: outcome.weatherCode,
@@ -62,8 +75,14 @@ interface OpenMeteoCurrentWeather {
   time: string
 }
 
+interface OpenMeteoDaily {
+  temperature_2m_max: number[]
+  temperature_2m_min: number[]
+}
+
 interface OpenMeteoResponse {
   current_weather?: OpenMeteoCurrentWeather
+  daily?: OpenMeteoDaily
 }
 
 /** WMO weather codes (subset) used by Open-Meteo's `current_weather` field. */
@@ -146,7 +165,7 @@ async function fetchOpenMeteoCurrentWeather(
 ): Promise<WeatherFetchOutcome> {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto`,
     )
     if (!response.ok) {
       return { kind: 'error' }
@@ -156,9 +175,13 @@ async function fetchOpenMeteoCurrentWeather(
     if (!current) {
       return { kind: 'error' }
     }
+    const temperatureMax = data.daily?.temperature_2m_max[0]
+    const temperatureMin = data.daily?.temperature_2m_min[0]
     return {
       kind: 'success',
       temperature: current.temperature,
+      ...(temperatureMax !== undefined ? { temperatureMax } : {}),
+      ...(temperatureMin !== undefined ? { temperatureMin } : {}),
       condition: describeWeatherCode(current.weathercode),
       weatherCode: current.weathercode,
       observedAt: current.time,
