@@ -1,4 +1,4 @@
-import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
+import type { HourlyForecastEntry, WeatherPreference, WeatherSummary } from '../types/dashboard'
 
 /**
  * Outcome of a weather fetch attempt, decoupled from how the fetch itself
@@ -15,6 +15,7 @@ export type WeatherFetchOutcome =
       condition: string
       weatherCode: number
       observedAt: string
+      hourlyForecast?: HourlyForecastEntry[]
     }
   | { kind: 'error'; reason?: WeatherErrorReason }
 
@@ -56,6 +57,7 @@ export function resolveWeatherSummary(
 
   const temperatureMax = outcome.temperatureMax !== undefined ? { temperatureMax: outcome.temperatureMax } : {}
   const temperatureMin = outcome.temperatureMin !== undefined ? { temperatureMin: outcome.temperatureMin } : {}
+  const hourlyForecast = outcome.hourlyForecast !== undefined ? { hourlyForecast: outcome.hourlyForecast } : {}
 
   return {
     status: 'available',
@@ -66,6 +68,7 @@ export function resolveWeatherSummary(
     condition: outcome.condition,
     weatherCode: outcome.weatherCode,
     observedAt: outcome.observedAt,
+    ...hourlyForecast,
   }
 }
 
@@ -80,9 +83,41 @@ interface OpenMeteoDaily {
   temperature_2m_min: number[]
 }
 
+interface OpenMeteoHourly {
+  time: string[]
+  temperature_2m: number[]
+  weathercode: number[]
+}
+
 interface OpenMeteoResponse {
   current_weather?: OpenMeteoCurrentWeather
   daily?: OpenMeteoDaily
+  hourly?: OpenMeteoHourly
+}
+
+/** Number of upcoming hours shown in the "today" forecast row. */
+const HOURLY_FORECAST_SIZE = 5
+
+/** Picks the next `HOURLY_FORECAST_SIZE` hourly entries at or after `now` (provider times are already in the location's local timezone via `timezone=auto`). */
+function buildHourlyForecast(hourly: OpenMeteoHourly | undefined, now: Date): HourlyForecastEntry[] | undefined {
+  if (!hourly) {
+    return undefined
+  }
+  const startIndex = hourly.time.findIndex((time) => new Date(time).getTime() >= now.getTime())
+  if (startIndex === -1) {
+    return undefined
+  }
+  const entries: HourlyForecastEntry[] = []
+  for (let i = startIndex; i < hourly.time.length && entries.length < HOURLY_FORECAST_SIZE; i += 1) {
+    const time = hourly.time[i]
+    const temperature = hourly.temperature_2m[i]
+    const weatherCode = hourly.weathercode[i]
+    if (time === undefined || temperature === undefined || weatherCode === undefined) {
+      continue
+    }
+    entries.push({ time, temperature, weatherCode })
+  }
+  return entries.length > 0 ? entries : undefined
 }
 
 /** WMO weather codes (subset) used by Open-Meteo's `current_weather` field. */
@@ -165,7 +200,7 @@ async function fetchOpenMeteoCurrentWeather(
 ): Promise<WeatherFetchOutcome> {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&timezone=auto`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min&hourly=temperature_2m,weathercode&timezone=auto`,
     )
     if (!response.ok) {
       return { kind: 'error' }
@@ -177,6 +212,7 @@ async function fetchOpenMeteoCurrentWeather(
     }
     const temperatureMax = data.daily?.temperature_2m_max[0]
     const temperatureMin = data.daily?.temperature_2m_min[0]
+    const hourlyForecast = buildHourlyForecast(data.hourly, new Date(current.time))
     return {
       kind: 'success',
       temperature: current.temperature,
@@ -185,6 +221,7 @@ async function fetchOpenMeteoCurrentWeather(
       condition: describeWeatherCode(current.weathercode),
       weatherCode: current.weathercode,
       observedAt: current.time,
+      ...(hourlyForecast !== undefined ? { hourlyForecast } : {}),
     }
   } catch {
     return { kind: 'error' }

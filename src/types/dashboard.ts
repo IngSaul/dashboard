@@ -44,6 +44,13 @@ export interface WeatherPreference {
 
 export type WeatherStatus = 'loading' | 'available' | 'unavailable' | 'disabled'
 
+/** One entry of the "today" hourly forecast row; `time` is an ISO 8601 timestamp in the location's local timezone (Open-Meteo `timezone=auto`). */
+export interface HourlyForecastEntry {
+  time: string
+  temperature: number
+  weatherCode: number
+}
+
 export interface WeatherSummary {
   status: WeatherStatus
   locationLabel?: string
@@ -55,6 +62,8 @@ export interface WeatherSummary {
   weatherCode?: number
   observedAt?: string
   message?: string
+  /** Upcoming hours of today, only populated when the provider returned hourly data (`browserLocation` mode). */
+  hourlyForecast?: HourlyForecastEntry[]
 }
 
 // Shortcuts

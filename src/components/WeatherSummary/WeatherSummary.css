@@ -1,5 +1,11 @@
 .weather-summary {
   display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.weather-summary__top {
+  display: flex;
   align-items: center;
   gap: var(--space-3);
 }
@@ -44,4 +50,49 @@
     flex-basis: 35%;
     max-width: 72px;
   }
+}
+
+.weather-summary__hourly {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-2);
+}
+
+.weather-summary__hourly-title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.weather-summary__hourly-list {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.weather-summary__hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 2.75rem;
+}
+
+.weather-summary__hourly-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.weather-summary__hourly-temp {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.weather-summary__hourly-time {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
 }

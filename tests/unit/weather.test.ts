@@ -66,6 +66,25 @@ describe('resolveWeatherSummary', () => {
     })
   })
 
+  it('returns an available summary including the hourly forecast when the outcome provides one', () => {
+    const result = resolveWeatherSummary(configuredPreference, {
+      kind: 'success',
+      temperature: 21,
+      condition: 'Clear',
+      weatherCode: 0,
+      observedAt: '2026-07-08T09:00:00.000Z',
+      hourlyForecast: [
+        { time: '2026-07-08T10:00:00.000Z', temperature: 22, weatherCode: 1 },
+        { time: '2026-07-08T11:00:00.000Z', temperature: 23, weatherCode: 2 },
+      ],
+    })
+
+    expect(result.hourlyForecast).toEqual([
+      { time: '2026-07-08T10:00:00.000Z', temperature: 22, weatherCode: 1 },
+      { time: '2026-07-08T11:00:00.000Z', temperature: 23, weatherCode: 2 },
+    ])
+  })
+
   it('returns a calm unavailable summary on fetch failure, not a thrown error', () => {
     const result = resolveWeatherSummary(configuredPreference, { kind: 'error' })
 
@@ -96,6 +115,16 @@ describe('fetchWeatherSummary', () => {
   const openMeteoResponse = {
     current_weather: { temperature: 21, weathercode: 0, time: '2026-07-10T12:00:00.000Z' },
     daily: { temperature_2m_max: [24], temperature_2m_min: [12] },
+    hourly: {
+      time: [
+        '2026-07-10T11:00:00.000Z',
+        '2026-07-10T12:00:00.000Z',
+        '2026-07-10T13:00:00.000Z',
+        '2026-07-10T14:00:00.000Z',
+      ],
+      temperature_2m: [20, 21, 22, 23],
+      weathercode: [1, 0, 2, 3],
+    },
   }
 
   afterEach(() => {
@@ -126,6 +155,11 @@ describe('fetchWeatherSummary', () => {
     expect(result.temperatureMax).toBe(24)
     expect(result.temperatureMin).toBe(12)
     expect(result.weatherCode).toBe(0)
+    expect(result.hourlyForecast).toEqual([
+      { time: '2026-07-10T12:00:00.000Z', temperature: 21, weatherCode: 0 },
+      { time: '2026-07-10T13:00:00.000Z', temperature: 22, weatherCode: 2 },
+      { time: '2026-07-10T14:00:00.000Z', temperature: 23, weatherCode: 3 },
+    ])
   })
 
   it('reports a permission-denied reason when both geolocation and the IP fallback fail', async () => {

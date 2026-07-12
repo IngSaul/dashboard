@@ -1,6 +1,7 @@
 import { StatusMessage, type StatusMessageTone } from '../StatusMessage/StatusMessage'
 import { WeatherIllustration } from '../weather/WeatherIllustration'
-import type { WeatherSummary as WeatherSummaryData } from '../../types/dashboard'
+import { formatDashboardTime } from '../../utils/dateTime'
+import type { HourlyForecastEntry, WeatherSummary as WeatherSummaryData } from '../../types/dashboard'
 import './WeatherSummary.css'
 
 export interface WeatherSummaryProps {
@@ -27,11 +28,38 @@ export function WeatherSummary({ summary }: WeatherSummaryProps) {
 
   return (
     <div className="weather-summary">
-      <div className="weather-summary__details">
-        {message}
-        {range && <p className="weather-summary__range">{range}</p>}
+      <div className="weather-summary__top">
+        <div className="weather-summary__details">
+          {message}
+          {range && <p className="weather-summary__range">{range}</p>}
+        </div>
+        <WeatherIllustration code={summary.weatherCode} className="weather-summary__illustration" />
       </div>
-      <WeatherIllustration code={summary.weatherCode} className="weather-summary__illustration" />
+      {summary.hourlyForecast && summary.hourlyForecast.length > 0 && (
+        <HourlyForecast entries={summary.hourlyForecast} />
+      )}
+    </div>
+  )
+}
+
+interface HourlyForecastProps {
+  entries: HourlyForecastEntry[]
+}
+
+/** Renders the "today" hourly forecast row (icon + temperature + hour) for each upcoming entry. */
+function HourlyForecast({ entries }: HourlyForecastProps) {
+  return (
+    <div className="weather-summary__hourly">
+      <p className="weather-summary__hourly-title">Pronóstico del tiempo para hoy</p>
+      <ul className="weather-summary__hourly-list">
+        {entries.map((entry) => (
+          <li key={entry.time} className="weather-summary__hourly-item">
+            <WeatherIllustration code={entry.weatherCode} className="weather-summary__hourly-icon" />
+            <span className="weather-summary__hourly-temp">{Math.round(entry.temperature)}°</span>
+            <span className="weather-summary__hourly-time">{formatDashboardTime(new Date(entry.time))}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
