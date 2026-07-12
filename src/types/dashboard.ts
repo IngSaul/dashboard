@@ -49,6 +49,8 @@ export interface WeatherSummary {
   locationLabel?: string
   temperature?: number
   condition?: string
+  /** Raw WMO weather code from the provider, used by `WeatherIllustration` to pick an illustration — kept separate from `condition`'s human-readable text. */
+  weatherCode?: number
   observedAt?: string
   message?: string
 }

@@ -48,6 +48,7 @@ describe('resolveWeatherSummary', () => {
       kind: 'success',
       temperature: 21,
       condition: 'Clear',
+      weatherCode: 0,
       observedAt: '2026-07-08T09:00:00.000Z',
     })
 
@@ -56,6 +57,7 @@ describe('resolveWeatherSummary', () => {
       locationLabel: 'Example City',
       temperature: 21,
       condition: 'Clear',
+      weatherCode: 0,
       observedAt: '2026-07-08T09:00:00.000Z',
     })
   })
@@ -116,6 +118,7 @@ describe('fetchWeatherSummary', () => {
 
     expect(result.status).toBe('available')
     expect(result.temperature).toBe(21)
+    expect(result.weatherCode).toBe(0)
   })
 
   it('reports a permission-denied reason when both geolocation and the IP fallback fail', async () => {

@@ -7,7 +7,7 @@ import type { WeatherPreference, WeatherSummary } from '../types/dashboard'
 export type WeatherErrorReason = 'permission-denied' | 'unavailable'
 
 export type WeatherFetchOutcome =
-  | { kind: 'success'; temperature: number; condition: string; observedAt: string }
+  | { kind: 'success'; temperature: number; condition: string; weatherCode: number; observedAt: string }
   | { kind: 'error'; reason?: WeatherErrorReason }
 
 const DISABLED_MESSAGE = 'El clima está desactivado.'
@@ -51,6 +51,7 @@ export function resolveWeatherSummary(
     ...locationLabel,
     temperature: outcome.temperature,
     condition: outcome.condition,
+    weatherCode: outcome.weatherCode,
     observedAt: outcome.observedAt,
   }
 }
@@ -159,6 +160,7 @@ async function fetchOpenMeteoCurrentWeather(
       kind: 'success',
       temperature: current.temperature,
       condition: describeWeatherCode(current.weathercode),
+      weatherCode: current.weathercode,
       observedAt: current.time,
     }
   } catch {

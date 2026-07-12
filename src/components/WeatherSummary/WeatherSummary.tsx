@@ -1,5 +1,7 @@
 import { StatusMessage, type StatusMessageTone } from '../StatusMessage/StatusMessage'
+import { WeatherIllustration } from '../weather/WeatherIllustration'
 import type { WeatherSummary as WeatherSummaryData } from '../../types/dashboard'
+import './WeatherSummary.css'
 
 export interface WeatherSummaryProps {
   summary: WeatherSummaryData
@@ -9,11 +11,24 @@ export interface WeatherSummaryProps {
  * Renders the weather summary through `StatusMessage` for every state
  * (loading/available/unavailable/disabled), so it always exposes a single
  * identifiable `role="status"` region regardless of state (UI contract's
- * accessibility and weather sections).
+ * accessibility and weather sections). Only the `available` state also gets
+ * a large `WeatherIllustration` alongside it — the other states have no
+ * weather code to illustrate.
  */
 export function WeatherSummary({ summary }: WeatherSummaryProps) {
   const tone: StatusMessageTone = summary.status === 'available' ? 'info' : 'notice'
-  return <StatusMessage message={buildWeatherMessage(summary)} tone={tone} />
+  const message = <StatusMessage message={buildWeatherMessage(summary)} tone={tone} />
+
+  if (summary.status !== 'available') {
+    return message
+  }
+
+  return (
+    <div className="weather-summary">
+      {message}
+      <WeatherIllustration code={summary.weatherCode} className="weather-summary__illustration" />
+    </div>
+  )
 }
 
 function buildWeatherMessage(summary: WeatherSummaryData): string {
