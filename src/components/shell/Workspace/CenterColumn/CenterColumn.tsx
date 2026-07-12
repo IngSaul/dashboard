@@ -1,7 +1,4 @@
-import { useState } from 'react'
 import { WorkspaceColumn } from '../WorkspaceColumn'
-import { SearchBar } from '../../../SearchBar/SearchBar'
-import { loadDashboardConfig } from '../../../../services/configStore'
 import type { Widget } from '../../../../types/widgets'
 
 export interface CenterColumnProps {
@@ -9,21 +6,16 @@ export interface CenterColumnProps {
 }
 
 /**
- * Wider primary column: search bar, then clock/shortcuts widgets — see
- * design-reference.md ("search bar -> clock/date -> quick-filter pills ->
- * shortcut grid"). `SearchBar` is fixed chrome, not a registered `Widget`
- * type, so it's passed as `WorkspaceColumn`'s leading `children` rather
- * than going through `WorkspaceState.resolvedLayout`. `searchPreference`
- * has no owning state slice (like `weatherPreference`) and isn't editable
- * by any UI yet, so a one-time load is sufficient — no live-update wiring
- * needed.
+ * Wider primary column: clock/shortcuts widgets — see design-reference.md
+ * ("clock/date -> quick-filter pills -> shortcut grid"). No page-level
+ * search box: a plain web page has no way to focus or write into the
+ * browser's own address bar (no WebExtensions API exposes that, and this
+ * app isn't packaged as an extension), so faking an in-app search box would
+ * only mimic — not proxy — the browser's real omnibox. `CommandPalette`
+ * (Cmd/Ctrl+K) still covers quick shortcut/command lookup.
  */
 export function CenterColumn({ widgets }: CenterColumnProps) {
-  const [searchPreference] = useState(() => loadDashboardConfig().searchPreference)
-
   return (
-    <WorkspaceColumn widgets={widgets} className="workspace-column--center" label="Widgets principales">
-      <SearchBar searchPreference={searchPreference} />
-    </WorkspaceColumn>
+    <WorkspaceColumn widgets={widgets} className="workspace-column--center" label="Widgets principales" />
   )
 }

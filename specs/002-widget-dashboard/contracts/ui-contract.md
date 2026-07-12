@@ -23,7 +23,7 @@ baseline) still apply.
   feature.
 - `CommandPalette` MUST source its results from `searchEngine` (see
   [search-engine-contract.md](./search-engine-contract.md)) — it MUST NOT
-  implement its own separate matching/filtering logic from `SearchBar`.
+  implement its own separate matching/filtering logic.
 - Any interaction that needs to affect a different state slice than the one
   the acting component belongs to (e.g. `CommandPalette`, part of
   `SearchState`, opening a `SettingsDrawer` section, part of `SettingsState`)

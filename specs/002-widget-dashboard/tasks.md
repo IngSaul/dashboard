@@ -206,14 +206,16 @@ React dashboard/start page structure (extension of `001-browser-dashboard`):
 
 **Purpose**: Unify `SearchBar`/`CommandPalette` behind `searchEngine` (per the architecture review), plus verification/hardening that spans multiple stories. Not required for any single user story to be complete.
 
+> **2026-07-12 update**: `SearchBar` (the always-visible in-page search box) was removed — see spec.md's Clarifications entry for 2026-07-12. No browser API lets a page or extension focus/write the native address bar or read the user's default search engine, so an in-page search box could only mimic the browser's omnibox, never proxy it. T096 and T098 below describe work that has since been undone; they're kept for history, not as a description of current behavior. `CommandPalette` (T097) and `searchEngine` (T091-T095) are unaffected and remain current.
+
 - [X] T091 [P] Implement `searchEngine` (`registerSource`/`query`, synchronous per-source matching, per-source failure isolation) in `src/services/searchEngine.ts`
 - [X] T092 [P] Unit test `searchEngine` source registration, ranking/merging, duplicate-id handling, and per-source failure isolation per [contracts/search-engine-contract.md](./contracts/search-engine-contract.md) in `tests/unit/searchEngine.test.ts` (depends on T091)
 - [X] T093 Register the existing web-search behavior from `src/services/search.ts` as a `"web"` `SearchSource` (depends on T091)
 - [X] T094 Register a jump-to-shortcut `SearchSource` from `src/services/shortcuts.ts` (depends on T091)
 - [X] T095 [P] Register static navigation `SearchSource`s (e.g. "Open Wallpaper Settings") in `AppShell`'s bootstrap, emitting `eventBus` events consumed by `SettingsState` (depends on T039, T047, T091)
-- [X] T096 Wire `SearchBar` to call `searchEngine.query(input, { kinds: ["web", "shortcut"] })`, preserving existing Enter-to-search behavior (depends on T093, T094)
+- [~] T096 ~~Wire `SearchBar` to call `searchEngine.query(input, { kinds: ["web", "shortcut"] })`, preserving existing Enter-to-search behavior (depends on T093, T094)~~ — **Superseded 2026-07-12**: `SearchBar` was removed (see note above); nothing in the current codebase performs this wiring.
 - [X] T097 Wire `CommandPalette` to call `searchEngine.query(input)` unscoped, reusing `utils/keyboard.ts` navigation, executing `onSelect()` (navigation or `eventBus` emit) (depends on T052, T095, T096)
-- [X] T098 [P] Integration test: `SearchBar` and `CommandPalette` return consistent results for the same query, and a command result opens the correct `SettingsDrawer` section via `eventBus` in `tests/integration/SearchAndCommandPalette.test.tsx` (depends on T097)
+- [~] T098 ~~[P] Integration test: `SearchBar` and `CommandPalette` return consistent results for the same query, and a command result opens the correct `SettingsDrawer` section via `eventBus` in `tests/integration/SearchAndCommandPalette.test.tsx` (depends on T097)~~ — **Superseded 2026-07-12**: replaced by `tests/integration/CommandPalette.test.tsx`, covering `CommandPalette` (shortcut match, command results, `eventBus` section-opening) without the removed `SearchBar` comparison.
 - [X] T099 [P] e2e test: three-column desktop → tablet responsive reflow and reduced-motion behavior in `tests/e2e/responsive-widgets.spec.ts`
 - [X] T100 [P] TypeScript strictness audit confirming no new `any` across `src/design/`, `src/state/`, `src/plugins/`, and all new `src/services/`
 - [X] T101 Bundle/performance check: confirm disabled widgets are not downloaded (`WidgetRegistry.lazyLoad()` code-splitting) and initial dashboard usability stays under one second, per quickstart Scenario 4c

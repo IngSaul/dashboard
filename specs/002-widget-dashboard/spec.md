@@ -8,6 +8,12 @@
 
 **Input**: User description: "Build a personal browser start page focused on productivity. The application should provide a modern glassmorphism interface inspired by Arc Browser, Bonjourr and Homepage. It must display configurable widgets such as weather, clock, server status, Docker containers, calendar, notes and quick shortcuts. The dashboard is not an ERP. Business applications such as the bakery ERP or POS are external systems accessed through shortcuts. The UI must be highly customizable while keeping business logic independent from presentation."
 
+## Clarifications
+
+### Session 2026-07-12
+
+- Q: Should the dashboard provide an in-page global search bar that behaves like the browser's own address bar (proxying the user's default search engine)? → A: No. No browser exposes an API — to a web page or even a packaged browser extension — that can focus or write into the native address bar, or that can read the user's configured default search engine; browsers deliberately withhold that capability to prevent address-bar spoofing. A page-level search box could therefore only mimic a browser's address bar, never actually proxy it, so the always-visible in-page search control was removed rather than kept as a look-alike. The keyboard-invoked command/shortcut launcher (opened via Cmd/Ctrl+K) is a distinct, separate control — not an address-bar look-alike — and is unaffected.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Glanceable Widget Grid on Open (Priority: P1)
@@ -125,3 +131,4 @@ As the user, I want shortcut widgets/cards that link out to my external business
 - Glassmorphism styling is treated as a new theme/style variant layered on top of the existing light/dark theme system, not a replacement for accessibility-required contrast — sufficient contrast and reduced-motion behavior are preserved.
 - "Highly customizable" is scoped to widget selection, ordering, and visual theme/style variant; free-form drag-and-drop pixel positioning and third-party widget plugins are out of scope for this feature.
 - Business application shortcuts (bakery ERP, POS, etc.) are treated identically to any other shortcut — no special-cased integration, authentication, or data exchange is introduced for them.
+- The dashboard has no in-page global search bar / browser-address-bar proxy; see Clarifications (2026-07-12). A keyboard-invoked command/shortcut launcher (Cmd/Ctrl+K) covers quick shortcut/command lookup instead.

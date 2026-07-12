@@ -32,8 +32,8 @@ extends it in place.
 4. **Expect**: dashboard reflects the new enabled set and order; no layout
    artifacts from the removed widget.
 5. Switch the background/theme style option in settings.
-6. **Expect**: all widgets and chrome (search bar, pills) update to the new
-   look consistently; text remains readable against the background.
+6. **Expect**: all widgets and chrome (pills, settings toggle) update to the
+   new look consistently; text remains readable against the background.
 7. Manually corrupt the persisted widget-layout value in local storage, then
    reload.
 8. **Expect**: dashboard falls back to the default layout instead of failing
@@ -96,18 +96,20 @@ extends it in place.
    visible and interactive, no clipped or overlapping content — driven by
    `layoutEngine`'s resolved output, not per-component CSS breakpoints.
 
-## Scenario 6 — Shared search/command engine
+## Scenario 6 — CommandPalette / search engine
 
-1. Type a shortcut's name into the search bar.
-2. **Expect**: a matching jump-to-shortcut suggestion appears alongside the
-   default web-search behavior.
-3. Open `CommandPalette` (keyboard shortcut) and type the same shortcut name.
-4. **Expect**: the same shortcut result appears, ranked consistently — proving
-   both entry points read from the same `searchEngine`, not two separate
-   implementations.
-5. From `CommandPalette`, select a command that opens a specific
+> **2026-07-12 update**: this scenario previously also compared results
+> against `SearchBar`, which was removed — see spec.md's Clarifications
+> entry. No browser API lets a page or extension focus/write the native
+> address bar or read the default search engine, so an in-page search box
+> could only mimic the browser's omnibox, never proxy it.
+
+1. Open `CommandPalette` (keyboard shortcut) and type a shortcut's name.
+2. **Expect**: a matching jump-to-shortcut result appears, sourced from
+   `searchEngine`.
+3. From `CommandPalette`, select a command that opens a specific
    `SettingsDrawer` section (e.g. "Open Wallpaper Settings").
-6. **Expect**: the drawer opens directly to that section; inspect that this
+4. **Expect**: the drawer opens directly to that section; inspect that this
    happened via an `eventBus` event rather than `CommandPalette` importing
    `SettingsDrawer`'s internals (code-review check, not a runtime one).
 
@@ -143,8 +145,10 @@ extends it in place.
   render (via `WorkspaceState`/`layoutEngine`); empty-column handling.
 - `tests/integration/WidgetSettings.test.tsx` — keyboard operability, all six
   theme-group sections, and monitoring-endpoint controls.
-- `tests/integration/SearchAndCommandPalette.test.tsx` — `SearchBar` and
-  `CommandPalette` return consistent results for the same query; command
-  execution reaches `SettingsDrawer` via `eventBus`.
+- `tests/integration/CommandPalette.test.tsx` — `CommandPalette` shortcut
+  matches, command results, and command execution reaching `SettingsDrawer`
+  via `eventBus`. (Formerly `SearchAndCommandPalette.test.tsx`, which also
+  covered `SearchBar`; `SearchBar` was removed 2026-07-12 — see spec.md's
+  Clarifications entry.)
 - `tests/e2e/responsive-widgets.spec.ts` — desktop/tablet reflow, reduced-motion
   behavior.

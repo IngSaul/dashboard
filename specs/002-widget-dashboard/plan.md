@@ -180,9 +180,9 @@ Grafana, RSS, Stocks) in this feature — see Complexity Tracking.
   registration descriptor) behind the common `WidgetRegistry` interface, so
   `Workspace` never hardcodes a widget-by-widget switch — it iterates whatever
   is registered, and never computes column/breakpoint logic itself (that's
-  `layoutEngine`'s job). `SearchBar` and `CommandPalette` stay separate,
-  focused components but share one `searchEngine` behind them, avoiding
-  duplicated matching logic. Existing components (ShortcutCard, CategoryNav,
+  `layoutEngine`'s job). `CommandPalette` is a focused component built on
+  `searchEngine` (originally shared with `SearchBar`, which was removed
+  2026-07-12 — see spec.md's Clarifications entry). Existing components (ShortcutCard, CategoryNav,
   WeatherSummary) are composed inside the relevant plugin's widget component
   rather than duplicated.
 - **Configuration Driven**: PASS. Widget catalog, enabled/order state,
@@ -333,7 +333,7 @@ src/
 │   │   ├── NotesWidget/               # NEW
 │   │   └── ShortcutsWidget/           # NEW — composes existing ShortcutCard/CategoryNav + IconProvider
 │   ├── WidgetSettings/                # NEW — enable/disable/reorder + theme/background/icon controls
-│   ├── SearchBar/                     # existing, reused as-is (also invoked from CommandPalette)
+│   ├── (SearchBar/ removed 2026-07-12 — see spec.md's Clarifications entry)
 │   ├── DateTime/                      # existing, superseded on-dashboard by ClockWidget
 │   ├── ShortcutCard/                   # existing, extended to render an IconProvider-resolved icon
 │   ├── CategoryNav/                   # existing, reused
@@ -372,7 +372,7 @@ src/
 │   ├── widgetLayout.ts                 # NEW — enable/order persistence + validation/repair
 │   ├── widgetRegistry.ts               # NEW — register()/unregister()/getMetadata()/load()/lazyLoad()
 │   ├── layoutEngine.ts                 # NEW — breakpoint detection + WidgetLayout -> ResolvedLayout
-│   ├── searchEngine.ts                 # NEW — registerSource()/query(); powers SearchBar + CommandPalette + quick actions
+│   ├── searchEngine.ts                 # NEW — registerSource()/query(); powers CommandPalette + quick actions (previously also SearchBar, removed 2026-07-12)
 │   ├── eventBus.ts                     # NEW — typed emit()/on()/off() pub/sub, no React dependency
 │   ├── monitoring.ts                   # NEW — non-blocking fetch for server-status/Docker widgets
 │   ├── notes.ts                        # NEW — local notes persistence
@@ -391,7 +391,7 @@ src/
 
 tests/
 ├── unit/            # widgetLayout, widgetRegistry, layoutEngine, searchEngine, eventBus, StorageProvider/LocalStorageProvider, monitoring, notes, backgroundEngine, iconProvider, schema validation/repair
-├── integration/      # AppShell composition (5 state providers), Workspace (via WorkspaceState/layoutEngine), WidgetSettings, CommandPalette+SearchBar (shared searchEngine), per-widget rendering + fallback states
+├── integration/      # AppShell composition (5 state providers), Workspace (via WorkspaceState/layoutEngine), WidgetSettings, CommandPalette (searchEngine), per-widget rendering + fallback states
 └── e2e/               # three-column responsive layout, reduced-motion, keyboard nav across widgets and CommandPalette
 ```
 
@@ -469,10 +469,11 @@ Research is captured in [research.md](./research.md). Key decisions:
 - "Widget" is kept as the domain term (not renamed); "Plugin" and "Workspace"
   already carry the platform framing. See the Terminology section above and
   [research.md §10](./research.md#10-widget-terminology-decision).
-- `SearchBar` and `CommandPalette` share one `searchEngine` (source
-  registration + query/ranking) instead of duplicating matching logic; `search.ts`
-  and `shortcuts.ts` become registered sources rather than being called
-  directly by UI components.
+- `CommandPalette` is built on `searchEngine` (source registration +
+  query/ranking) instead of hand-rolled matching logic; `search.ts` and
+  `shortcuts.ts` become registered sources rather than being called directly
+  by UI components. (`searchEngine` was originally shared with `SearchBar`
+  too, which was removed 2026-07-12 — see spec.md's Clarifications entry.)
 - `layoutEngine` centralizes breakpoint detection and column/order resolution;
   `Workspace` consumes its `ResolvedLayout` output instead of computing reflow
   itself.
@@ -504,8 +505,9 @@ Design artifacts:
   Provider fallback order, favicon-discovery request/error behavior, and
   caching rules for shortcut icons.
 - [contracts/search-engine-contract.md](./contracts/search-engine-contract.md):
-  `SearchSource` registration shape, ranking/merging rules, and how `SearchBar`/
-  `CommandPalette`/quick actions consume the shared engine.
+  `SearchSource` registration shape, ranking/merging rules, and how
+  `CommandPalette`/quick actions consume the shared engine (originally also
+  `SearchBar`, removed 2026-07-12).
 - [contracts/storage-provider-contract.md](./contracts/storage-provider-contract.md):
   `StorageProvider` interface guarantees and `LocalStorageProvider` behavior.
 - [quickstart.md](./quickstart.md): End-to-end validation guide for widget

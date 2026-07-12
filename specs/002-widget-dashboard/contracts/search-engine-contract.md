@@ -1,10 +1,16 @@
-# Search Engine Contract: Shared SearchBar / CommandPalette Behavior
+# Search Engine Contract: CommandPalette Behavior
 
-Defines the behavior of `searchEngine`, the single service behind the two
-search-like entry points in this feature (`SearchBar`, `CommandPalette`) and
-any future quick-action surface. See
+Defines the behavior of `searchEngine`, the service behind `CommandPalette`
+and any future quick-action surface. See
 [data-model.md](../data-model.md#searchsource--searchresult) for the
 `SearchSource`/`SearchResult` shapes.
+
+> **2026-07-12 update**: `SearchBar`, originally the other entry point behind
+> `searchEngine`, was removed — see spec.md's Clarifications entry. No
+> browser API lets a page or extension focus/write the native address bar or
+> read the user's default search engine, so an in-page search box could only
+> mimic the browser's omnibox, never proxy it. Everything below describing
+> `SearchBar` documents prior, now-removed behavior.
 
 ## Registration
 

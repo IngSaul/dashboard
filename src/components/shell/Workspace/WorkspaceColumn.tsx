@@ -6,7 +6,7 @@ export interface WorkspaceColumnProps {
   widgets: Widget[]
   className: string
   label: string
-  /** Fixed chrome rendered before the widget list (e.g. `CenterColumn`'s `SearchBar`) — not a registered `Widget`, so it isn't part of `widgets`/`WorkspaceState`. */
+  /** Fixed chrome rendered before the widget list — not a registered `Widget`, so it isn't part of `widgets`/`WorkspaceState`. */
   children?: ReactNode
 }
 

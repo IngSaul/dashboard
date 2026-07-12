@@ -55,16 +55,20 @@ export function resolveLayout(
 
 /**
  * Which of `left`/`right` have widgets, as a `Workspace.css` track-layout
- * key (`center` always renders `CenterColumn`'s fixed `SearchBar` chrome,
- * so it's never actually empty and is never left out of the key).
- * `grid-template-columns` is a fixed explicit track list, so an empty
- * column (`.workspace-column:empty { display: none }`) would otherwise
- * still reserve its `minmax()` min width — and because grid tracks are
- * positional, a plain "how many columns" count can't tell `left+center`
- * apart from `center+right` (same count, different track widths needed).
- * This key lets `Workspace.css` size each real combination explicitly.
- * Reflow (tablet/phone) already empties `right`/`left` in `resolveLayout`
- * above, so this stays accurate across breakpoints without extra input.
+ * key. `center` is always included as the base key (the default config's
+ * `clock`+`shortcuts` widgets live there, and schema repair guarantees at
+ * least one of them stays enabled — see `config/schema.ts`), but unlike
+ * before, it's no longer guaranteed non-empty by fixed chrome: a user who
+ * moves both off the center column via `setWidgetColumn` will see a blank
+ * center track. `grid-template-columns` is a fixed explicit track list, so
+ * an empty column (`.workspace-column:empty { display: none }`) would
+ * otherwise still reserve its `minmax()` min width — and because grid
+ * tracks are positional, a plain "how many columns" count can't tell
+ * `left+center` apart from `center+right` (same count, different track
+ * widths needed). This key lets `Workspace.css` size each real combination
+ * explicitly. Reflow (tablet/phone) already empties `right`/`left` in
+ * `resolveLayout` above, so this stays accurate across breakpoints without
+ * extra input.
  */
 export type WorkspaceColumnsKey = 'center' | 'left-center' | 'center-right' | 'left-center-right'
 

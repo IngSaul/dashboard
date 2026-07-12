@@ -220,6 +220,13 @@
 
 ## 11. Unifying SearchBar and CommandPalette behind a Search Engine
 
+> **2026-07-12 update**: `SearchBar` was later removed (see spec.md's
+> Clarifications entry) — no browser API lets a page or extension focus/write
+> the native address bar or read the default search engine, so it could only
+> mimic the browser's omnibox, never proxy it. The decision record below is
+> kept as-is for historical context; `searchEngine` now powers `CommandPalette`
+> only.
+
 - **Decision**: Introduce `searchEngine` with `registerSource(source)` and
   `query(input)`. A `SearchSource` is `{ id, label, kind: "web" | "shortcut" |
   "command", match(query): SearchResult[] }`, evaluated synchronously (no

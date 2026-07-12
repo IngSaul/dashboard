@@ -6,8 +6,10 @@ import { expect, test } from '@playwright/test'
  * `responsive.spec.ts`/`accessibilityAndTheme.spec.ts` (which target a
  * main-chrome "Toggle theme"/"Manage shortcuts" button that doesn't exist
  * in this architecture — `ThemeToggle` only lives inside `SettingsDrawer`),
- * this spec targets controls that actually exist today: the `SearchBar`,
- * the settings-drawer toggle, and the default clock/shortcuts widgets.
+ * this spec targets controls that actually exist today: the settings-drawer
+ * toggle and the default clock/shortcuts widgets. `SearchBar` was removed
+ * (no WebExtensions API lets a page focus or write into the browser's own
+ * address bar), so it's no longer part of this layout.
  */
 
 test.beforeEach(async ({ page }) => {
@@ -20,7 +22,6 @@ test.describe('Desktop layout', () => {
   test('lays out the three workspace columns without horizontal overflow', async ({ page }) => {
     await page.goto('/')
 
-    await expect(page.getByRole('search')).toBeVisible()
     await expect(page.getByRole('button', { name: /alternar configuración/i })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
     await expect(page.locator('.workspace-column')).toHaveCount(3)
@@ -38,7 +39,6 @@ test.describe('Tablet layout', () => {
   test('keeps primary controls visible and reachable without overflow', async ({ page }) => {
     await page.goto('/')
 
-    await expect(page.getByRole('search')).toBeVisible()
     await expect(page.getByRole('button', { name: /alternar configuración/i })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
 
@@ -60,23 +60,6 @@ test.describe('Tablet layout', () => {
     if (!box || !viewport) return
 
     expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1)
-  })
-
-  test('does not overlap the search bar with the settings toggle', async ({ page }) => {
-    await page.goto('/')
-
-    const searchBox = await page.getByRole('search').boundingBox()
-    const toggleBox = await page.getByRole('button', { name: /alternar configuración/i }).boundingBox()
-    expect(searchBox).not.toBeNull()
-    expect(toggleBox).not.toBeNull()
-    if (!searchBox || !toggleBox) return
-
-    const overlaps =
-      searchBox.x < toggleBox.x + toggleBox.width &&
-      searchBox.x + searchBox.width > toggleBox.x &&
-      searchBox.y < toggleBox.y + toggleBox.height &&
-      searchBox.y + searchBox.height > toggleBox.y
-    expect(overlaps).toBe(false)
   })
 })
 

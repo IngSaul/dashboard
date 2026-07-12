@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Dashboard } from '../../src/features/dashboard/Dashboard'
@@ -18,9 +18,11 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
  * (T054). The category-filter/shortcut-link test (`ShortcutsWidget`/
- * `CategoryNav`, T068) and the search test (`SearchBar` now composed as
- * `CenterColumn`'s fixed leading chrome, T096) both pass. Two still fail,
- * for reasons already resolved elsewhere, not a regression: `ThemeToggle`
+ * `CategoryNav`, T068) passes. `SearchBar` was removed (no WebExtensions
+ * API lets a page focus or write into the browser's address bar, so an
+ * in-app search box could only fake it) — there is no in-app search control
+ * left to keyboard-navigate to. Two still fail, for reasons already
+ * resolved elsewhere, not a regression: `ThemeToggle`
  * lives only inside `SettingsDrawer`'s theme section (T078) with no
  * assigned main-chrome position; "Manage shortcuts" text/state doesn't
  * match this drawer's actual "Toggle settings" control (renaming it would
@@ -42,16 +44,6 @@ async function tabUntil(
   throw new Error('Element not reached via Tab within maxSteps')
 }
 
-function mockLocationAssign(): ReturnType<typeof vi.fn> {
-  const assignMock = vi.fn()
-  Object.defineProperty(window, 'location', {
-    value: { ...window.location, assign: assignMock },
-    writable: true,
-    configurable: true,
-  })
-  return assignMock
-}
-
 describe('Keyboard navigation (User Story 3)', () => {
   beforeEach(() => {
     clearDashboardStorage()
@@ -59,18 +51,6 @@ describe('Keyboard navigation (User Story 3)', () => {
 
   afterEach(() => {
     clearDashboardStorage()
-  })
-
-  it('submits a search using only the keyboard', async () => {
-    const assignMock = mockLocationAssign()
-    const user = userEvent.setup()
-    render(<Dashboard />)
-
-    const searchBox = screen.getByRole('textbox', { name: /buscar/i })
-    await tabUntil(user, (el) => el === searchBox)
-    await user.keyboard('react hooks{Enter}')
-
-    expect(assignMock).toHaveBeenCalledTimes(1)
   })
 
   it('reaches and activates the theme toggle using only the keyboard', async () => {

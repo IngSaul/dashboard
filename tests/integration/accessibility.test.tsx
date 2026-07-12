@@ -11,10 +11,13 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * these tests are expected to fail until that work lands.
  *
  * 002-widget-dashboard update: `Dashboard` now renders `<AppShell>`
- * (T054); its widgets (T062-T069) are registered and render correctly, and
- * `SearchBar` is now composed as `CenterColumn`'s fixed leading chrome
- * (T096). Two assertions still fail, for different, already-resolved-
- * elsewhere reasons, not a regression: (1) `ThemeToggle` lives only inside
+ * (T054); its widgets (T062-T069) are registered and render correctly.
+ * `SearchBar` was removed: no WebExtensions API lets a page focus or write
+ * into the browser's own address bar, so an in-app search box could only
+ * mimic — not proxy — the browser's real omnibox and default search engine
+ * (see the SearchBar-removal note in CenterColumn.tsx). Two assertions
+ * still fail, for different, already-resolved-elsewhere reasons, not a
+ * regression: (1) `ThemeToggle` lives only inside
  * `SettingsDrawer`'s theme section (T078) — no task assigns it a
  * persistent main-chrome position, and design-reference.md doesn't show
  * one either, so this is a deliberate placement, not a gap; (2) "manage
@@ -66,8 +69,6 @@ describe('Accessibility (User Story 3)', () => {
   it('exposes accessible names for primary interactive controls', () => {
     render(<Dashboard />)
 
-    expect(screen.getByRole('textbox', { name: /buscar/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /buscar/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /cambiar tema/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /gestionar accesos directos/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Gmail' })).toBeInTheDocument()
@@ -85,8 +86,6 @@ describe('Accessibility (User Story 3)', () => {
     render(<Dashboard />)
 
     const controls = [
-      screen.getByRole('textbox', { name: /buscar/i }),
-      screen.getByRole('button', { name: /buscar/i }),
       screen.getByRole('button', { name: /cambiar tema/i }),
       screen.getByRole('button', { name: /gestionar accesos directos/i }),
       screen.getByRole('link', { name: 'Gmail' }),
@@ -101,7 +100,6 @@ describe('Accessibility (User Story 3)', () => {
     mockMatchMedia(true)
     render(<Dashboard />)
 
-    expect(screen.getByRole('search')).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Gmail' })).toBeInTheDocument()
   })
 })
