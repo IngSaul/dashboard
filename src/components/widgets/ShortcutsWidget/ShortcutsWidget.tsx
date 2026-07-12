@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { CategoryNav } from '../../CategoryNav/CategoryNav'
 import { ShortcutCard } from '../../ShortcutCard/ShortcutCard'
+import { AddShortcutCard } from '../../AddShortcutCard/AddShortcutCard'
 import { StatusMessage } from '../../StatusMessage/StatusMessage'
 import { EditShortcutModal } from '../../EditShortcutModal/EditShortcutModal'
+import { AddShortcutModal } from '../../AddShortcutModal/AddShortcutModal'
 import { GlassConfirmDialog } from '../../glass/GlassConfirmDialog/GlassConfirmDialog'
 import { filterShortcutsByCategory, getNonEmptyCategories } from '../../../services/categories'
 import { useShortcutLibrary } from '../../../state/useShortcutLibrary'
@@ -11,18 +13,20 @@ import './ShortcutsWidget.css'
 
 /**
  * Shortcuts grid: category filtering (`CategoryNav`) + launch cards
- * (`ShortcutCard`). Unlike before, cards here aren't read-only — hovering a
- * card reveals its corner menu (Editar/Eliminar), wired to
- * `useShortcutLibrary`'s mutation helpers, `EditShortcutModal`, and a
- * `GlassConfirmDialog` for delete. `ShortcutSettings`/`SettingsDrawer`'s
- * add form and Subir/Bajar row still exist unchanged alongside this — this
- * widget just stops being launch-only.
+ * (`ShortcutCard`), with a trailing `AddShortcutCard` tile that's always
+ * the grid's last child. Hovering a launch card reveals its corner menu
+ * (Editar/Eliminar), wired to `useShortcutLibrary`'s mutation helpers,
+ * `EditShortcutModal`, and a `GlassConfirmDialog` for delete; the trailing
+ * tile opens `AddShortcutModal` to create a new one. New shortcuts are
+ * appended to the end of the array (`addShortcut`) and filtering never
+ * reorders, so the "+" tile stays last with no extra ordering logic.
  */
 export function ShortcutsWidget() {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null)
   const [pendingDeleteShortcut, setPendingDeleteShortcut] = useState<Shortcut | null>(null)
-  const { shortcuts, categories, editShortcut, deleteShortcut } = useShortcutLibrary()
+  const [isAddModalOpen, setAddModalOpen] = useState(false)
+  const { shortcuts, categories, createShortcut, editShortcut, deleteShortcut } = useShortcutLibrary()
 
   const visibleCategories = useMemo(
     () => getNonEmptyCategories(categories, shortcuts),
@@ -48,20 +52,18 @@ export function ShortcutsWidget() {
         activeCategoryId={activeCategoryId}
         onSelectCategory={setActiveCategoryId}
       />
-      {visibleShortcuts.length === 0 ? (
-        <StatusMessage message="Aún no hay accesos directos." />
-      ) : (
-        <div className="shortcuts-widget__grid">
-          {visibleShortcuts.map((shortcut) => (
-            <ShortcutCard
-              key={shortcut.id}
-              shortcut={shortcut}
-              onEdit={setEditingShortcut}
-              onRemove={setPendingDeleteShortcut}
-            />
-          ))}
-        </div>
-      )}
+      {visibleShortcuts.length === 0 ? <StatusMessage message="Aún no hay accesos directos." /> : null}
+      <div className="shortcuts-widget__grid">
+        {visibleShortcuts.map((shortcut) => (
+          <ShortcutCard
+            key={shortcut.id}
+            shortcut={shortcut}
+            onEdit={setEditingShortcut}
+            onRemove={setPendingDeleteShortcut}
+          />
+        ))}
+        <AddShortcutCard onClick={() => setAddModalOpen(true)} />
+      </div>
       <EditShortcutModal
         key={editingShortcut?.id ?? 'edit-shortcut-modal'}
         open={editingShortcut !== null}
@@ -69,6 +71,12 @@ export function ShortcutsWidget() {
         categories={categories}
         onClose={() => setEditingShortcut(null)}
         onSave={editShortcut}
+      />
+      <AddShortcutModal
+        open={isAddModalOpen}
+        categories={categories}
+        onClose={() => setAddModalOpen(false)}
+        onCreate={createShortcut}
       />
       <GlassConfirmDialog
         open={pendingDeleteShortcut !== null}

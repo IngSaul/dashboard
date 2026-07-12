@@ -1,0 +1,36 @@
+/*
+ * Dimmed-background/hover-brightness now live on the shared `.shortcut-card`
+ * base rule (`ShortcutCard.css`) so every card in the grid matches this
+ * one's look. This block only adds what `.shortcut-card` can't cover on
+ * its own: this card has no inner `<a>` to key a `:has()` hover selector
+ * off of (regular cards do), so it needs its own `:hover`/`:focus-visible`
+ * trigger for the same box-shadow/background/filter values. No
+ * `transform: scale()` on hover, to match — see `ShortcutCard.css` for why.
+ */
+.add-shortcut-card {
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font: inherit;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.add-shortcut-card:hover,
+.add-shortcut-card:focus-visible {
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  filter: brightness(1.1);
+  box-shadow: var(--shadow-soft);
+}
+
+.add-shortcut-card__icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  opacity: 0.7;
+  transition: opacity var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.add-shortcut-card:hover .add-shortcut-card__icon,
+.add-shortcut-card:focus-visible .add-shortcut-card__icon {
+  opacity: 1;
+}

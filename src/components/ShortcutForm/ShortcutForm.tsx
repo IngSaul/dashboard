@@ -19,6 +19,8 @@ export interface ShortcutFormProps {
   onCategoryChange: (value: string) => void
   onSubmit: () => void
   onCancel: () => void
+  /** Text for the submit button — `EditShortcutModal` keeps "Guardar", `AddShortcutModal` uses "Crear". */
+  submitLabel?: string
 }
 
 /**
@@ -38,6 +40,7 @@ export function ShortcutForm({
   onCategoryChange,
   onSubmit,
   onCancel,
+  submitLabel = 'Guardar',
 }: ShortcutFormProps) {
   const categoryOptions = [
     { value: NO_CATEGORY_VALUE, label: 'Ninguna' },
@@ -65,7 +68,7 @@ export function ShortcutForm({
         </p>
       ) : null}
       <div className="shortcut-form__actions">
-        <GlassButton type="submit">Guardar</GlassButton>
+        <GlassButton type="submit">{submitLabel}</GlassButton>
         <GlassButton type="button" variant="ghost" onClick={onCancel}>
           Cancelar
         </GlassButton>

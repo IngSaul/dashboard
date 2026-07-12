@@ -6,15 +6,28 @@
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  /* Dims only the card's surface fill, not its content — `opacity` on the
+     whole element would wash out the icon/label too (regressed legibility). */
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
   transition:
     box-shadow var(--transition-fast),
-    background-color var(--motion-duration-base) var(--motion-easing-standard);
+    background-color var(--motion-duration-base) var(--motion-easing-standard),
+    filter var(--motion-duration-fast) var(--motion-easing-standard);
 }
 
+/*
+ * No `transform: scale()` here on purpose — scaling an element with text
+ * inside forces the browser to rasterize it, and at a fractional factor
+ * like 1.03 the label loses its normal font hinting and renders visibly
+ * blurrier (confirmed by comparing high-DPI screenshots with/without the
+ * transform). box-shadow/background/filter don't have that problem, so
+ * they're enough on their own to communicate hover.
+ */
 .shortcut-card:has(.shortcut-card__link:hover),
 .shortcut-card:has(.shortcut-card__link:focus-visible) {
   box-shadow: var(--shadow-soft);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  filter: brightness(1.1);
 }
 
 .shortcut-card__link {
@@ -24,6 +37,18 @@
   text-align: center;
   gap: var(--space-2);
   text-decoration: none;
+  color: var(--color-text);
+}
+
+/*
+ * Overrides the global `a:hover` reset (`index.css`) which would otherwise
+ * tint the label `var(--color-accent)` on hover — hard to read against the
+ * card's translucent surface. The card already communicates its hover
+ * state via `.shortcut-card`'s brightness/shadow/background, so the label
+ * doesn't need to change color too.
+ */
+.shortcut-card__link:hover,
+.shortcut-card__link:focus-visible {
   color: var(--color-text);
 }
 

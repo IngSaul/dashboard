@@ -2,12 +2,19 @@ import { useEffect, useState } from 'react'
 import { loadDashboardConfig, saveDashboardConfig } from '../services/configStore'
 import { defaultEventBus } from '../services/eventBus'
 import { resolveIcon } from '../services/iconProvider'
-import { removeShortcut, updateShortcut, type ShortcutInput, type ShortcutMutationResult } from '../services/shortcuts'
+import {
+  addShortcut,
+  removeShortcut,
+  updateShortcut,
+  type ShortcutInput,
+  type ShortcutMutationResult,
+} from '../services/shortcuts'
 import type { Shortcut, ShortcutCategory } from '../types/dashboard'
 
 export interface ShortcutLibrary {
   shortcuts: Shortcut[]
   categories: ShortcutCategory[]
+  createShortcut: (input: ShortcutInput) => ShortcutMutationResult
   editShortcut: (id: string, input: ShortcutInput) => ShortcutMutationResult
   deleteShortcut: (id: string) => ShortcutMutationResult
 }
@@ -63,6 +70,18 @@ export function useShortcutLibrary(): ShortcutLibrary {
     })
   }
 
+  function createShortcut(input: ShortcutInput): ShortcutMutationResult {
+    const result = addShortcut(shortcuts, input)
+    if (result.ok) {
+      persist(result.shortcuts)
+      const saved = result.shortcuts.at(-1)
+      if (saved) {
+        resolveAndPersistIcon(saved.id, saved.url, saved.label, saved.icon)
+      }
+    }
+    return result
+  }
+
   function editShortcut(id: string, input: ShortcutInput): ShortcutMutationResult {
     const result = updateShortcut(shortcuts, id, input)
     if (result.ok) {
@@ -83,5 +102,5 @@ export function useShortcutLibrary(): ShortcutLibrary {
     return result
   }
 
-  return { shortcuts, categories, editShortcut, deleteShortcut }
+  return { shortcuts, categories, createShortcut, editShortcut, deleteShortcut }
 }
