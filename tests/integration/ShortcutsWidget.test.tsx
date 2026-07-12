@@ -71,9 +71,9 @@ describe('ShortcutsWidget (User Story 3)', () => {
     await waitFor(() => {
       expect(document.querySelector('.category-nav')).not.toBeNull()
     })
-    const categoryButtons = Array.from(document.querySelectorAll('.category-nav__item')).map(
-      (button) => button.textContent,
-    )
+    const categoryButtons = Array.from(
+      document.querySelectorAll('.category-nav__item:not(.add-category-card)'),
+    ).map((button) => button.textContent)
     expect(categoryButtons).toEqual(['Todas', 'General'])
   })
 

@@ -29,7 +29,7 @@ export interface EventMap {
   'widget-registry:changed': { type: WidgetType }
   /** A `CommandPalette`/quick-action result wants `SettingsDrawer` opened to a specific section. */
   'settings:open-section': { section: SettingsSectionId }
-  /** `ShortcutSettings` persisted a shortcut/category add/edit/remove/reorder — `ShortcutsWidget` re-reads `configStore` on this, since neither has an owning state slice to react through instead. */
+  /** `useShortcutLibrary` persisted a shortcut/category add/edit/remove — `ShortcutsWidget` re-reads `configStore` on this, since neither has an owning state slice to react through instead. */
   'shortcuts:changed': Record<string, never>
 }
 

@@ -4,7 +4,6 @@ import { useSettingsState } from '../../../state/SettingsProvider'
 import { GlassIconButton } from '../../glass/GlassIconButton/GlassIconButton'
 import { GlassPanel } from '../../glass/GlassPanel/GlassPanel'
 import { WidgetSettings } from '../../WidgetSettings/WidgetSettings'
-import { ShortcutSettings } from './ShortcutSettings'
 import { AccessibilitySection } from './sections/AccessibilitySection'
 import { AnimationsSection } from './sections/AnimationsSection'
 import { AppearanceSection } from './sections/AppearanceSection'
@@ -16,11 +15,13 @@ import './SettingsDrawer.css'
 /**
  * Slide-in surface hosting widget/theme settings. Closed by default and
  * never blocks/delays `Workspace` rendering while closed (per the UI
- * contract's AppShell rule). Composes `WidgetSettings`, the existing
- * `Settings` component (via `ShortcutSettings`), and the six independently
- * editable `ThemePreferences` group sections — every one of them persists
- * immediately through its own state slice/service, with no separate save
- * step (T081).
+ * contract's AppShell rule). Composes `WidgetSettings` and the six
+ * independently editable `ThemePreferences` group sections — every one of
+ * them persists immediately through its own state slice/service, with no
+ * separate save step (T081). Shortcut/category management (add/edit/
+ * delete) lives entirely on `ShortcutsWidget`'s grid now (`AddShortcutCard`/
+ * `AddCategoryCard` and their hover-menu edit/delete flows) — this drawer
+ * no longer duplicates any of it.
  *
  * Scrolls to `activeSection` (each section has a matching
  * `#settings-section-{id}` element) whenever it opens or changes — this is
@@ -103,7 +104,6 @@ export function SettingsDrawer() {
           </div>
           <div className="settings-drawer__body">
             <WidgetSettings />
-            <ShortcutSettings />
             <ThemeSection />
             <AppearanceSection />
             <WallpaperSection />

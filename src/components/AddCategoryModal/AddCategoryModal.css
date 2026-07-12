@@ -1,0 +1,17 @@
+.add-category-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: min(20rem, 80vw);
+}
+
+.add-category-modal__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: var(--font-size-caption);
+}
+
+.add-category-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+}

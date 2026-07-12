@@ -22,3 +22,12 @@
   border-color: var(--color-accent);
   color: var(--color-surface);
 }
+
+.category-nav__entry {
+  position: relative;
+  display: inline-flex;
+}
+
+.category-nav__entry .category-nav__item {
+  padding-right: calc(var(--space-3) + 1.25rem);
+}

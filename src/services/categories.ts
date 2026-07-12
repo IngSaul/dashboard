@@ -10,19 +10,36 @@ export type CategoryMutationResult =
   | { ok: true; categories: ShortcutCategory[] }
   | { ok: false; error: string }
 
-function validateCategoryInput(input: CategoryInput): string | null {
+/**
+ * Validates a category name: required, and unique case-insensitively among
+ * `categories` (trimmed comparison). `excludeId` lets `updateCategory` rename
+ * a category to its own unchanged name without tripping the duplicate check
+ * on itself.
+ */
+function validateCategoryInput(
+  categories: ShortcutCategory[],
+  input: CategoryInput,
+  excludeId?: string,
+): string | null {
   if (!isNonEmptyString(input.name)) {
     return 'El nombre es obligatorio.'
+  }
+  const normalized = input.name.trim().toLowerCase()
+  const isDuplicate = categories.some(
+    (category) => category.id !== excludeId && category.name.trim().toLowerCase() === normalized,
+  )
+  if (isDuplicate) {
+    return 'Ya existe una categoría con ese nombre.'
   }
   return null
 }
 
-/** Appends a new category. Rejects a blank name without touching the existing list. */
+/** Appends a new category. Rejects a blank or duplicate name without touching the existing list. */
 export function addCategory(
   categories: ShortcutCategory[],
   input: CategoryInput,
 ): CategoryMutationResult {
-  const error = validateCategoryInput(input)
+  const error = validateCategoryInput(categories, input)
   if (error) {
     return { ok: false, error }
   }
@@ -38,7 +55,7 @@ export function addCategory(
   return { ok: true, categories: [...categories, category] }
 }
 
-/** Renames/updates the category matching `id`. Rejects an unknown id or blank name. */
+/** Renames/updates the category matching `id`. Rejects an unknown id, a blank name, or a name duplicating another category. */
 export function updateCategory(
   categories: ShortcutCategory[],
   id: string,
@@ -48,7 +65,7 @@ export function updateCategory(
   if (!existing) {
     return { ok: false, error: 'Categoría no encontrada.' }
   }
-  const error = validateCategoryInput(input)
+  const error = validateCategoryInput(categories, input, id)
   if (error) {
     return { ok: false, error }
   }
@@ -84,6 +101,25 @@ export function filterShortcutsByCategory(
     return shortcuts
   }
   return shortcuts.filter((shortcut) => shortcut.categoryId === categoryId)
+}
+
+/**
+ * Clears `categoryId` on every shortcut assigned to `categoryId`. Called
+ * alongside `removeCategory` so deleting a category never leaves a
+ * shortcut pointing at one that no longer exists — the same "uncategorized"
+ * outcome `repairShortcuts` (`config/schema.ts`) already enforces for a
+ * `categoryId` that fails to resolve on load, just applied eagerly instead
+ * of waiting for the next reload.
+ */
+export function unassignShortcutsFromCategory(shortcuts: Shortcut[], categoryId: string): Shortcut[] {
+  return shortcuts.map((shortcut) => {
+    if (shortcut.categoryId !== categoryId) {
+      return shortcut
+    }
+    const next = { ...shortcut }
+    delete next.categoryId
+    return next
+  })
 }
 
 /**

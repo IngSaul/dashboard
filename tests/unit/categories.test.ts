@@ -4,6 +4,7 @@ import {
   filterShortcutsByCategory,
   getNonEmptyCategories,
   removeCategory,
+  unassignShortcutsFromCategory,
   updateCategory,
 } from '../../src/services/categories'
 import {
@@ -47,6 +48,14 @@ describe('addCategory', () => {
 
     expect(result.ok).toBe(false)
   })
+
+  it('rejects a name that duplicates an existing category, ignoring case and whitespace', () => {
+    const result = addCategory(categories(), { name: `  ${workCategoryFixture.name.toUpperCase()}  ` })
+
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.error).toMatch(/ya existe/i)
+  })
 })
 
 describe('updateCategory', () => {
@@ -67,6 +76,24 @@ describe('updateCategory', () => {
 
     expect(result.ok).toBe(false)
   })
+
+  it('rejects renaming to another category\'s name, ignoring case', () => {
+    const list = categories()
+
+    const result = updateCategory(list, personalCategoryFixture.id, {
+      name: workCategoryFixture.name.toLowerCase(),
+    })
+
+    expect(result.ok).toBe(false)
+  })
+
+  it('allows re-saving a category with its own unchanged name', () => {
+    const list = categories()
+
+    const result = updateCategory(list, workCategoryFixture.id, { name: workCategoryFixture.name })
+
+    expect(result.ok).toBe(true)
+  })
 })
 
 describe('removeCategory', () => {
@@ -86,6 +113,27 @@ describe('removeCategory', () => {
     const result = removeCategory(categories(), 'does-not-exist')
 
     expect(result.ok).toBe(false)
+  })
+})
+
+describe('unassignShortcutsFromCategory', () => {
+  it('clears categoryId on shortcuts assigned to the removed category', () => {
+    const result = unassignShortcutsFromCategory(shortcuts(), workCategoryFixture.id)
+
+    const formerlyWork = result.filter((s) =>
+      dashboardShortcutFixtures.some(
+        (fixture) => fixture.id === s.id && fixture.categoryId === workCategoryFixture.id,
+      ),
+    )
+    expect(formerlyWork.length).toBeGreaterThan(0)
+    expect(formerlyWork.every((s) => s.categoryId === undefined)).toBe(true)
+  })
+
+  it('leaves shortcuts in other categories untouched', () => {
+    const result = unassignShortcutsFromCategory(shortcuts(), workCategoryFixture.id)
+
+    const personalShortcut = result.find((s) => s.categoryId === personalCategoryFixture.id)
+    expect(personalShortcut).toBeDefined()
   })
 })
 

@@ -1,0 +1,36 @@
+/*
+ * Same translucent-surface + hover-brightness glass language
+ * `AddShortcutCard`/`ShortcutCard` use, layered on top of the opaque
+ * `.category-nav__item` pill so the tile still matches its siblings'
+ * height/border/radius/font while reading as "glass" and low-opacity when
+ * idle, per the add-shortcut tile it mirrors.
+ */
+.add-category-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  min-width: 2.25rem;
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.add-category-card:hover,
+.add-category-card:focus-visible {
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  filter: brightness(1.1);
+  box-shadow: var(--shadow-soft);
+}
+
+.add-category-card__icon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.7;
+  transition: opacity var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+.add-category-card:hover .add-category-card__icon,
+.add-category-card:focus-visible .add-category-card__icon {
+  opacity: 1;
+}

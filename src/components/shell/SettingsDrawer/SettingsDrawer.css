@@ -56,10 +56,10 @@
 }
 
 /*
- * Shared by every settings-drawer section after `WidgetSettings`
- * (ShortcutSettings, and the six ThemePreferences group sections) — a
- * top divider between each, matching `WidgetSettings`'s own internal
- * `.widget-settings__monitoring` divider style.
+ * Shared by every settings-drawer section after `WidgetSettings` (the six
+ * ThemePreferences group sections) — a top divider between each, matching
+ * `WidgetSettings`'s own internal `.widget-settings__monitoring` divider
+ * style.
  */
 .settings-section {
   display: flex;

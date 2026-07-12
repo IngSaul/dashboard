@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Dashboard } from '../../src/features/dashboard/Dashboard'
-import { clearDashboardStorage, seedDashboardStorage } from '../fixtures/dashboardConfig'
+import { clearDashboardStorage, seedDashboardStorage, workCategoryFixture } from '../fixtures/dashboardConfig'
 
 /**
  * Covers the trailing "+" tile (`AddShortcutCard`) that restores shortcut
@@ -87,6 +87,24 @@ describe('AddShortcutCard (create shortcuts from the grid)', () => {
     expect(screen.queryByRole('link', { name: 'Temp' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('link')).toHaveLength(linksBefore)
     expect(lastGridItemIsAddCard()).toBe(true)
+  })
+
+  it('assigns a newly created shortcut to a category via the form dropdown', async () => {
+    const user = userEvent.setup()
+    render(<Dashboard />)
+    await screen.findByRole('link', { name: 'Mail' })
+
+    await user.click(screen.getByRole('button', { name: 'Añadir acceso directo' }))
+    const dialog = screen.getByRole('dialog', { name: 'Añadir acceso directo' })
+    await user.type(within(dialog).getByRole('textbox', { name: /nombre/i }), 'Docs')
+    await user.type(within(dialog).getByRole('textbox', { name: /url/i }), 'https://docs.example.com')
+    await user.click(within(dialog).getByRole('button', { name: /categoría/i }))
+    await user.click(within(dialog).getByRole('option', { name: workCategoryFixture.name }))
+    await user.click(within(dialog).getByRole('button', { name: /crear/i }))
+
+    await user.click(screen.getByRole('button', { name: workCategoryFixture.name }))
+    expect(screen.getByRole('link', { name: 'Docs' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'News' })).not.toBeInTheDocument()
   })
 
   it('keeps "+" as the last item through a create, an edit, and a delete', async () => {

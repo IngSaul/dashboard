@@ -123,8 +123,8 @@ export function reorderShortcuts(
 /**
  * Registers the "jump to shortcut" `SearchSource` (T094): matches
  * shortcuts whose label contains the query (case-insensitive), reading
- * `configStore` fresh on every call so a shortcut added/edited/removed via
- * `ShortcutSettings` is reflected on the very next keystroke.
+ * `configStore` fresh on every call so a shortcut added/edited/removed from
+ * the grid is reflected on the very next keystroke.
  */
 export function registerShortcutSearchSource(): void {
   defaultSearchEngine.registerSource({
