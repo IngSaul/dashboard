@@ -72,11 +72,20 @@ export interface Shortcut {
   id: string
   label: string
   url: string
-  categoryId?: string
+  /** Every shortcut always belongs to a real category — never left unset; falls back to "General" (see `resolveGeneralCategory`). Only ever changes via an explicit edit — never as a side effect of reordering. */
+  categoryId: string
   description?: string
   /** Resolved via `iconProvider` (002-widget-dashboard) — only ever set by an explicit create/(re)save, never during dashboard render. */
   icon?: IconSource
-  order: number
+  /**
+   * The single source of truth for shortcut order across the whole
+   * dashboard — one flat, globally-ordered sequence. A category is only a
+   * filter over this sequence (via `categoryId`); there is no separate
+   * per-category order stored anywhere. "Todas" renders every shortcut
+   * sorted by `globalOrder`; a filtered category view renders the same
+   * sorted sequence with non-matching shortcuts removed.
+   */
+  globalOrder: number
   createdAt: string
   updatedAt: string
 }

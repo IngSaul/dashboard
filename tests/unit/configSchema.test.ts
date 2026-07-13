@@ -43,11 +43,13 @@ describe('repairDashboardConfig', () => {
     expect(result.shortcuts).toEqual([])
   })
 
-  it('clears an orphaned categoryId while keeping the shortcut', () => {
+  it('reassigns an orphaned categoryId to General while keeping the shortcut', () => {
     const result = repairDashboardConfig(JSON.parse(orphanCategoryReferenceConfigFixture))
 
     expect(result.shortcuts).toHaveLength(1)
-    expect(result.shortcuts[0]?.categoryId).toBeUndefined()
+    const general = result.categories.find((category) => category.name === 'General')
+    expect(general).toBeDefined()
+    expect(result.shortcuts[0]?.categoryId).toBe(general?.id)
   })
 
   it('keeps valid records and drops invalid ones from a mixed list', () => {
@@ -79,7 +81,10 @@ describe('repairDashboardConfig', () => {
 
     const result = repairDashboardConfig(duplicated)
 
-    expect(result.categories).toHaveLength(1)
+    // 1 deduplicated "Work" + an auto-created "General" (`resolveGeneralCategory`
+    // guarantees one exists, and "Work" alone doesn't satisfy that).
+    expect(result.categories).toHaveLength(2)
+    expect(result.categories.filter((category) => category.name === 'Work')).toHaveLength(1)
     expect(result.shortcuts).toHaveLength(1)
   })
 })

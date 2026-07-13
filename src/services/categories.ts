@@ -92,6 +92,38 @@ export function removeCategory(
   return { ok: true, categories: categories.filter((category) => category.id !== id) }
 }
 
+const GENERAL_CATEGORY_NAME = 'General'
+
+/**
+ * Finds the category named "General" (case-insensitive, trimmed — matching
+ * `validateCategoryInput`'s duplicate-name comparison), creating one if none
+ * exists (e.g. it was renamed or just deleted). Every shortcut must always
+ * resolve to a real category — this is the single, shared fallback used for
+ * "no category selected" on create/edit, for reassigning a deleted
+ * category's shortcuts, and for repairing an orphaned `categoryId`
+ * reference on load (`config/schema.ts`).
+ */
+export function resolveGeneralCategory(
+  categories: ShortcutCategory[],
+): { categories: ShortcutCategory[]; category: ShortcutCategory } {
+  const existing = categories.find(
+    (category) => category.name.trim().toLowerCase() === GENERAL_CATEGORY_NAME.toLowerCase(),
+  )
+  if (existing) {
+    return { categories, category: existing }
+  }
+  const now = new Date().toISOString()
+  const general: ShortcutCategory = {
+    id: crypto.randomUUID(),
+    name: GENERAL_CATEGORY_NAME,
+    order: categories.length,
+    isVisible: true,
+    createdAt: now,
+    updatedAt: now,
+  }
+  return { categories: [...categories, general], category: general }
+}
+
 /** Returns shortcuts assigned to `categoryId`, or every shortcut when `categoryId` is `null`. */
 export function filterShortcutsByCategory(
   shortcuts: Shortcut[],
@@ -104,22 +136,38 @@ export function filterShortcutsByCategory(
 }
 
 /**
- * Clears `categoryId` on every shortcut assigned to `categoryId`. Called
- * alongside `removeCategory` so deleting a category never leaves a
- * shortcut pointing at one that no longer exists — the same "uncategorized"
- * outcome `repairShortcuts` (`config/schema.ts`) already enforces for a
- * `categoryId` that fails to resolve on load, just applied eagerly instead
- * of waiting for the next reload.
+ * Reassigns every shortcut in `fromCategoryId` to `toCategoryId`.
+ * `globalOrder` is untouched — category and order are fully independent, so
+ * reassigning category never needs to renumber anything. Called alongside
+ * `removeCategory` so deleting a category never leaves a shortcut pointing
+ * at one that no longer exists — every shortcut always belongs to a real
+ * category, falling back to "General" (`resolveGeneralCategory`).
  */
-export function unassignShortcutsFromCategory(shortcuts: Shortcut[], categoryId: string): Shortcut[] {
-  return shortcuts.map((shortcut) => {
-    if (shortcut.categoryId !== categoryId) {
-      return shortcut
-    }
-    const next = { ...shortcut }
-    delete next.categoryId
-    return next
-  })
+export function reassignShortcutsToCategory(
+  shortcuts: Shortcut[],
+  fromCategoryId: string,
+  toCategoryId: string,
+): Shortcut[] {
+  return shortcuts.map((shortcut) =>
+    shortcut.categoryId === fromCategoryId ? { ...shortcut, categoryId: toCategoryId } : shortcut,
+  )
+}
+
+/**
+ * Render order for the shortcuts grid — the single source of truth so
+ * `ShortcutGrid` only ever needs to render what it's given. `categoryId` is
+ * purely a filter: this always starts from the one global order
+ * (`globalOrder`, ascending) and, for a specific category, removes
+ * shortcuts that don't match — it never reads or reconstructs order from
+ * categories. "Todas" (`activeCategoryId === null`) is that same global
+ * order with nothing filtered out.
+ */
+export function getOrderedShortcuts(
+  shortcuts: Shortcut[],
+  activeCategoryId: string | null,
+): Shortcut[] {
+  const ordered = [...shortcuts].sort((a, b) => a.globalOrder - b.globalOrder)
+  return filterShortcutsByCategory(ordered, activeCategoryId)
 }
 
 /**
@@ -131,11 +179,7 @@ export function getNonEmptyCategories(
   categories: ShortcutCategory[],
   shortcuts: Shortcut[],
 ): ShortcutCategory[] {
-  const categoryIdsWithShortcuts = new Set(
-    shortcuts
-      .map((shortcut) => shortcut.categoryId)
-      .filter((categoryId): categoryId is string => categoryId !== undefined),
-  )
+  const categoryIdsWithShortcuts = new Set(shortcuts.map((shortcut) => shortcut.categoryId))
   return categories.filter(
     (category) => category.isVisible && categoryIdsWithShortcuts.has(category.id),
   )

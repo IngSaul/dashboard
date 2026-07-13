@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { Dashboard } from '../../src/features/dashboard/Dashboard'
 import { createDefaultDashboardConfig } from '../../src/config/defaults'
 import { saveDashboardConfig } from '../../src/services/configStore'
@@ -31,6 +31,13 @@ import { clearDashboardStorage } from '../fixtures/dashboardConfig'
  * the default widgets: clock + shortcuts"), so a test wanting to see the
  * weather widget's status must enable it explicitly, via `enableWeather()`
  * below (same helper shape as `WidgetGrid.test.tsx`'s).
+ *
+ * `findByRole('status')` is scoped to the weather widget's own
+ * `[data-widget-type="weather"]` container rather than queried bare: the
+ * shortcuts widget's drag & drop (`ShortcutGrid`) also renders a hidden
+ * `role="status"` live region for screen-reader drag announcements
+ * (`@dnd-kit/accessibility`'s `LiveRegion`), so an unscoped query is
+ * ambiguous whenever both widgets are enabled together, as here.
  */
 
 /** Enables the `weather` widget on top of the defaults (clock + shortcuts). */
@@ -59,7 +66,12 @@ describe('Dashboard launch (User Story 1)', () => {
     render(<Dashboard />)
 
     expect(await screen.findByRole('group', { name: /fecha y hora actual/i })).toBeInTheDocument()
-    expect(await screen.findByRole('status')).toBeInTheDocument()
+    const weatherWidget = await waitFor(() => {
+      const element = document.querySelector('[data-widget-type="weather"]')
+      if (!element) throw new Error('weather widget not rendered yet')
+      return element as HTMLElement
+    })
+    expect(await within(weatherWidget).findByRole('status')).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: 'Gmail' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'GitHub' })).toBeInTheDocument()
   })
@@ -68,7 +80,12 @@ describe('Dashboard launch (User Story 1)', () => {
     enableWeather()
     render(<Dashboard />)
 
-    const status = await screen.findByRole('status')
+    const weatherWidget = await waitFor(() => {
+      const element = document.querySelector('[data-widget-type="weather"]')
+      if (!element) throw new Error('weather widget not rendered yet')
+      return element as HTMLElement
+    })
+    const status = await within(weatherWidget).findByRole('status')
     expect(status).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Gmail' })).toBeInTheDocument()
   })

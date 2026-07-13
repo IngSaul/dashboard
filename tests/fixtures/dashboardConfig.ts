@@ -41,13 +41,29 @@ export const emptyCategoryFixture: ShortcutCategory = {
   updatedAt: FIXED_TIMESTAMP,
 }
 
+/** The well-known fallback category every shortcut resolves to when none is picked — see `resolveGeneralCategory`. */
+export const generalCategoryFixture: ShortcutCategory = {
+  id: 'category-general',
+  name: 'General',
+  order: 3,
+  isVisible: true,
+  createdAt: FIXED_TIMESTAMP,
+  updatedAt: FIXED_TIMESTAMP,
+}
+
+/**
+ * `globalOrder` is the single source of truth for render order across the
+ * whole dashboard (see `Shortcut.globalOrder`) — categories are pure
+ * filters over this one sequence, so these values (0..3, in fixture array
+ * order) are what both "Todas" and any single-category view derive from.
+ */
 export const dashboardShortcutFixtures: Shortcut[] = [
   {
     id: 'shortcut-mail',
     label: 'Mail',
     url: 'https://mail.example.com',
     categoryId: workCategoryFixture.id,
-    order: 0,
+    globalOrder: 0,
     createdAt: FIXED_TIMESTAMP,
     updatedAt: FIXED_TIMESTAMP,
   },
@@ -56,7 +72,7 @@ export const dashboardShortcutFixtures: Shortcut[] = [
     label: 'Calendar',
     url: 'https://calendar.example.com',
     categoryId: workCategoryFixture.id,
-    order: 1,
+    globalOrder: 1,
     createdAt: FIXED_TIMESTAMP,
     updatedAt: FIXED_TIMESTAMP,
   },
@@ -65,15 +81,16 @@ export const dashboardShortcutFixtures: Shortcut[] = [
     label: 'News',
     url: 'https://news.example.com',
     categoryId: personalCategoryFixture.id,
-    order: 0,
+    globalOrder: 2,
     createdAt: FIXED_TIMESTAMP,
     updatedAt: FIXED_TIMESTAMP,
   },
   {
-    id: 'shortcut-uncategorized',
+    id: 'shortcut-notes',
     label: 'Notes',
     url: 'https://notes.example.com',
-    order: 0,
+    categoryId: generalCategoryFixture.id,
+    globalOrder: 3,
     createdAt: FIXED_TIMESTAMP,
     updatedAt: FIXED_TIMESTAMP,
   },
@@ -94,7 +111,7 @@ export const defaultDashboardConfigFixture: DashboardConfiguration = {
     enabled: true,
   },
   shortcuts: dashboardShortcutFixtures,
-  categories: [workCategoryFixture, personalCategoryFixture, emptyCategoryFixture],
+  categories: [workCategoryFixture, personalCategoryFixture, emptyCategoryFixture, generalCategoryFixture],
   updatedAt: FIXED_TIMESTAMP,
 }
 
@@ -122,7 +139,7 @@ export const missingFieldsConfigFixture = JSON.stringify({
 export const invalidShortcutConfigFixture = JSON.stringify({
   ...defaultDashboardConfigFixture,
   shortcuts: [
-    { id: 'shortcut-broken', order: 0, createdAt: FIXED_TIMESTAMP, updatedAt: FIXED_TIMESTAMP },
+    { id: 'shortcut-broken', globalOrder: 0, createdAt: FIXED_TIMESTAMP, updatedAt: FIXED_TIMESTAMP },
   ],
 })
 
@@ -135,7 +152,7 @@ export const orphanCategoryReferenceConfigFixture = JSON.stringify({
       label: 'Orphan',
       url: 'https://orphan.example.com',
       categoryId: 'category-does-not-exist',
-      order: 0,
+      globalOrder: 0,
       createdAt: FIXED_TIMESTAMP,
       updatedAt: FIXED_TIMESTAMP,
     },
@@ -150,7 +167,7 @@ export const partiallyInvalidConfigFixture = JSON.stringify({
   ...defaultDashboardConfigFixture,
   shortcuts: [
     dashboardShortcutFixtures[0],
-    { id: 'shortcut-broken', order: 1, createdAt: FIXED_TIMESTAMP, updatedAt: FIXED_TIMESTAMP },
+    { id: 'shortcut-broken', globalOrder: 1, createdAt: FIXED_TIMESTAMP, updatedAt: FIXED_TIMESTAMP },
   ],
 })
 

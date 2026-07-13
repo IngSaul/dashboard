@@ -3,13 +3,16 @@ import {
   addCategory,
   filterShortcutsByCategory,
   getNonEmptyCategories,
+  getOrderedShortcuts,
+  reassignShortcutsToCategory,
   removeCategory,
-  unassignShortcutsFromCategory,
+  resolveGeneralCategory,
   updateCategory,
 } from '../../src/services/categories'
 import {
   dashboardShortcutFixtures,
   emptyCategoryFixture,
+  generalCategoryFixture,
   personalCategoryFixture,
   workCategoryFixture,
 } from '../fixtures/dashboardConfig'
@@ -22,7 +25,7 @@ import {
  */
 
 function categories() {
-  return [workCategoryFixture, personalCategoryFixture, emptyCategoryFixture].map((c) => ({
+  return [workCategoryFixture, personalCategoryFixture, emptyCategoryFixture, generalCategoryFixture].map((c) => ({
     ...c,
   }))
 }
@@ -116,9 +119,9 @@ describe('removeCategory', () => {
   })
 })
 
-describe('unassignShortcutsFromCategory', () => {
-  it('clears categoryId on shortcuts assigned to the removed category', () => {
-    const result = unassignShortcutsFromCategory(shortcuts(), workCategoryFixture.id)
+describe('reassignShortcutsToCategory', () => {
+  it('reassigns categoryId on shortcuts assigned to the source category', () => {
+    const result = reassignShortcutsToCategory(shortcuts(), workCategoryFixture.id, generalCategoryFixture.id)
 
     const formerlyWork = result.filter((s) =>
       dashboardShortcutFixtures.some(
@@ -126,14 +129,54 @@ describe('unassignShortcutsFromCategory', () => {
       ),
     )
     expect(formerlyWork.length).toBeGreaterThan(0)
-    expect(formerlyWork.every((s) => s.categoryId === undefined)).toBe(true)
+    expect(formerlyWork.every((s) => s.categoryId === generalCategoryFixture.id)).toBe(true)
   })
 
   it('leaves shortcuts in other categories untouched', () => {
-    const result = unassignShortcutsFromCategory(shortcuts(), workCategoryFixture.id)
+    const result = reassignShortcutsToCategory(shortcuts(), workCategoryFixture.id, generalCategoryFixture.id)
 
     const personalShortcut = result.find((s) => s.categoryId === personalCategoryFixture.id)
     expect(personalShortcut).toBeDefined()
+  })
+
+  it('never touches globalOrder — category and order are fully independent', () => {
+    const before = shortcuts()
+
+    const result = reassignShortcutsToCategory(before, workCategoryFixture.id, generalCategoryFixture.id)
+
+    result.forEach((shortcut) => {
+      const original = before.find((s) => s.id === shortcut.id)
+      expect(shortcut.globalOrder).toBe(original?.globalOrder)
+    })
+  })
+})
+
+describe('resolveGeneralCategory', () => {
+  it('returns the existing category named "General" unchanged', () => {
+    const cats = categories()
+
+    const result = resolveGeneralCategory(cats)
+
+    expect(result.category.id).toBe(generalCategoryFixture.id)
+    expect(result.categories).toBe(cats)
+  })
+
+  it('matches "General" case-insensitively and trimmed', () => {
+    const cats = [{ ...generalCategoryFixture, name: '  general  ' }]
+
+    const result = resolveGeneralCategory(cats)
+
+    expect(result.category.id).toBe(generalCategoryFixture.id)
+  })
+
+  it('creates a new "General" category when none exists', () => {
+    const cats = [workCategoryFixture, personalCategoryFixture]
+
+    const result = resolveGeneralCategory(cats)
+
+    expect(result.category.name).toBe('General')
+    expect(result.categories).toHaveLength(cats.length + 1)
+    expect(result.categories).toContainEqual(result.category)
   })
 })
 
@@ -169,5 +212,64 @@ describe('getNonEmptyCategories', () => {
     )
 
     expect(result.some((c) => c.id === workCategoryFixture.id)).toBe(false)
+  })
+})
+
+describe('getOrderedShortcuts', () => {
+  it('sorts a single category by globalOrder regardless of input array order', () => {
+    const list = shortcuts().reverse()
+
+    const result = getOrderedShortcuts(list, workCategoryFixture.id)
+
+    expect(result.map((s) => s.id)).toEqual(['shortcut-mail', 'shortcut-calendar'])
+  })
+
+  it('"Todas" is the single globalOrder-sorted sequence, with nothing filtered out', () => {
+    const result = getOrderedShortcuts(shortcuts().reverse(), null)
+
+    expect(result.map((s) => s.id)).toEqual([
+      'shortcut-mail',
+      'shortcut-calendar',
+      'shortcut-news',
+      'shortcut-notes',
+    ])
+  })
+
+  it('a category is purely a filter: reshuffling globalOrder changes both "Todas" and the filtered view together, with no order of its own', () => {
+    // Mirrors the worked example in the feature spec: reorder the global
+    // sequence so the two "Work" shortcuts are no longer adjacent, and
+    // confirm the category view is still exactly their relative order
+    // within that one sequence — not a stored, independent order.
+    const byId = (id: string) => {
+      const found = shortcuts().find((s) => s.id === id)
+      if (!found) throw new Error(`fixture missing ${id}`)
+      return found
+    }
+    const reshuffled = [
+      { ...byId('shortcut-notes'), globalOrder: 0 },
+      { ...byId('shortcut-calendar'), globalOrder: 1 },
+      { ...byId('shortcut-news'), globalOrder: 2 },
+      { ...byId('shortcut-mail'), globalOrder: 3 },
+    ]
+
+    expect(getOrderedShortcuts(reshuffled, null).map((s) => s.id)).toEqual([
+      'shortcut-notes',
+      'shortcut-calendar',
+      'shortcut-news',
+      'shortcut-mail',
+    ])
+    expect(getOrderedShortcuts(reshuffled, workCategoryFixture.id).map((s) => s.id)).toEqual([
+      'shortcut-calendar',
+      'shortcut-mail',
+    ])
+  })
+
+  it('does not mutate the input shortcuts array', () => {
+    const list = shortcuts()
+    const originalListOrder = list.map((s) => s.id)
+
+    getOrderedShortcuts(list, null)
+
+    expect(list.map((s) => s.id)).toEqual(originalListOrder)
   })
 })

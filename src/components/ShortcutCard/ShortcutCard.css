@@ -4,6 +4,9 @@
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   /* Dims only the card's surface fill, not its content — `opacity` on the
@@ -13,6 +16,27 @@
     box-shadow var(--transition-fast),
     background-color var(--motion-duration-base) var(--motion-easing-standard),
     filter var(--motion-duration-fast) var(--motion-easing-standard);
+}
+
+/*
+ * `ShortcutGrid`'s sortable drag states — the floating `DragOverlay` clone
+ * (`--dragging`) does get a `transform: scale()` on purpose, unlike the
+ * static hover state above: it's rendered in its own compositor layer via
+ * dnd-kit's portal, so there's no text-blur cost, and every reference
+ * interaction the feature is modeled on (Notion/Trello/iOS/Arc) scales the
+ * lifted card exactly like this. `--placeholder` is the original grid slot
+ * left behind while its card is being dragged elsewhere.
+ */
+.shortcut-card--dragging {
+  transform: scale(1.05);
+  opacity: 0.85;
+  box-shadow: var(--shadow-soft);
+  cursor: grabbing;
+  z-index: 20;
+}
+
+.shortcut-card--placeholder {
+  opacity: 0.35;
 }
 
 /*

@@ -1,3 +1,4 @@
+import type { CSSProperties, HTMLAttributes, Ref } from 'react'
 import { ShortcutIcon } from '../ShortcutIcon/ShortcutIcon'
 import { ShortcutActionsMenu } from '../ShortcutActionsMenu/ShortcutActionsMenu'
 import type { Shortcut } from '../../types/dashboard'
@@ -13,6 +14,30 @@ export interface ShortcutCardProps {
   onRemove?: (shortcut: Shortcut) => void
   onMoveUp?: (shortcut: Shortcut) => void
   onMoveDown?: (shortcut: Shortcut) => void
+  /**
+   * Drag wiring for `ShortcutGrid`'s sortable list — deliberately untyped
+   * against any specific DnD library so this component stays presentational;
+   * `ShortcutGrid` owns the `@dnd-kit` integration and just spreads its
+   * `useSortable()` output through here. Split across the root `<div>` and
+   * the inner `<a>` on purpose: the root gets the ref (for rect measurement
+   * so the transform-based lift/reflow animates correctly) and the
+   * pointer/touch listeners (so grabbing anywhere on the card starts a
+   * drag), while the *link* keeps being the sole focusable/tabbable
+   * element — putting a second `tabIndex` on the root would double the
+   * card's tab stops. Keyboard drag activation therefore lives on the link
+   * too (`linkDragProps`), restricted by `ShortcutGrid` to the `Space` key
+   * only, so `Enter` still opens the shortcut instead of being hijacked for
+   * "pick up".
+   */
+  cardRef?: Ref<HTMLDivElement>
+  cardStyle?: CSSProperties
+  cardDragProps?: HTMLAttributes<HTMLDivElement>
+  linkRef?: Ref<HTMLAnchorElement>
+  linkDragProps?: HTMLAttributes<HTMLAnchorElement>
+  /** This card is the floating `DragOverlay` clone being carried under the pointer. */
+  isDragOverlay?: boolean
+  /** This card is the original grid slot while it's the active drag source (the overlay clone represents it visually instead). */
+  isDragPlaceholder?: boolean
 }
 
 /**
@@ -31,12 +56,33 @@ export function ShortcutCard({
   onRemove,
   onMoveUp,
   onMoveDown,
+  cardRef,
+  cardStyle,
+  cardDragProps,
+  linkRef,
+  linkDragProps,
+  isDragOverlay = false,
+  isDragPlaceholder = false,
 }: ShortcutCardProps) {
   const showCornerMenu = !editable && (onEdit !== undefined || onRemove !== undefined)
+  const cardClassName = [
+    'shortcut-card',
+    isDragOverlay ? 'shortcut-card--dragging' : null,
+    isDragPlaceholder ? 'shortcut-card--placeholder' : null,
+  ]
+    .filter((name): name is string => name !== null)
+    .join(' ')
 
   return (
-    <div className="shortcut-card">
-      <a href={shortcut.url} className="shortcut-card__link" target="_blank" rel="noopener noreferrer">
+    <div ref={cardRef} style={cardStyle} className={cardClassName} {...cardDragProps}>
+      <a
+        ref={linkRef}
+        href={shortcut.url}
+        className="shortcut-card__link"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...linkDragProps}
+      >
         <ShortcutIcon shortcut={shortcut} />
         <span className="shortcut-card__label">{shortcut.label}</span>
         {shortcut.description ? (

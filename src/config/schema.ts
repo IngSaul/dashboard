@@ -1,5 +1,6 @@
 import type { GlassBorderStrength, GlassIntensity } from '../design/glass'
 import { createDefaultDashboardConfig, DEFAULT_DASHBOARD_CONFIG_VERSION } from './defaults'
+import { resolveGeneralCategory } from '../services/categories'
 import type {
   DashboardConfiguration,
   ResolvedThemeMode,
@@ -89,7 +90,7 @@ export function isShortcut(value: unknown): value is Shortcut {
     !isNonEmptyTrimmedString(value.id) ||
     !isNonEmptyTrimmedString(value.label) ||
     !isValidUrlString(value.url) ||
-    !isFiniteNumber(value.order) ||
+    !isFiniteNumber(value.globalOrder) ||
     !isNonEmptyTrimmedString(value.createdAt) ||
     !isNonEmptyTrimmedString(value.updatedAt)
   ) {
@@ -198,7 +199,14 @@ function repairCategories(raw: unknown): ShortcutCategory[] {
   return categories
 }
 
-function repairShortcuts(raw: unknown, validCategories: ShortcutCategory[]): Shortcut[] {
+/**
+ * `fallbackCategoryId` must already resolve to a real category within
+ * `validCategories` (see `resolveGeneralCategory`, called by the sole
+ * caller `repairDashboardConfig`) — a missing/orphaned `categoryId` repairs
+ * to it instead of being cleared, since every shortcut always belongs to a
+ * real category.
+ */
+function repairShortcuts(raw: unknown, validCategories: ShortcutCategory[], fallbackCategoryId: string): Shortcut[] {
   if (!Array.isArray(raw)) {
     return []
   }
@@ -213,15 +221,15 @@ function repairShortcuts(raw: unknown, validCategories: ShortcutCategory[]): Sho
     const categoryId =
       entry.categoryId !== undefined && validCategoryIds.has(entry.categoryId)
         ? entry.categoryId
-        : undefined
+        : fallbackCategoryId
     shortcuts.push({
       id: entry.id,
       label: entry.label,
       url: entry.url,
-      order: entry.order,
+      globalOrder: entry.globalOrder,
       createdAt: entry.createdAt,
       updatedAt: entry.updatedAt,
-      ...(categoryId !== undefined ? { categoryId } : {}),
+      categoryId,
       ...(entry.description !== undefined ? { description: entry.description } : {}),
       ...(entry.icon !== undefined ? { icon: entry.icon } : {}),
     })
@@ -538,10 +546,14 @@ export function repairDashboardConfig(raw: unknown): DashboardConfiguration {
     return defaults
   }
 
-  const categories =
+  const repairedCategories =
     'categories' in raw ? repairCategories(raw.categories) : defaults.categories
+  // Guarantees a "General" category exists (creating one if it's missing/
+  // renamed away) before repairing shortcuts against it, so every shortcut
+  // always has somewhere valid to fall back to.
+  const { categories, category: generalCategory } = resolveGeneralCategory(repairedCategories)
   const shortcuts =
-    'shortcuts' in raw ? repairShortcuts(raw.shortcuts, categories) : defaults.shortcuts
+    'shortcuts' in raw ? repairShortcuts(raw.shortcuts, categories, generalCategory.id) : defaults.shortcuts
 
   return {
     version: DEFAULT_DASHBOARD_CONFIG_VERSION,

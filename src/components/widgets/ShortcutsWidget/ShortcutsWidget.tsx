@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CategoryNav } from '../../CategoryNav/CategoryNav'
-import { ShortcutCard } from '../../ShortcutCard/ShortcutCard'
+import { ShortcutGrid } from '../../ShortcutGrid/ShortcutGrid'
 import { AddShortcutCard } from '../../AddShortcutCard/AddShortcutCard'
 import { StatusMessage } from '../../StatusMessage/StatusMessage'
 import { EditShortcutModal } from '../../EditShortcutModal/EditShortcutModal'
@@ -8,7 +8,7 @@ import { AddShortcutModal } from '../../AddShortcutModal/AddShortcutModal'
 import { EditCategoryModal } from '../../EditCategoryModal/EditCategoryModal'
 import { AddCategoryModal } from '../../AddCategoryModal/AddCategoryModal'
 import { GlassConfirmDialog } from '../../glass/GlassConfirmDialog/GlassConfirmDialog'
-import { filterShortcutsByCategory } from '../../../services/categories'
+import { getOrderedShortcuts } from '../../../services/categories'
 import type { CategoryInput, CategoryMutationResult } from '../../../services/categories'
 import { useShortcutLibrary } from '../../../state/useShortcutLibrary'
 import type { Shortcut, ShortcutCategory } from '../../../types/dashboard'
@@ -23,13 +23,22 @@ import './ShortcutsWidget.css'
  * tile opens `AddShortcutModal` to create a new one. Category entries get
  * the same edit/delete treatment via `CategoryActionsMenu` (inside
  * `CategoryNav`), `EditCategoryModal`, and a second `GlassConfirmDialog` —
- * deleting a category unassigns (not deletes) its shortcuts, handled by
+ * deleting a category reassigns (not deletes) its shortcuts to "General"
+ * (creating it if it was the category just deleted), handled by
  * `useShortcutLibrary.deleteCategory`. `CategoryNav`'s own trailing
  * `AddCategoryCard` tile opens `AddCategoryModal`; a successful create
  * auto-selects the new category (`handleCreateCategory`) so it's visible
- * immediately without a reload. New shortcuts are appended to the end of
- * the array (`addShortcut`) and filtering never reorders, so the "+" tile
- * stays last with no extra ordering logic.
+ * immediately without a reload. `getOrderedShortcuts` supplies render order:
+ * the single `globalOrder`-sorted sequence, filtered to `activeCategoryId`
+ * (categories have no order of their own — see `services/categories.ts`).
+ * `ShortcutGrid` renders that order and reports drops via
+ * `onReorder(activeId, overId)`, forwarded directly to
+ * `useShortcutLibrary.moveShortcut` — a shortcut can be dragged anywhere,
+ * including across categories (from any tab, or from "Todas"), but that
+ * only ever changes its `globalOrder`; its `categoryId` never changes from
+ * a drag, only from an explicit edit. `AddShortcutCard` is rendered outside
+ * `ShortcutGrid`'s sortable items, in the same CSS grid container, so it
+ * always stays last and is never draggable.
  */
 export function ShortcutsWidget() {
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
@@ -48,6 +57,7 @@ export function ShortcutsWidget() {
     createCategory,
     editCategory,
     deleteCategory,
+    moveShortcut,
   } = useShortcutLibrary()
 
   // Every visible category, not just non-empty ones — an empty category
@@ -57,7 +67,7 @@ export function ShortcutsWidget() {
     [categories],
   )
   const visibleShortcuts = useMemo(
-    () => filterShortcutsByCategory(shortcuts, activeCategoryId),
+    () => getOrderedShortcuts(shortcuts, activeCategoryId),
     [shortcuts, activeCategoryId],
   )
 
@@ -104,14 +114,12 @@ export function ShortcutsWidget() {
       />
       {visibleShortcuts.length === 0 ? <StatusMessage message="Aún no hay accesos directos." /> : null}
       <div className="shortcuts-widget__grid">
-        {visibleShortcuts.map((shortcut) => (
-          <ShortcutCard
-            key={shortcut.id}
-            shortcut={shortcut}
-            onEdit={setEditingShortcut}
-            onRemove={setPendingDeleteShortcut}
-          />
-        ))}
+        <ShortcutGrid
+          shortcuts={visibleShortcuts}
+          onEdit={setEditingShortcut}
+          onRemove={setPendingDeleteShortcut}
+          onReorder={moveShortcut}
+        />
         <AddShortcutCard onClick={() => setAddModalOpen(true)} />
       </div>
       <EditShortcutModal
@@ -145,7 +153,7 @@ export function ShortcutsWidget() {
       <GlassConfirmDialog
         open={pendingDeleteCategory !== null}
         title="Eliminar categoría"
-        message={`¿Eliminar la categoría "${pendingDeleteCategory?.name ?? ''}"? Sus accesos directos no se eliminarán, quedarán sin categoría.`}
+        message={`¿Eliminar la categoría "${pendingDeleteCategory?.name ?? ''}"? Sus accesos directos no se eliminarán, se moverán a General.`}
         onCancel={() => setPendingDeleteCategory(null)}
         onConfirm={handleConfirmDeleteCategory}
       />
