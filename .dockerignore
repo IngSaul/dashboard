@@ -1,0 +1,15 @@
+node_modules
+server/node_modules
+server/dist
+dist
+data
+.git
+.specify
+specs
+tests
+server/test
+playwright-report
+test-results
+*.md
+.env
+.env.*

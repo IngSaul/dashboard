@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createLocalStorageProvider } from '../../src/services/storage/LocalStorageProvider'
+import {
+  createLocalStorageProvider,
+  defaultStorageProvider,
+  setActiveStorageProvider,
+} from '../../src/services/storage/LocalStorageProvider'
 import type { StorageProvider } from '../../src/services/storage/StorageProvider'
 
 const KEY = 'storage-provider-test.value'
@@ -114,5 +118,54 @@ describe('LocalStorageProvider', () => {
 
     expect(provider.get(KEY)).toEqual({ count: 9 })
     expect(other.get(KEY)).toBeUndefined()
+  })
+})
+
+describe('defaultStorageProvider (delegating facade)', () => {
+  afterEach(() => {
+    // Restore the default so later test files (which rely on
+    // `defaultStorageProvider` reading real localStorage via configStore's
+    // default parameter) aren't affected by a provider swap made here.
+    setActiveStorageProvider(createLocalStorageProvider())
+    window.localStorage.removeItem(KEY)
+  })
+
+  it('forwards to a real LocalStorageProvider by default', () => {
+    defaultStorageProvider.set(KEY, { count: 1 })
+
+    expect(defaultStorageProvider.get(KEY)).toEqual({ count: 1 })
+    expect(JSON.parse(window.localStorage.getItem(KEY) ?? 'null')).toEqual({ count: 1 })
+  })
+
+  it('setActiveStorageProvider redirects get/set/remove without changing defaultStorageProvider’s identity', () => {
+    const identityBefore = defaultStorageProvider
+
+    const calls: Array<{ method: string; key: string }> = []
+    const stub: StorageProvider = {
+      get: (key) => {
+        calls.push({ method: 'get', key })
+        return undefined
+      },
+      set: (key) => {
+        calls.push({ method: 'set', key })
+      },
+      remove: (key) => {
+        calls.push({ method: 'remove', key })
+      },
+    }
+
+    setActiveStorageProvider(stub)
+    defaultStorageProvider.get(KEY)
+    defaultStorageProvider.set(KEY, { count: 2 })
+    defaultStorageProvider.remove(KEY)
+
+    expect(defaultStorageProvider).toBe(identityBefore)
+    expect(calls).toEqual([
+      { method: 'get', key: KEY },
+      { method: 'set', key: KEY },
+      { method: 'remove', key: KEY },
+    ])
+    // The stub, not real storage, handled the write.
+    expect(window.localStorage.getItem(KEY)).toBeNull()
   })
 })

@@ -62,5 +62,36 @@ export function createLocalStorageProvider(): StorageProvider {
   }
 }
 
-/** Shared instance used by `configStore` by default. */
-export const defaultStorageProvider: StorageProvider = createLocalStorageProvider()
+/**
+ * `defaultStorageProvider` is a stable delegating facade, not a plain
+ * `LocalStorageProvider` instance: `configStore`'s ~10 call sites all rely on
+ * it as a default-parameter binding (`provider: StorageProvider =
+ * defaultStorageProvider`), and a `const` binding can't be repointed from
+ * outside its module. Every method call forwards to whichever provider is
+ * currently `activeProvider` — starting out as `LocalStorageProvider`, and
+ * swapped to `RemoteStorageProvider` post-login by `setActiveStorageProvider`
+ * (see `src/state/AuthProvider.tsx`) — while `defaultStorageProvider` itself
+ * keeps the same object identity forever. This is exactly the seam
+ * `specs/002-widget-dashboard/contracts/storage-provider-contract.md`
+ * anticipates: "only the `StorageProvider` instance passed to `configStore`
+ * changes," with zero call-site changes required.
+ */
+let activeProvider: StorageProvider = createLocalStorageProvider()
+
+/** Swaps the provider every `defaultStorageProvider` call forwards to. Called once, after successful login + config hydration (see `AuthProvider`). */
+export function setActiveStorageProvider(provider: StorageProvider): void {
+  activeProvider = provider
+}
+
+/** Shared instance used by `configStore` by default — a stable facade over the currently active provider (see above). */
+export const defaultStorageProvider: StorageProvider = {
+  get<T>(key: string): T | undefined {
+    return activeProvider.get<T>(key)
+  },
+  set<T>(key: string, value: T): void {
+    activeProvider.set(key, value)
+  },
+  remove(key: string): void {
+    activeProvider.remove(key)
+  },
+}

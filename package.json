@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -12,6 +15,7 @@
     "format:check": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:server": "npm test --workspace=server",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",

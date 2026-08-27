@@ -12,9 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Backend (003-auth-persistence)
+server/dist
+/data/
+.env
+.env.*
+!.env.example
+
 # Playwright
 test-results/
 playwright-report/
+playwright/.auth/
 
 # Editor directories and files
 .vscode/*

@@ -1,0 +1,58 @@
+.auth-gate-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+}
+
+.auth-gate-loading__panel {
+  padding: var(--space-4) var(--space-6);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+}
+
+.auth-gate-logout {
+  /* Top-left, deliberately not top-right: `SettingsDrawer` (`z-index:
+     var(--z-drawer)`) slides in anchored top-right (`top/right: var(--space-4)`,
+     full viewport height), so its own close button lives in that same
+     corner — placing this there too would visually collide and intercept
+     clicks on whichever control renders later in the DOM. */
+  position: fixed;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: var(--z-drawer);
+}
+
+.auth-gate-toast {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-dialog);
+}
+
+.auth-gate-toast__panel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-elevation-2);
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+}
+
+.auth-gate-toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.auth-gate-toast__dismiss:hover,
+.auth-gate-toast__dismiss:focus-visible {
+  color: var(--color-text);
+}
