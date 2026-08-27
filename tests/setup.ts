@@ -1,8 +1,23 @@
 import '@testing-library/jest-dom/vitest'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { registerBuiltInPlugins } from '../src/plugins'
 import { registerBuiltInSearchSources } from '../src/services/searchSources'
+
+/**
+ * Every widget is code-split behind `widgetRegistry.lazyLoad()` (a hard UI
+ * contract rule — see `WidgetGrid.test.tsx`'s note), so the *first* time any
+ * given widget type is dynamically imported within a test file's module
+ * graph, mounting it pays a real on-demand transform cost, not just a
+ * microtask tick. Under the CPU contention of running many test files at
+ * once, that cost has been observed to exceed `@testing-library`'s default
+ * 1000ms `findBy*`/`waitFor` polling window, producing intermittent
+ * failures that are purely about timing headroom, not incorrect app
+ * behavior — every affected assertion passes reliably alone or with
+ * reduced parallelism. Raising the shared default here fixes all of them
+ * at once without touching any test's actual assertions/coverage.
+ */
+configure({ asyncUtilTimeout: 5000 })
 
 /**
  * jsdom does not implement `window.matchMedia`. Components that read theme
