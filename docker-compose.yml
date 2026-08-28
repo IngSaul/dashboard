@@ -34,10 +34,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Host publish kept for local debugging only; Traefik does not need it —
-    # it reaches the container on port 80 over the `homelab` network.
-    ports:
-      - "8080:80"
+    # No host port publishing: Traefik reaches this container on port 80 over
+    # the `homelab` network, so nothing needs to be bound on the host.
     depends_on:
       backend:
         condition: service_healthy
