@@ -18,6 +18,10 @@ services:
       # container recreation — see specs/003-auth-persistence/research.md §7
       # and docs/backup-restore.md.
       - ./data:/data
+    # No `ports:` — the backend is reachable only from the frontend over the
+    # internal network. Port 3210 is never published to the host.
+    networks:
+      - dashboard-internal
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:3210/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
@@ -30,14 +34,40 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # Host publish kept for local debugging only; Traefik does not need it —
+    # it reaches the container on port 80 over the `homelab` network.
     ports:
       - "8080:80"
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      # Internal network: lets nginx resolve/reach `backend:3210` via Docker DNS.
+      - dashboard-internal
+      # External Traefik network: lets the reverse proxy reach this container.
+      - homelab
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.avalonnova.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=80"
+      # Required when the container is attached to more than one network:
+      # tells Traefik which network to use to reach it.
+      - "traefik.docker.network=homelab"
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
     restart: unless-stopped
+
+networks:
+  # Private frontend <-> backend network. `internal: true` means no route to
+  # the outside world and no host-published ports on this network — the
+  # backend stays strictly internal.
+  dashboard-internal:
+    driver: bridge
+    internal: true
+  # Pre-existing Traefik network, created outside this compose project.
+  homelab:
+    external: true
