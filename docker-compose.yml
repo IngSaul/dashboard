@@ -53,7 +53,7 @@ services:
       # tells Traefik which network to use to reach it.
       - "traefik.docker.network=homelab"
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost/ || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
