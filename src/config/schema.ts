@@ -1,6 +1,8 @@
 import type { GlassBorderStrength, GlassIntensity } from '../design/glass'
 import { createDefaultDashboardConfig, DEFAULT_DASHBOARD_CONFIG_VERSION } from './defaults'
 import { resolveGeneralCategory } from '../services/categories'
+import { isKnownBrandSlug } from '../services/brandIconSlugs'
+import { isSafeResourceUrl, isValidUrl } from '../utils/validation'
 import type {
   DashboardConfiguration,
   ResolvedThemeMode,
@@ -56,16 +58,21 @@ function isBoolean(value: unknown): value is boolean {
   return typeof value === 'boolean'
 }
 
+/**
+ * A stored configuration is untrusted input: it comes from browser storage
+ * or a server response, either of which could hold something written by an
+ * older, laxer version of this app — or by somebody else. Repair therefore
+ * applies the same protocol allow-list the editor does, so a `javascript:`
+ * shortcut that was accepted before is dropped on load rather than rendered
+ * into an `<a href>`.
+ */
 function isValidUrlString(value: unknown): value is string {
-  if (typeof value !== 'string' || value.trim().length === 0) {
-    return false
-  }
-  try {
-    new URL(value)
-    return true
-  } catch {
-    return false
-  }
+  return typeof value === 'string' && isValidUrl(value)
+}
+
+/** Same, for the fields the app *loads* from rather than links to — see `ALLOWED_RESOURCE_PROTOCOLS`. */
+function isSafeResourceUrlString(value: unknown): value is string {
+  return typeof value === 'string' && isSafeResourceUrl(value)
 }
 
 export function isShortcutCategory(value: unknown): value is ShortcutCategory {
@@ -362,7 +369,7 @@ function repairBackgroundConfig(raw: unknown, fallback: BackgroundConfig): Backg
   if (!source) {
     return fallback
   }
-  if (source === 'custom-url' && !isValidUrlString(raw.value)) {
+  if (source === 'custom-url' && !isSafeResourceUrlString(raw.value)) {
     return { ...fallback, source: 'default', value: null }
   }
   const value = raw.value === null || isNonEmptyTrimmedString(raw.value) ? raw.value : fallback.value
@@ -501,7 +508,8 @@ function repairMonitoringSourceConfig(
   if (!isPlainObject(raw)) {
     return fallback
   }
-  const endpointUrl = raw.endpointUrl === null || isValidUrlString(raw.endpointUrl) ? raw.endpointUrl : null
+  const endpointUrl =
+    raw.endpointUrl === null || isSafeResourceUrlString(raw.endpointUrl) ? raw.endpointUrl : null
   const pollIntervalSeconds = isFiniteNumber(raw.pollIntervalSeconds)
     ? clamp(raw.pollIntervalSeconds, 10, 3600)
     : fallback.pollIntervalSeconds
@@ -521,18 +529,48 @@ function repairNote(raw: unknown, fallback: Note): Note {
   return { content, updatedAt: raw.updatedAt }
 }
 
-const ICON_PROVIDERS: IconProviderKind[] = ['lucide', 'simple-icons', 'custom-svg', 'favicon', 'fallback']
+const ICON_PROVIDERS: IconProviderKind[] = ['lucide', 'simple-icons', 'favicon', 'fallback']
 
-/** Validates a `Shortcut.icon` field (002-widget-dashboard, US3) — used by `isShortcut` above. */
+/** A Lucide icon name is a kebab-case identifier; anything else is not a name this app could have written. */
+const LUCIDE_ICON_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/
+
+/**
+ * Validates a `Shortcut.icon` field (002-widget-dashboard, US3) — used by
+ * `isShortcut` above.
+ *
+ * Each provider's `value` is checked against what that provider is actually
+ * allowed to hold, not merely "a non-empty string". That is what stops a
+ * stored configuration from claiming `provider: 'simple-icons'` with an SVG
+ * document in `value`, or `provider: 'favicon'` with a `data:` payload.
+ * `custom-svg` is gone entirely (see `IconProviderKind`), so a config that
+ * still names it fails here and the icon is dropped — the shortcut then
+ * falls back to the URL-derived brand icon and looks unchanged.
+ */
 export function isIconSource(value: unknown): value is IconSource {
   if (!isPlainObject(value)) {
     return false
   }
-  return (
-    (ICON_PROVIDERS as string[]).includes(value.provider as string) &&
-    isNonEmptyTrimmedString(value.value) &&
-    isNonEmptyTrimmedString(value.resolvedAt)
-  )
+  if (
+    !(ICON_PROVIDERS as string[]).includes(value.provider as string) ||
+    !isNonEmptyTrimmedString(value.value) ||
+    !isNonEmptyTrimmedString(value.resolvedAt)
+  ) {
+    return false
+  }
+  switch (value.provider as IconProviderKind) {
+    case 'lucide':
+      return LUCIDE_ICON_NAME.test(value.value)
+    case 'simple-icons':
+      // The slug must name an icon this build bundles; that lookup is the
+      // only source of the markup that eventually renders.
+      return isKnownBrandSlug(value.value)
+    case 'favicon':
+      return isSafeResourceUrl(value.value)
+    case 'fallback':
+      // Initials, rendered as text — no markup path, so length is the only
+      // thing worth bounding.
+      return value.value.length <= 8
+  }
 }
 
 /**

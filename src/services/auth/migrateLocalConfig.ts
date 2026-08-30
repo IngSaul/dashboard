@@ -9,6 +9,13 @@ export interface MigrationDecision {
   needsUpload: boolean
   /** `true` only when `config` came from a pre-existing local browser configuration — drives the one-time toast and the local-key rename. */
   migratedFromLocal: boolean
+  /**
+   * The server revision `config` is based on, or `null` when that could not
+   * be established. `0` means "the account has no configuration yet", which
+   * is a real, checkable precondition: two tabs racing to seed the same new
+   * account cannot both win.
+   */
+  revision: number | null
 }
 
 function hasRawLocalConfig(): boolean {
@@ -38,7 +45,12 @@ function hasRawLocalConfig(): boolean {
  */
 export function decideMigration(outcome: DashboardFetchOutcome): MigrationDecision {
   if (outcome.kind === 'found') {
-    return { config: outcome.config, needsUpload: false, migratedFromLocal: false }
+    return {
+      config: outcome.config,
+      needsUpload: false,
+      migratedFromLocal: false,
+      revision: outcome.revision,
+    }
   }
 
   if (outcome.kind === 'not-found') {
@@ -46,13 +58,17 @@ export function decideMigration(outcome: DashboardFetchOutcome): MigrationDecisi
       config: loadDashboardConfig(),
       needsUpload: true,
       migratedFromLocal: hasRawLocalConfig(),
+      // The account has no row yet, and saying so is a precondition the
+      // server can check — not an assumption.
+      revision: 0,
     }
   }
 
   // 'error': degrade gracefully — don't block the auth gate forever on a
-  // transient failure to load config; defaults render, changes will still
-  // attempt to sync going forward.
-  return { config: loadDashboardConfig(), needsUpload: false, migratedFromLocal: false }
+  // transient failure to load config; defaults render so the dashboard is
+  // usable. `revision: null` is the important part: this tab never learned
+  // what the account's real configuration is, so it must not write over it.
+  return { config: loadDashboardConfig(), needsUpload: false, migratedFromLocal: false, revision: null }
 }
 
 /** Renames (never deletes) the local key once its content is safely persisted server-side — a zero-cost safety net, not the migration's actual idempotency guard (that's the server-state check in `decideMigration`). */

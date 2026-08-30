@@ -1,20 +1,16 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 
 /**
  * T099: three-column `AppShell`/`Workspace` responsive reflow (desktop →
- * tablet) and reduced-motion behavior. Unlike the feature-001-era
- * `responsive.spec.ts`/`accessibilityAndTheme.spec.ts` (which target a
- * main-chrome "Toggle theme"/"Manage shortcuts" button that doesn't exist
- * in this architecture — `ThemeToggle` only lives inside `SettingsDrawer`),
- * this spec targets controls that actually exist today: the settings-drawer
- * toggle and the default clock/shortcuts widgets. `SearchBar` was removed
- * (no WebExtensions API lets a page focus or write into the browser's own
- * address bar), so it's no longer part of this layout.
+ * tablet) and reduced-motion behavior, against the controls that actually
+ * exist today: the settings-drawer toggle and the default clock/shortcuts
+ * widgets. `SearchBar` was removed (no WebExtensions API lets a page focus
+ * or write into the browser's own address bar), so it's no longer part of
+ * this layout, and `ThemeToggle` only lives inside `SettingsDrawer`.
+ *
+ * The feature-001-era `responsive.spec.ts` this superseded has now been
+ * deleted rather than left failing against a UI it no longer describes.
  */
-
-test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.clear())
-})
 
 test.describe('Desktop layout', () => {
   test.use({ viewport: { width: 1280, height: 800 } })

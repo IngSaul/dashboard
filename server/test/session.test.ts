@@ -66,11 +66,13 @@ describe('session', () => {
 
     // 35 days later: within the 40-day absolute cap, well past the throttle window.
     vi.setSystemTime(new Date('2026-02-05T00:00:00.000Z'))
-    touchSession(db, validated!.sessionId, { idleTtlDays: 30, absoluteTtlDays: 40 })
+    expect(validated).not.toBeNull()
+    if (!validated) return
+    touchSession(db, validated.sessionId, { idleTtlDays: 30, absoluteTtlDays: 40 })
 
     const row = db
       .prepare('SELECT expires_at AS expiresAt FROM sessions WHERE id = ?')
-      .get(validated!.sessionId) as { expiresAt: string }
+      .get(validated.sessionId) as { expiresAt: string }
     // Absolute cap: 2026-01-01 + 40 days = 2026-02-10, which is earlier than
     // the sliding idle expiry (2026-02-05 + 30 days), so the cap wins.
     expect(new Date(row.expiresAt).toISOString()).toBe(new Date('2026-02-10T00:00:00.000Z').toISOString())
@@ -81,7 +83,9 @@ describe('session', () => {
     vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'))
     const userId = insertUser(db, 'dave')
     const { token } = createSession(db, userId, TTL)
-    const validated = validateSessionToken(db, token)!
+    const validated = validateSessionToken(db, token)
+    expect(validated).not.toBeNull()
+    if (!validated) return
     const before = db
       .prepare('SELECT last_seen_at AS lastSeenAt FROM sessions WHERE id = ?')
       .get(validated.sessionId) as { lastSeenAt: string }

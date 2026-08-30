@@ -9,7 +9,11 @@ services:
       DATABASE_PATH: /data/dashboard.sqlite3
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # Must be "true": with NODE_ENV=production the backend refuses to
+      # start otherwise (server/src/env.ts), so the session cookie can never
+      # silently travel over plain HTTP. Traefik terminates TLS in front of
+      # the frontend container — see its labels below.
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
       SESSION_IDLE_TTL_DAYS: ${SESSION_IDLE_TTL_DAYS:-30}
       SESSION_ABSOLUTE_TTL_DAYS: ${SESSION_ABSOLUTE_TTL_DAYS:-90}
     volumes:
@@ -46,9 +50,28 @@ services:
       - homelab
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.avalonnova.com`)"
-      - "traefik.http.routers.dashboard.entrypoints=web"
+
+      # HTTPS router. `tls=true` is what makes this an HTTPS route at all;
+      # `certresolver` names an entry in your Traefik *static* config's
+      # `certificatesResolvers`. If your Traefik already assigns a
+      # certificate at the entrypoint level, TRAEFIK_CERT_RESOLVER must
+      # still match a real resolver — verify it before deploying.
+      - "traefik.http.routers.dashboard.rule=Host(`${DASHBOARD_HOST:-dashboard.avalonnova.com}`)"
+      - "traefik.http.routers.dashboard.entrypoints=${TRAEFIK_HTTPS_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-letsencrypt}"
       - "traefik.http.services.dashboard.loadbalancer.server.port=80"
+
+      # Plain-HTTP router whose only job is to bounce every request to
+      # HTTPS. Without it the site would still answer on port 80 and the
+      # session cookie (now `Secure`) would simply never be sent — a silent
+      # "you are logged out" rather than an obvious redirect.
+      - "traefik.http.routers.dashboard-http.rule=Host(`${DASHBOARD_HOST:-dashboard.avalonnova.com}`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=${TRAEFIK_HTTP_ENTRYPOINT:-web}"
+      - "traefik.http.routers.dashboard-http.middlewares=dashboard-https-redirect"
+      - "traefik.http.middlewares.dashboard-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.dashboard-https-redirect.redirectscheme.permanent=true"
+
       # Required when the container is attached to more than one network:
       # tells Traefik which network to use to reach it.
       - "traefik.docker.network=homelab"

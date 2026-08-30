@@ -13,7 +13,11 @@ function extractSessionCookie(setCookieHeader: string | string[] | undefined): s
   if (!header) {
     throw new Error('expected a Set-Cookie header')
   }
-  return header.split(';')[0]!
+  const [cookie] = header.split(';')
+  if (!cookie) {
+    throw new Error(`expected a name=value pair in Set-Cookie: ${header}`)
+  }
+  return cookie
 }
 
 describe('auth routes', () => {
@@ -44,8 +48,9 @@ describe('auth routes', () => {
     expect(response.json()).toEqual({ id: expect.any(Number), username: 'admin', role: 'admin' })
     const cookie = response.cookies.find((c) => c.name === 'dashboard_session')
     expect(cookie).toBeDefined()
-    expect(cookie!.httpOnly).toBe(true)
-    expect(cookie!.sameSite).toBe('Lax')
+    expect(cookie).toBeDefined()
+    expect(cookie?.httpOnly).toBe(true)
+    expect(cookie?.sameSite).toBe('Lax')
   })
 
   it('rejects a wrong password', async () => {
@@ -190,6 +195,6 @@ describe('auth routes', () => {
   it('GET /healthz reports ok', async () => {
     const response = await app.inject({ method: 'GET', url: '/healthz' })
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ status: 'ok' })
+    expect(response.json()).toEqual({ status: 'ok', schemaVersion: expect.any(Number) })
   })
 })

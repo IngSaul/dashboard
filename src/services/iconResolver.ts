@@ -170,6 +170,24 @@ function colorizeSvg(svg: string, hex: string): string {
   return svg.replace('<svg ', `<svg fill="#${hex}" `)
 }
 
+/**
+ * Brand SVG for a Simple Icons slug, already colorized, or `null` when the
+ * slug is not one this build bundles.
+ *
+ * This is the single door through which SVG markup reaches the DOM: the
+ * only strings it can return are the ones statically imported at the top of
+ * this file. A persisted icon names a slug and gets markup from here, so an
+ * attacker who controls stored configuration controls a lookup key, never
+ * the markup itself.
+ */
+export function getBrandSvgBySlug(slug: string): string | null {
+  const brand = (BRANDS as Record<string, BrandEntry | undefined>)[slug]
+  if (!brand?.svg) {
+    return null
+  }
+  return colorizeSvg(brand.svg, brand.hex)
+}
+
 function unknownIcon(label: string): ShortcutIconDefinition {
   return { match: 'unknown', label, color: 'currentColor', Icon: Globe }
 }

@@ -21,9 +21,24 @@ function validateShortcutInput(input: ShortcutInput): string | null {
     return 'El nombre es obligatorio.'
   }
   if (!isValidUrl(input.url)) {
-    return 'Se requiere una URL válida.'
+    // Two different problems deserve two different messages: "that isn't a
+    // URL" is a typo, while "that scheme isn't allowed" is a rule the user
+    // has no way to guess. `javascript:alert(1)` parses perfectly, so the
+    // generic message would have been actively misleading.
+    return parsesAsUrl(input.url)
+      ? 'Solo se permiten enlaces https://, http:// o mailto:.'
+      : 'Se requiere una URL válida.'
   }
   return null
+}
+
+function parsesAsUrl(value: string): boolean {
+  try {
+    new URL(value)
+    return true
+  } catch {
+    return false
+  }
 }
 
 function buildShortcutFields(input: ShortcutInput, categoryId: string) {

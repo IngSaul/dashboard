@@ -5,8 +5,21 @@ import { createDefaultDashboardConfig } from '../../../src/config/defaults'
 import { DASHBOARD_CONFIG_STORAGE_KEY, saveDashboardConfig } from '../../../src/services/configStore'
 import { clearDashboardStorage } from '../../fixtures/dashboardConfig'
 
-function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers },
+  })
+}
+
+/**
+ * The dashboard routes always answer with the current revision as a strong
+ * ETag, and a client that never learns one deliberately refuses to write
+ * (it cannot prove what its edits are based on) — so a stub that omits it
+ * is not a stub of this server.
+ */
+function dashboardResponse(status: number, body: unknown, revision: number): Response {
+  return jsonResponse(status, body, { ETag: `"${revision}"` })
 }
 
 function Probe() {
@@ -52,7 +65,7 @@ describe('AuthProvider', () => {
         return Promise.resolve(jsonResponse(200, { id: 1, username: 'admin', role: 'admin' }))
       }
       if (url.endsWith('/dashboard')) {
-        return Promise.resolve(jsonResponse(200, config))
+        return Promise.resolve(dashboardResponse(200, config, 1))
       }
       throw new Error(`unexpected fetch: ${url}`)
     })
@@ -64,6 +77,37 @@ describe('AuthProvider', () => {
     )
 
     await waitFor(() => expect(screen.getByTestId('auth-status').textContent).toBe('authenticated'))
+  })
+
+  it('refuses to write when the config could not be read, rather than overwriting it blind', async () => {
+    let putCount = 0
+    fetchMock.mockImplementation((url: string, init?: RequestInit) => {
+      if (url.endsWith('/auth/me')) {
+        return Promise.resolve(jsonResponse(200, { id: 1, username: 'admin', role: 'admin' }))
+      }
+      if (url.endsWith('/dashboard') && init?.method === 'PUT') {
+        putCount += 1
+        return Promise.resolve(jsonResponse(200, { revision: 1 }, { ETag: '"1"' }))
+      }
+      // The account almost certainly *has* a configuration; this tab just
+      // failed to read it. Writing now would replace it with defaults.
+      if (url.endsWith('/dashboard')) {
+        return Promise.resolve(jsonResponse(500, { error: 'boom' }))
+      }
+      throw new Error(`unexpected fetch: ${url}`)
+    })
+
+    render(
+      <AuthProvider>
+        <Probe />
+      </AuthProvider>,
+    )
+    await waitFor(() => expect(screen.getByTestId('auth-status').textContent).toBe('authenticated'))
+
+    saveDashboardConfig(createDefaultDashboardConfig())
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+
+    expect(putCount).toBe(0)
   })
 
   it('a 401 from a later background save returns to unauthenticated exactly once, without looping', async () => {
@@ -78,7 +122,7 @@ describe('AuthProvider', () => {
         return Promise.resolve(jsonResponse(401, { error: 'unauthenticated' }))
       }
       if (url.endsWith('/dashboard')) {
-        return Promise.resolve(jsonResponse(200, config))
+        return Promise.resolve(dashboardResponse(200, config, 4))
       }
       throw new Error(`unexpected fetch: ${url}`)
     })

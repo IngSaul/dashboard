@@ -50,3 +50,12 @@ docker run --rm -v "$(pwd)/data:/data" alpine sh -c "tar -C /data -czf - ." > ba
 The `./data` directory is entirely self-contained — copy it to the new
 host's repo checkout in the same relative location and run
 `docker compose up -d`.
+
+## Before a schema upgrade
+
+A release that changes the database schema migrates it in place on first
+startup, and migrations only move forward — there is no automatic downgrade.
+Take a backup first, and see
+[database-migrations.md](./database-migrations.md) for how to check which
+schema version a database is on and how to rehearse an upgrade against a
+copy.

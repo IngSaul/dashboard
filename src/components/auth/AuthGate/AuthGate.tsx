@@ -5,6 +5,7 @@ import { applyResolvedTheme, getSystemPrefersDark, resolveThemeMode } from '../.
 import { GlassPanel } from '../../glass/GlassPanel/GlassPanel'
 import { GlassIconButton } from '../../glass/GlassIconButton/GlassIconButton'
 import { LoginScreen } from '../LoginScreen/LoginScreen'
+import { SyncStatusIndicator } from '../SyncStatusIndicator/SyncStatusIndicator'
 import './AuthGate.css'
 
 export interface AuthGateProps {
@@ -54,6 +55,7 @@ export function AuthGate({ children }: AuthGateProps) {
       >
         <LogOut aria-hidden="true" />
       </GlassIconButton>
+      <SyncStatusIndicator />
       {migrationNotice ? (
         <div className="auth-gate-toast" role="status">
           <GlassPanel className="auth-gate-toast__panel">

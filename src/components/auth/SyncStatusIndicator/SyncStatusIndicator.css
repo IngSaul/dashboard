@@ -1,0 +1,62 @@
+.sync-status {
+  position: fixed;
+  /* Sits above the migration toast's slot so the two never overlap. */
+  bottom: calc(var(--space-6) + 3.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-dialog);
+  max-width: min(28rem, calc(100vw - var(--space-8)));
+}
+
+.sync-status__panel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--shadow-elevation-2);
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+}
+
+.sync-status__icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.sync-status__icon--spin {
+  animation: sync-status-spin 1.2s linear infinite;
+}
+
+@keyframes sync-status-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Constitution V: motion is restrained and reduced-motion aware. */
+@media (prefers-reduced-motion: reduce) {
+  .sync-status__icon--spin {
+    animation: none;
+  }
+}
+
+.sync-status__message {
+  flex: 1 1 auto;
+}
+
+.sync-status__retry {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--glass-border-visible);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sync-status__retry:hover,
+.sync-status__retry:focus-visible {
+  background: var(--glass-fill-medium);
+}

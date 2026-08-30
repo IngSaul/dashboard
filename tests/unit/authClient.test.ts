@@ -2,8 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createAuthClient } from '../../src/services/auth/AuthClient'
 import { createDefaultDashboardConfig } from '../../src/config/defaults'
 
-function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...headers },
+  })
+}
+
+/** The dashboard routes always answer with the current revision as a strong ETag. */
+function etag(revision: number): Record<string, string> {
+  return { ETag: `"${revision}"` }
 }
 
 describe('AuthClient', () => {
@@ -62,28 +70,70 @@ describe('AuthClient', () => {
     const config = createDefaultDashboardConfig()
     const client = createAuthClient()
 
-    fetchMock.mockResolvedValueOnce(jsonResponse(200, config))
-    await expect(client.getDashboard()).resolves.toEqual({ kind: 'found', config })
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, config, etag(4)))
+    await expect(client.getDashboard()).resolves.toEqual({ kind: 'found', config, revision: 4 })
 
     fetchMock.mockResolvedValueOnce(jsonResponse(404, { error: 'not found' }))
     await expect(client.getDashboard()).resolves.toEqual({ kind: 'not-found' })
 
     fetchMock.mockResolvedValueOnce(jsonResponse(500, { error: 'boom' }))
     await expect(client.getDashboard()).resolves.toEqual({ kind: 'error' })
+
+    // A 200 with no usable ETag leaves the client unable to prove what its
+    // edits are based on, which is no safer to write from than a failure.
+    fetchMock.mockResolvedValueOnce(jsonResponse(200, config))
+    await expect(client.getDashboard()).resolves.toEqual({ kind: 'error' })
   })
 
-  it('putDashboard: resolves true on 200, false on any other outcome (never throws)', async () => {
+  /**
+   * The sync engine decides whether to retry from this classification, so
+   * "did it work" is not enough: a 500 has to be distinguishable from a 400,
+   * or a transient outage becomes a permanent give-up (and vice versa —
+   * an invalid payload retried forever).
+   */
+  it('putDashboard: classifies the outcome so the caller can tell transient from permanent', async () => {
     const client = createAuthClient()
     const config = createDefaultDashboardConfig()
 
-    fetchMock.mockResolvedValueOnce(jsonResponse(200, { updatedAt: '2026-01-01T00:00:00.000Z' }))
-    await expect(client.putDashboard(config)).resolves.toBe(true)
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(200, { updatedAt: '2026-01-01T00:00:00.000Z', revision: 3 }, etag(3)),
+    )
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'saved', revision: 3 })
+
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse(409, { error: 'revision conflict', revision: 7 }, etag(7)),
+    )
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'conflict', revision: 7 })
 
     fetchMock.mockResolvedValueOnce(jsonResponse(400, { error: 'invalid' }))
-    await expect(client.putDashboard(config)).resolves.toBe(false)
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'rejected', status: 400 })
+
+    fetchMock.mockResolvedValueOnce(jsonResponse(403, { error: 'wrong account' }))
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'rejected', status: 403 })
+
+    fetchMock.mockResolvedValueOnce(jsonResponse(401, { error: 'unauthenticated' }))
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'unauthenticated' })
+
+    // A server-side error is the server having a bad moment, not a bad
+    // request: the same bytes are worth sending again.
+    fetchMock.mockResolvedValueOnce(jsonResponse(503, { error: 'unavailable' }))
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'unavailable' })
 
     fetchMock.mockRejectedValueOnce(new Error('network down'))
-    await expect(client.putDashboard(config)).resolves.toBe(false)
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'unavailable' })
+
+    fetchMock.mockRejectedValueOnce(new DOMException('aborted', 'AbortError'))
+    await expect(client.putDashboard(config)).resolves.toEqual({ kind: 'aborted' })
+  })
+
+  it('putDashboard: sends the revision it was composed on as an If-Match precondition', async () => {
+    const client = createAuthClient()
+    fetchMock.mockResolvedValue(jsonResponse(200, { revision: 6 }, etag(6)))
+
+    await client.putDashboard(createDefaultDashboardConfig(), { revision: 5, accountId: 2 })
+
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit
+    expect(init.headers).toMatchObject({ 'If-Match': '"5"', 'X-Dashboard-Account': '2' })
   })
 
   it('a 401 from any endpoint invokes onUnauthenticated exactly once per call', async () => {

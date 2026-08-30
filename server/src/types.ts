@@ -35,6 +35,8 @@ export interface DashboardConfigRecord {
   configJson: string
   schemaVersion: number
   updatedAt: string
+  /** Bumped on every successful write. The value clients echo back as `If-Match` to prove they saw the current state. */
+  revision: number
 }
 
 /** Public-safe user shape returned by `/auth/me`, `/auth/login`, and `/auth/users` — never includes `passwordHash`. */

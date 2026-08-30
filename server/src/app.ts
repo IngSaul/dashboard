@@ -8,11 +8,17 @@ import type { SessionTtlConfig } from './auth/session.js'
 import { createAuthenticate } from './plugins/authenticate.js'
 import { registerAuthRoutes } from './auth/routes.js'
 import { registerDashboardRoutes } from './dashboard/routes.js'
+import { getSchemaVersion } from './db/migrate.js'
+
+/** Mirrors `env.ts`'s `LOGIN_RATE_LIMIT_MAX` default, for callers (tests) that build an app without a parsed env. */
+const DEFAULT_LOGIN_RATE_LIMIT_MAX = 20
 
 export interface BuildAppDeps {
   db: Database.Database
   cookieSecure: boolean
   sessionTtl: SessionTtlConfig
+  /** Max `POST /auth/login` attempts per IP per minute (`env.ts`'s `LOGIN_RATE_LIMIT_MAX`). Defaults to the same 20 the env schema does, so tests that don't care can omit it. */
+  loginRateLimitMax?: number
   /** Defaults to `true`; route tests pass `false` to keep test output clean. */
   logger?: boolean
 }
@@ -40,13 +46,18 @@ export async function buildApp(deps: BuildAppDeps): Promise<FastifyInstance> {
     cookieSecure: deps.cookieSecure,
     sessionTtl: deps.sessionTtl,
     authenticate,
+    loginRateLimitMax: deps.loginRateLimitMax ?? DEFAULT_LOGIN_RATE_LIMIT_MAX,
   })
   registerDashboardRoutes(app, { db: deps.db, authenticate })
 
   app.get('/healthz', async (_request, reply) => {
     try {
       deps.db.prepare('SELECT 1').get()
-      return { status: 'ok' }
+      // The applied schema version travels with the health check because it
+      // is otherwise only knowable by opening the database file — which is
+      // exactly what you cannot do while diagnosing a container that is
+      // behaving oddly after a deploy.
+      return { status: 'ok', schemaVersion: getSchemaVersion(deps.db) }
     } catch {
       return reply.code(503).send({ status: 'unavailable' })
     }

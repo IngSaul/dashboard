@@ -1,42 +1,124 @@
 import type Database from 'better-sqlite3'
+import { MIGRATIONS, type Migration } from './migrations.js'
+
+export interface MigrationResult {
+  /** Schema version before this run. `0` for a database that had never been migrated. */
+  from: number
+  /** Schema version after this run. */
+  to: number
+  /** Migrations applied by this run, in the order they ran. Empty when the database was already current. */
+  applied: { id: number; name: string }[]
+}
 
 /**
- * Creates the schema if it doesn't already exist. Hand-rolled `CREATE TABLE
- * IF NOT EXISTS` DDL rather than a migration framework — three tables total,
- * per plan.md's "keep it simple to maintain" constraint. Safe to call on
- * every startup (production) and once per test database (`:memory:`).
+ * Applies every migration the database has not seen yet, in order, once
+ * each.
+ *
+ * This replaces a single block of idempotent `CREATE TABLE IF NOT EXISTS`
+ * DDL. That block was fine for one fixed schema and nothing else: it could
+ * create tables but never alter them, so the first column that needed adding
+ * had nowhere to go. Recording what has run is what makes the schema
+ * something that can evolve rather than only be created.
+ *
+ * Safe to call on every startup, and safe against a database created before
+ * this existed — see migration 1's note.
  */
-export function migrate(db: Database.Database): void {
+export function migrate(
+  db: Database.Database,
+  migrations: Migration[] = MIGRATIONS,
+): MigrationResult {
+  assertUsableMigrations(migrations)
+
   db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-      username           TEXT NOT NULL UNIQUE COLLATE NOCASE,
-      password_hash      TEXT NOT NULL,
-      role               TEXT NOT NULL CHECK (role IN ('admin', 'user')) DEFAULT 'user',
-      failed_login_count INTEGER NOT NULL DEFAULT 0,
-      locked_until       TEXT NULL,
-      created_at         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-      updated_at         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      token_hash    TEXT NOT NULL UNIQUE,
-      user_id       INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      created_at    TEXT NOT NULL,
-      last_seen_at  TEXT NOT NULL,
-      expires_at    TEXT NOT NULL,
-      user_agent    TEXT NULL,
-      ip_address    TEXT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-    CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
-
-    CREATE TABLE IF NOT EXISTS dashboard_configs (
-      user_id        INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-      config_json    TEXT NOT NULL,
-      schema_version INTEGER NOT NULL,
-      updated_at     TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id         INTEGER PRIMARY KEY,
+      name       TEXT NOT NULL,
+      applied_at TEXT NOT NULL
     );
   `)
+
+  const applied = new Set(
+    (db.prepare('SELECT id FROM schema_migrations').all() as { id: number }[]).map((row) => row.id),
+  )
+  const from = applied.size === 0 ? 0 : Math.max(...applied)
+
+  const ordered = [...migrations].sort((first, second) => first.id - second.id)
+  assertNotAheadOfCode(from, ordered)
+
+  const record = db.prepare('INSERT INTO schema_migrations (id, name, applied_at) VALUES (?, ?, ?)')
+  const ran: { id: number; name: string }[] = []
+
+  for (const migration of ordered) {
+    if (applied.has(migration.id)) {
+      continue
+    }
+    // One transaction per migration: a failure rolls back its schema change
+    // *and* its bookkeeping row together, so a half-applied migration can
+    // never be recorded as done.
+    db.transaction(() => {
+      migration.up(db)
+      record.run(migration.id, migration.name, new Date().toISOString())
+    })()
+    ran.push({ id: migration.id, name: migration.name })
+  }
+
+  return { from, to: getSchemaVersion(db), applied: ran }
+}
+
+/**
+ * Two ids can only disagree about what a version means. A duplicate would
+ * also fail silently rather than loudly: the second entry looks "already
+ * applied" and is skipped, so its schema change never runs and nothing says
+ * so.
+ */
+function assertUsableMigrations(migrations: Migration[]): void {
+  const seen = new Set<number>()
+  for (const migration of migrations) {
+    if (!Number.isInteger(migration.id) || migration.id < 1) {
+      throw new Error(`Invalid migration id ${String(migration.id)} (${migration.name}): expected a positive integer`)
+    }
+    if (seen.has(migration.id)) {
+      throw new Error(`Duplicate migration id ${migration.id} (${migration.name})`)
+    }
+    seen.add(migration.id)
+  }
+}
+
+/**
+ * Refuses to run against a database migrated by a *newer* build than this
+ * one — the shape a rolled-back deployment takes.
+ *
+ * Doing nothing would be worse than failing: `migrate` would find every
+ * migration it knows already applied, report success, and leave the app
+ * reading a schema it has no knowledge of. Since migrations only move
+ * forward, the honest answer is to stop and say so.
+ */
+function assertNotAheadOfCode(currentVersion: number, ordered: Migration[]): void {
+  const highestKnown = ordered.at(-1)?.id ?? 0
+  if (currentVersion > highestKnown) {
+    throw new Error(
+      `Database schema version ${currentVersion} is newer than this build knows about (${highestKnown}). ` +
+        'This usually means a newer version of the app ran against this database and was then rolled back. ' +
+        'Deploy the newer build again, or restore a backup taken before the upgrade (docs/backup-restore.md).',
+    )
+  }
+}
+
+/** Highest migration id this database has applied; `0` for an empty one. Useful for diagnostics and tests. */
+export function getSchemaVersion(db: Database.Database): number {
+  const tableExists = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'")
+    .get()
+  if (!tableExists) {
+    return 0
+  }
+  const row = db.prepare('SELECT MAX(id) AS version FROM schema_migrations').get() as {
+    version: number | null
+  }
+  return row.version ?? 0
+}
+
+/** The schema version this build expects — the highest migration it ships. */
+export function getExpectedSchemaVersion(migrations: Migration[] = MIGRATIONS): number {
+  return migrations.reduce((highest, migration) => Math.max(highest, migration.id), 0)
 }

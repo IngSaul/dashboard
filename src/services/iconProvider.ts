@@ -1,17 +1,26 @@
+import { isKnownBrandSlug } from './brandIconSlugs'
 import type { IconSource } from '../types/widgets'
 
 /**
  * Shortcut icon resolution, per contracts/icon-provider-contract.md's fixed
- * fallback chain: manual `lucide`/`custom-svg` choice -> Simple Icons brand
- * match -> favicon auto-discovery -> initials fallback. Runs only when
- * explicitly invoked by the shortcut editor (T088) — never during normal
- * dashboard render or on a polling interval; the result is meant to be
- * cached onto the shortcut's persisted `icon` field by the caller.
+ * fallback chain: manual `lucide` choice -> Simple Icons brand match ->
+ * favicon auto-discovery -> initials fallback. Runs only when explicitly
+ * invoked by the shortcut editor (T088) — never during normal dashboard
+ * render or on a polling interval; the result is meant to be cached onto
+ * the shortcut's persisted `icon` field by the caller.
+ *
+ * A brand match resolves to the icon's **slug**, not its markup. Persisting
+ * markup put a whole SVG document into stored configuration, which
+ * `ShortcutIcon` then injected into the DOM; storing a slug means the
+ * markup only ever comes from what this build bundles (see
+ * `iconResolver.getBrandSvgBySlug`). It also removes the reason this module
+ * had dynamic imports of the same icons `iconResolver` already imports
+ * statically.
  */
 
 export interface ResolveIconOptions {
   /** An explicit manual choice — always wins immediately, with no fetch attempted, and is never later auto-downgraded. */
-  manualChoice?: { provider: 'lucide' | 'custom-svg'; value: string }
+  manualChoice?: { provider: 'lucide'; value: string }
   /** The shortcut's currently-cached icon, if any. A manual provider here is preserved unless `manualChoice` explicitly overrides it. */
   currentIcon?: IconSource
   /** Favicon-check timeout in ms (default 3000) — fails fast rather than blocking the settings UI, per the contract. */
@@ -21,34 +30,11 @@ export interface ResolveIconOptions {
 const DEFAULT_TIMEOUT_MS = 3000
 
 /**
- * Curated domain -> Simple Icons slug map. Each entry is a fully static
- * import specifier below (never a computed template-literal path), so Vite
- * bundles only these icons as separate on-demand chunks — never the whole
- * ~3000-icon package (research.md's Icon System decision explicitly rejects
- * bundling the full set).
+ * Curated domain -> Simple Icons slug map. Every slug here must also be one
+ * `iconResolver` bundles, which `resolveIcon` checks before returning it —
+ * so a resolved icon always has markup available to render.
  */
-const SLUG_IMPORTERS: Record<string, () => Promise<{ default: string }>> = {
-  github: () => import('simple-icons/icons/github.svg?raw'),
-  gitlab: () => import('simple-icons/icons/gitlab.svg?raw'),
-  youtube: () => import('simple-icons/icons/youtube.svg?raw'),
-  gmail: () => import('simple-icons/icons/gmail.svg?raw'),
-  googlecalendar: () => import('simple-icons/icons/googlecalendar.svg?raw'),
-  googledrive: () => import('simple-icons/icons/googledrive.svg?raw'),
-  googledocs: () => import('simple-icons/icons/googledocs.svg?raw'),
-  notion: () => import('simple-icons/icons/notion.svg?raw'),
-  figma: () => import('simple-icons/icons/figma.svg?raw'),
-  discord: () => import('simple-icons/icons/discord.svg?raw'),
-  npm: () => import('simple-icons/icons/npm.svg?raw'),
-  docker: () => import('simple-icons/icons/docker.svg?raw'),
-  trello: () => import('simple-icons/icons/trello.svg?raw'),
-  linear: () => import('simple-icons/icons/linear.svg?raw'),
-  vercel: () => import('simple-icons/icons/vercel.svg?raw'),
-  netlify: () => import('simple-icons/icons/netlify.svg?raw'),
-  grafana: () => import('simple-icons/icons/grafana.svg?raw'),
-  portainer: () => import('simple-icons/icons/portainer.svg?raw'),
-}
-
-const DOMAIN_TO_SLUG: Record<string, keyof typeof SLUG_IMPORTERS> = {
+const DOMAIN_TO_SLUG: Record<string, string> = {
   'github.com': 'github',
   'gitlab.com': 'gitlab',
   'youtube.com': 'youtube',
@@ -145,10 +131,7 @@ export async function resolveIcon(
   if (options.manualChoice) {
     return { provider: options.manualChoice.provider, value: options.manualChoice.value, resolvedAt: nowIso() }
   }
-  if (
-    options.currentIcon &&
-    (options.currentIcon.provider === 'lucide' || options.currentIcon.provider === 'custom-svg')
-  ) {
+  if (options.currentIcon && options.currentIcon.provider === 'lucide') {
     return options.currentIcon
   }
 
@@ -163,14 +146,8 @@ export async function resolveIcon(
   }
 
   const slug = DOMAIN_TO_SLUG[hostname]
-  const importSlug = slug ? SLUG_IMPORTERS[slug] : undefined
-  if (importSlug) {
-    try {
-      const module = await importSlug()
-      return { provider: 'simple-icons', value: module.default, resolvedAt: nowIso() }
-    } catch {
-      // Falls through to favicon/fallback below.
-    }
+  if (slug !== undefined && isKnownBrandSlug(slug)) {
+    return { provider: 'simple-icons', value: slug, resolvedAt: nowIso() }
   }
 
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS

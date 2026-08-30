@@ -1,30 +1,39 @@
 # Personal Browser Dashboard
 
 A distraction-free start page that replaces your browser's default new-tab
-page: search, current date/time, weather, and configurable shortcut cards
-grouped by category — no ads, no feeds. Built with React, TypeScript, and
-Vite, with a small Fastify + SQLite backend for real accounts and per-user
-persistence, deployable via Docker Compose in a homelab.
+page: a grid of configurable widgets — clock, shortcut cards grouped by
+category, weather, notes and status monitors — with no ads and no feeds.
+Built with React, TypeScript and Vite, with a small Fastify + SQLite backend
+for real accounts and per-account persistence, deployable via Docker Compose
+in a homelab.
 
-See [specs/001-browser-dashboard/spec.md](specs/001-browser-dashboard/spec.md)
-and [specs/003-auth-persistence/spec.md](specs/003-auth-persistence/spec.md)
-for the full feature specifications and
-[CLAUDE.md](CLAUDE.md) for project conventions and workflow.
+See [CLAUDE.md](CLAUDE.md) for project conventions and workflow, and
+[specs/](specs/) for the feature specifications (`002-widget-dashboard`
+describes the current UI; `001-browser-dashboard` is the earlier layout it
+replaced).
 
 ## Features
 
-- Global search with a configurable destination
-- Live date/time and current weather (non-blocking; degrades gracefully when
-  unavailable)
-- Shortcut cards grouped into categories: add, edit, remove, and reorder
-- Light/dark/system theme, remembered across sessions
-- Full keyboard navigation and accessible labels/focus states
-- Desktop-first responsive layout with tablet support
+- A three-column workspace of widgets you enable and arrange yourself. Clock
+  and shortcuts are on by default; weather, notes, calendar and server/Docker
+  status monitors can be switched on from the settings drawer.
+- Shortcut cards grouped into categories: add, edit, remove, and drag to
+  reorder. Brand icons are resolved automatically from the destination.
+- A command palette (`Ctrl`/`Cmd` + `K`) for web search and for jumping to a
+  shortcut or a settings section. There is no in-page search box: a web page
+  cannot focus or type into the browser's own address bar, so imitating one
+  would only be a worse omnibox.
+- Light/dark/system theme plus wallpaper, glass, motion and accessibility
+  preferences, all remembered per account.
+- Weather and status data degrade gracefully and never block first render.
+- Full keyboard navigation and accessible labels/focus states.
+- Desktop-first responsive layout with tablet support.
 - Real accounts (username/password), with a session that survives closing
-  and reopening the browser — no need to log in every visit
-- Per-account dashboard configuration, persisted server-side; a
-  pre-existing browser-only configuration is migrated to your account
-  automatically on first login
+  and reopening the browser — no need to log in every visit.
+- Per-account configuration persisted server-side, with changes retried on
+  failure and never silently dropped; if another tab or device saved first,
+  you are told rather than overwriting it. A pre-existing browser-only
+  configuration is imported into your account on first login.
 
 ## Getting Started
 
@@ -63,8 +72,9 @@ Opens the dashboard with hot module reloading at the URL Vite prints
 ### Build for production
 
 ```bash
-npm run build                    # frontend: type-checks + dist/
-npm run build --workspace=server # backend: type-checks + server/dist/
+npm run build:all    # both workspaces
+npm run build        # frontend only: type-checks + dist/
+npm run build:server # backend only: type-checks + server/dist/
 ```
 
 Preview the frontend production build locally with `npm run preview` (the
@@ -72,21 +82,37 @@ backend must be running separately, and won't be proxied to unless you also
 configure a reverse proxy — this is what `docker compose` sets up for you,
 see below).
 
-### Lint and format
+### Checks
+
+Everything runs from the repository root and covers both the frontend and
+the `server` workspace.
 
 ```bash
-npm run lint        # check
-npm run lint:fix     # check and auto-fix
+npm run verify       # lint + typecheck + tests + build, for both workspaces
 ```
 
-### Tests
+That is the whole gate, and it is what CI runs. The individual steps, in the
+order `verify` runs them:
 
 ```bash
-npm test             # frontend unit + integration tests (Vitest)
-npm run test:server  # backend tests (Vitest)
-npm run test:watch   # frontend watch mode
-npm run test:e2e     # end-to-end tests (Playwright; starts both dev servers)
+npm run lint          # ESLint over frontend, backend and tests
+npm run lint:fix      # ...and auto-fix
+npm run typecheck:all # tsc for the frontend, tests, and the backend
+npm run test:all      # Vitest for both workspaces
+npm run build:all     # production build of both workspaces
+```
+
+Narrower variants exist where a workspace needs checking on its own:
+`lint:server`, `typecheck` / `typecheck:server`, `test` / `test:server`,
+`build` / `build:server`.
+
+End-to-end tests are separate — they start both dev servers and drive a real
+browser, so they are not part of `verify`:
+
+```bash
+npm run test:e2e     # Playwright (starts both dev servers itself)
 npm run test:e2e:ui  # Playwright UI mode
+npm run test:watch   # frontend tests in watch mode
 ```
 
 ## Running with Docker Compose (recommended for a homelab)
@@ -96,11 +122,22 @@ cp .env.example .env   # then edit ADMIN_USERNAME/ADMIN_PASSWORD
 docker compose up -d --build
 ```
 
-Visit `http://<host>:8080`. See:
+Neither container publishes a host port: an existing Traefik instance on the
+external `homelab` network reaches the frontend directly, so the dashboard is
+served at `https://$DASHBOARD_HOST` (default `dashboard.avalonnova.com`) and
+plain HTTP is permanently redirected to HTTPS.
+
+Compose runs the backend with `NODE_ENV=production`, which **requires**
+`COOKIE_SECURE=true` — the backend refuses to start otherwise, so a session
+cookie can never travel in clear text. Before the first deploy, check that
+`TRAEFIK_CERT_RESOLVER` in your `.env` names a real resolver in your Traefik
+static configuration. See:
 
 - [docs/first-admin.md](docs/first-admin.md) — bootstrapping the first account
 - [docs/environment-variables.md](docs/environment-variables.md) — full env var reference
 - [docs/backup-restore.md](docs/backup-restore.md) — backing up/restoring `./data/dashboard.sqlite3`
+- [docs/database-migrations.md](docs/database-migrations.md) — schema versioning, and what to do when an upgrade goes sideways
+- [docs/diagnosing-sync.md](docs/diagnosing-sync.md) — when configuration stops saving: what the user sees, what is logged, and where
 - [docs/managing-users.md](docs/managing-users.md) — creating additional accounts
 
 `docker compose down` followed by `docker compose up -d` preserves all
@@ -118,34 +155,43 @@ outside this repo's scope.
 
 ```
 src/
-├── components/   # reusable UI, including auth/ (LoginScreen, AuthGate) and glass/ (design system)
+├── components/   # auth/ (login, gate, sync status), glass/ (design system),
+│                 #   shell/ (AppShell, Workspace, SettingsDrawer, CommandPalette),
+│                 #   widgets/ (clock, shortcuts, weather, notes, calendar, monitors)
 ├── config/       # typed defaults and validation/repair (defaults.ts, schema.ts)
-├── features/dashboard/  # composition shell (Dashboard.tsx, Dashboard.css)
-├── services/     # business logic (configStore, search, weather, shortcuts, categories, theme,
-│                 #   auth/ AuthClient + migration, storage/ StorageProvider + Local/RemoteStorageProvider)
-├── state/        # React context providers, including AuthProvider
+├── design/       # design tokens (color, spacing, motion, glass, z-index, ...)
+├── features/dashboard/  # Dashboard.tsx — renders AppShell
+├── plugins/      # widget registrations, one module per widget type
+├── services/     # business logic (configStore, search, weather, shortcuts, categories,
+│                 #   theme, icons; auth/ AuthClient + first-login migration;
+│                 #   storage/ StorageProvider, Local/Remote providers, configSyncEngine)
+├── state/        # React context providers (auth, theme, plugins, workspace, settings, search)
 ├── types/        # shared domain types
-└── utils/        # dateTime, validation, keyboard helpers
+└── utils/        # dateTime, validation (URL protocol allow-lists), keyboard helpers
 
-server/           # Fastify + SQLite backend (npm workspace) — auth, sessions, per-user config storage
-├── src/          # app.ts, auth/, dashboard/, db/, plugins/
+server/           # Fastify + SQLite backend (npm workspace) — auth, sessions, per-user config
+├── src/          # app.ts, auth/, dashboard/, db/ (connection, migrations, CLI), plugins/
 └── test/         # Vitest route/unit tests
 
 tests/
 ├── unit/         # business logic tests (Vitest)
 ├── integration/  # component interaction tests (Testing Library)
-├── e2e/          # browser-level tests (Playwright)
+├── e2e/          # browser-level tests (Playwright); fixtures.ts isolates each worker
 └── fixtures/     # shared test fixtures
 
 docker/           # nginx.conf (reverse proxy for the frontend image)
-docs/             # first-admin, environment-variables, backup-restore, managing-users
+docs/             # first-admin, environment-variables, backup-restore,
+                  #   database-migrations, managing-users
+.github/workflows # CI: `npm run verify` plus a separate end-to-end job
 ```
 
-Shortcuts, categories, search destination, weather preference, theme, and
-every other dashboard preference are typed and validated
-(`config/schema.ts`), and persist to the backend per account (see
-[specs/003-auth-persistence/data-model.md](specs/003-auth-persistence/data-model.md)) —
-nothing personal is hardcoded into components. See
-[specs/001-browser-dashboard/data-model.md](specs/001-browser-dashboard/data-model.md)
-for the dashboard configuration's own data model, which this feature wraps
-rather than redesigns.
+Shortcuts, categories, search destination, weather preference, theme, widget
+layout and every other dashboard preference are typed and validated
+(`config/schema.ts`) and persist to the backend per account — nothing
+personal is hardcoded into components.
+
+Configuration reaches the server through `services/storage/configSyncEngine.ts`,
+which keeps one write in flight at a time, retries failures with backoff, and
+uses the stored revision as an `If-Match` precondition so a second tab cannot
+silently overwrite the first. Anything it cannot save is surfaced in the UI
+rather than dropped.

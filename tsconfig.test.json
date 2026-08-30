@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    "composite": true,
+    // Vitest specs run in jsdom and Playwright specs in Node, so this
+    // project needs both sets of globals; the app project deliberately has
+    // only the browser ones.
+    "types": ["vite/client", "node"],
+    "noEmit": true
+  },
+  // `server/src/dashboard/schema.ts` is included because
+  // tests/unit/dashboardConfigContract.test.ts deliberately spans both
+  // workspaces: it asserts the frontend's config survives the backend's
+  // validation unchanged, which is exactly the seam neither side can check
+  // alone. It imports nothing but `zod`, so pulling it in here costs nothing.
+  "include": ["tests", "src", "server/src/dashboard/schema.ts"]
+}

@@ -14,6 +14,13 @@ dist-ssr
 
 # Backend (003-auth-persistence)
 server/dist
+# Compiled output next to the TypeScript it came from. Nothing builds the
+# backend tests — `tsconfig.json` is `noEmit` and the build config only
+# covers `src` — but a stray `tsc` invocation used to leave these behind,
+# and they were committed.
+server/test/*.js
+server/test/*.js.map
+server/test/*.d.ts
 /data/
 .env
 .env.*

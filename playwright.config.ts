@@ -1,5 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
-import { ADMIN_PASSWORD, ADMIN_USERNAME, STORAGE_STATE_PATH } from './tests/e2e/testCredentials.ts'
+import { ADMIN_PASSWORD, ADMIN_USERNAME } from './tests/e2e/testCredentials.ts'
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -22,11 +22,19 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       env: {
+        // Explicit, not inherited: a production backend refuses to start
+        // without COOKIE_SECURE=true, and Playwright merges the developer's
+        // own environment into this one.
+        NODE_ENV: 'test',
         ADMIN_USERNAME,
         ADMIN_PASSWORD,
         DATABASE_PATH: ':memory:',
         COOKIE_SECURE: 'false',
         PORT: '3210',
+        // One login per worker per project (see tests/e2e/fixtures.ts), all
+        // from a single loopback address — far above the brute-force default
+        // a real deployment wants, and unrelated to it.
+        LOGIN_RATE_LIMIT_MAX: '1000',
       },
     },
     {
@@ -38,28 +46,26 @@ export default defineConfig({
   ],
   projects: [
     {
-      // Logs in once as the bootstrapped admin and saves the resulting
-      // session cookie so every other project starts already authenticated
-      // — existing specs (firstLaunch, personalization, responsive, ...)
-      // need zero changes to keep exercising dashboard behavior post-login.
-      // Auth-specific specs (tests/e2e/auth*.spec.ts) override storageState
-      // to start unauthenticated, since they test the login flow itself.
+      // Saves an admin session the browser projects never run under: it is
+      // only the credential `tests/e2e/fixtures.ts` uses to create each
+      // worker's throwaway account via the admin-only POST /auth/users.
+      // Specs get their session from the `storageState` fixture instead.
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
     },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: STORAGE_STATE_PATH },
+      use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'], storageState: STORAGE_STATE_PATH },
+      use: { ...devices['Desktop Firefox'] },
       dependencies: ['setup'],
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'], storageState: STORAGE_STATE_PATH },
+      use: { ...devices['Desktop Safari'] },
       dependencies: ['setup'],
     },
   ],

@@ -12,7 +12,15 @@ async function main(): Promise<void> {
   const env = loadEnv()
 
   const db = openDatabase(env.DATABASE_PATH)
-  migrate(db)
+  const migration = migrate(db)
+  if (migration.applied.length > 0) {
+    console.info(
+      `Database schema migrated ${migration.from} -> ${migration.to}: ` +
+        migration.applied.map((entry) => `${entry.id} (${entry.name})`).join(', '),
+    )
+  } else {
+    console.info(`Database schema up to date at version ${migration.to}`)
+  }
   await bootstrapAdmin(db, { username: env.ADMIN_USERNAME, password: env.ADMIN_PASSWORD })
 
   setInterval(() => sweepExpiredSessions(db), SWEEP_INTERVAL_MS).unref()
@@ -24,6 +32,7 @@ async function main(): Promise<void> {
       idleTtlDays: env.SESSION_IDLE_TTL_DAYS,
       absoluteTtlDays: env.SESSION_ABSOLUTE_TTL_DAYS,
     },
+    loginRateLimitMax: env.LOGIN_RATE_LIMIT_MAX,
   })
 
   await app.listen({ host: '0.0.0.0', port: env.PORT })

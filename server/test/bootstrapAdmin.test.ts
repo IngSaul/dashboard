@@ -22,8 +22,9 @@ describe('bootstrapAdmin', () => {
       password_hash: string
     }>
     expect(admins).toHaveLength(1)
-    expect(admins[0]!.username).toBe('admin')
-    await expect(verifyPassword(admins[0]!.password_hash, 'super-secret-password')).resolves.toBe(true)
+    const [admin] = admins
+    expect(admin?.username).toBe('admin')
+    await expect(verifyPassword(admin?.password_hash ?? '', 'super-secret-password')).resolves.toBe(true)
   })
 
   it('is a no-op when an admin already exists', async () => {
@@ -34,6 +35,6 @@ describe('bootstrapAdmin', () => {
       username: string
     }>
     expect(admins).toHaveLength(1)
-    expect(admins[0]!.username).toBe('admin')
+    expect(admins[0]?.username).toBe('admin')
   })
 })

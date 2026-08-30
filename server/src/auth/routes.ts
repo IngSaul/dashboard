@@ -5,7 +5,7 @@ import { hashPassword, verifyPassword } from './password.js'
 import { clearLockout, isLocked, recordFailedLogin } from './lockout.js'
 import { createSession, deleteSessionByToken, type SessionTtlConfig } from './session.js'
 import { SESSION_COOKIE_NAME, sessionCookieOptions } from './cookie.js'
-import type { Authenticate } from '../plugins/authenticate.js'
+import { requireUser, type Authenticate } from '../plugins/authenticate.js'
 import type { AuthenticatedUser, UserRole } from '../types.js'
 
 interface UserRow {
@@ -20,6 +20,8 @@ export interface AuthRouteDeps {
   cookieSecure: boolean
   sessionTtl: SessionTtlConfig
   authenticate: Authenticate
+  /** Max `POST /auth/login` attempts per IP per minute — see `env.ts`'s `LOGIN_RATE_LIMIT_MAX`. */
+  loginRateLimitMax: number
 }
 
 /**
@@ -31,11 +33,11 @@ export interface AuthRouteDeps {
 const TIMING_SAFE_DECOY_HASH = await hashPassword('correct-horse-battery-staple-decoy-only')
 
 export function registerAuthRoutes(app: FastifyInstance, deps: AuthRouteDeps): void {
-  const { db, cookieSecure, sessionTtl, authenticate } = deps
+  const { db, cookieSecure, sessionTtl, authenticate, loginRateLimitMax } = deps
 
   app.post(
     '/auth/login',
-    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    { config: { rateLimit: { max: loginRateLimitMax, timeWindow: '1 minute' } } },
     async (request, reply) => {
       const parsed = loginBodySchema.safeParse(request.body)
       if (!parsed.success) {
@@ -93,7 +95,7 @@ export function registerAuthRoutes(app: FastifyInstance, deps: AuthRouteDeps): v
   app.get('/auth/me', { preHandler: authenticate }, async (request, reply) => {
     const user = db
       .prepare('SELECT id, username, role FROM users WHERE id = ?')
-      .get(request.user!.id) as { id: number; username: string; role: UserRole } | undefined
+      .get(requireUser(request).id) as { id: number; username: string; role: UserRole } | undefined
     if (!user) {
       return reply.code(401).send({ error: 'unauthenticated' })
     }
@@ -101,7 +103,7 @@ export function registerAuthRoutes(app: FastifyInstance, deps: AuthRouteDeps): v
   })
 
   app.post('/auth/users', { preHandler: authenticate }, async (request, reply) => {
-    if (request.user!.role !== 'admin') {
+    if (requireUser(request).role !== 'admin') {
       return reply.code(403).send({ error: 'forbidden' })
     }
     const parsed = createUserBodySchema.safeParse(request.body)

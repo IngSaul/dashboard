@@ -1,35 +1,28 @@
-import { expect, test } from '@playwright/test'
-import { ADMIN_PASSWORD, ADMIN_USERNAME } from './testCredentials'
+import { anonymousTest as test, createAccount, expect } from './fixtures'
 import { createDefaultDashboardConfig } from '../../src/config/defaults'
 
 const DASHBOARD_CONFIG_STORAGE_KEY = 'dashboard.config.v1'
 
 /**
- * User Story 4 (spec.md) — a pre-existing local (pre-account) dashboard
- * configuration is automatically migrated to an account on its first login,
- * exactly once, without ever overwriting a config the account already has.
- * Starts unauthenticated (overriding the pre-authenticated project default).
+ * A pre-existing local (pre-account) dashboard configuration is migrated to
+ * an account on its first login, exactly once, without ever overwriting a
+ * config the account already has.
+ *
+ * Needs an account with *no* server-side row, which the shared per-worker
+ * account (reseeded before every test) can't be — so this spec creates its
+ * own throwaway account through `createAccount`.
  */
-test.use({ storageState: { cookies: [], origins: [] } })
 
 test('a pre-existing local configuration becomes the account config on first login, with a one-time toast', async ({
+  playwright,
+  baseURL,
   page,
 }) => {
-  const username = `migrationuser-${Date.now()}`
-  const password = 'migration-user-password-123'
+  if (!baseURL) {
+    throw new Error('playwright.config.ts must define `use.baseURL`')
+  }
+  const account = await createAccount(playwright, baseURL, 'migration')
   const distinctiveLabel = `My Distinctive Bookmark ${Date.now()}`
-
-  // Log in as admin (via API, same context) just long enough to create the
-  // brand-new account this test will migrate into, then drop that session.
-  const adminLogin = await page.request.post('/api/auth/login', {
-    data: { username: ADMIN_USERNAME, password: ADMIN_PASSWORD },
-  })
-  expect(adminLogin.status()).toBe(200)
-  const createUser = await page.request.post('/api/auth/users', {
-    data: { username, password, role: 'user' },
-  })
-  expect(createUser.status()).toBe(201)
-  await page.context().clearCookies()
 
   // Simulate a pre-existing, pre-account local configuration: seed
   // localStorage with a fully valid config (so repairDashboardConfig
@@ -46,8 +39,8 @@ test('a pre-existing local configuration becomes the account config on first log
   )
 
   await page.goto('/')
-  await page.getByLabel('Usuario').fill(username)
-  await page.getByLabel('Contraseña').fill(password)
+  await page.getByLabel('Usuario').fill(account.username)
+  await page.getByLabel('Contraseña').fill(account.password)
   await page.getByRole('button', { name: 'Iniciar sesión' }).click()
 
   // The migrated shortcut appears, and the one-time toast confirms the import.

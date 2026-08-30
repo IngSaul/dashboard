@@ -1,59 +1,117 @@
-import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test, waitForPersistedConfig } from './fixtures'
 
 /**
- * User Story 2 personalization validation: add/edit/remove shortcuts and
- * verify the changes survive a real page reload (FR-008, FR-009, FR-010,
- * FR-011, and the UI contract's shortcuts/categories and persistence
- * sections).
+ * Personalization: add, edit, remove and filter shortcuts, verifying each
+ * change survives a real page reload — which, for an authenticated account,
+ * means it round-tripped through `PUT /api/dashboard` and came back from
+ * SQLite, not from browser storage.
+ *
+ * Rewritten from the feature-001 "Manage shortcuts" drawer flow: shortcut
+ * and category management lives on the shortcuts widget grid itself now
+ * (`AddShortcutCard`, the per-card `ShortcutActionsMenu`, and their modals)
+ * — see `ShortcutsWidget`'s own doc comment.
  */
 
 test.beforeEach(async ({ page }) => {
-  // `addInitScript` re-runs on every navigation, including the in-test
-  // `page.reload()` calls below, which would wipe out the very changes
-  // being verified. Clear storage once and reload so each test starts from
-  // a clean, default configuration without re-clearing on later reloads.
   await page.goto('/')
-  await page.evaluate(() => window.localStorage.clear())
-  await page.reload()
+  await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
 })
 
-test('adds a shortcut and keeps it after reload', async ({ page }) => {
-  await page.getByRole('button', { name: /manage shortcuts/i }).click()
-  await page.getByRole('textbox', { name: /label/i }).fill('Docs')
-  await page.getByRole('textbox', { name: /url/i }).fill('https://docs.example.com')
-  await page.getByRole('button', { name: /add shortcut/i }).click()
+/**
+ * A card's corner menu is `pointer-events: none` until the card is hovered
+ * or focused (`ShortcutActionsMenu.css`), so the pointer has to travel over
+ * the card first — exactly as a real user's does. Clicking the trigger
+ * straight away deadlocks: the hit test resolves to the wrapper instead.
+ */
+async function openCardMenu(page: Page, label: string) {
+  const card = page.locator('.shortcut-card').filter({
+    has: page.getByRole('link', { name: label, exact: true }),
+  })
+  await card.hover()
+  await card.getByRole('button', { name: `Acciones para ${label}` }).click()
+}
+
+test('adds a shortcut and keeps it after reload', async ({ page, accountApi }) => {
+  await page.getByRole('button', { name: 'Añadir acceso directo' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Añadir acceso directo' })
+  await dialog.getByRole('textbox', { name: /nombre/i }).fill('Docs')
+  await dialog.getByRole('textbox', { name: /url/i }).fill('https://docs.example.com')
+  await dialog.getByRole('button', { name: /crear/i }).click()
+  await expect(dialog).not.toBeVisible()
 
   await expect(page.getByRole('link', { name: 'Docs' })).toBeVisible()
 
+  await waitForPersistedConfig(accountApi, (config) =>
+    config.shortcuts.some((shortcut) => shortcut.label === 'Docs'),
+  )
   await page.reload()
   await expect(page.getByRole('link', { name: 'Docs' })).toBeVisible()
 })
 
-test('removes a shortcut and keeps it removed after reload', async ({ page }) => {
-  await page.getByRole('button', { name: /manage shortcuts/i }).click()
-  await page.getByRole('button', { name: 'Remove Gmail' }).click()
+test('removes a shortcut and keeps it removed after reload', async ({ page, accountApi }) => {
+  await openCardMenu(page, 'Gmail')
+  await page.getByRole('menuitem', { name: 'Eliminar' }).click()
+  const confirm = page.getByRole('dialog', { name: 'Eliminar acceso directo' })
+  await confirm.getByRole('button', { name: 'Eliminar' }).click()
+  await expect(confirm).not.toBeVisible()
 
   await expect(page.getByRole('link', { name: 'Gmail' })).toHaveCount(0)
 
+  await waitForPersistedConfig(accountApi, (config) =>
+    config.shortcuts.every((shortcut) => shortcut.label !== 'Gmail'),
+  )
   await page.reload()
+  await expect(page.getByRole('link', { name: 'GitHub' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Gmail' })).toHaveCount(0)
 })
 
-test('edits a shortcut label and keeps the change after reload', async ({ page }) => {
-  await page.getByRole('button', { name: /manage shortcuts/i }).click()
-  await page.getByRole('button', { name: 'Edit Gmail' }).click()
-  await page.getByRole('textbox', { name: /label/i }).fill('Mail')
-  await page.getByRole('button', { name: /save shortcut/i }).click()
+test('edits a shortcut label and keeps the change after reload', async ({ page, accountApi }) => {
+  await openCardMenu(page, 'Gmail')
+  await page.getByRole('menuitem', { name: 'Editar' }).click()
 
-  await expect(page.getByRole('link', { name: 'Mail' })).toBeVisible()
+  const dialog = page.getByRole('dialog', { name: 'Editar acceso directo' })
+  await dialog.getByRole('textbox', { name: /nombre/i }).fill('Correo')
+  await dialog.getByRole('button', { name: /guardar/i }).click()
+  await expect(dialog).not.toBeVisible()
 
+  await expect(page.getByRole('link', { name: 'Correo' })).toBeVisible()
+
+  await waitForPersistedConfig(accountApi, (config) =>
+    config.shortcuts.some((shortcut) => shortcut.label === 'Correo'),
+  )
   await page.reload()
-  await expect(page.getByRole('link', { name: 'Mail' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Correo' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Gmail' })).toHaveCount(0)
 })
 
 test('filters shortcuts by category', async ({ page }) => {
-  await page.getByRole('button', { name: 'General' }).click()
+  // A second category with its own shortcut, so filtering has something to
+  // actually hide — the default seed ships a single "General" category.
+  await page.getByRole('button', { name: 'Añadir categoría' }).click()
+  const categoryDialog = page.getByRole('dialog', { name: 'Añadir categoría' })
+  await categoryDialog.getByRole('textbox', { name: /nombre/i }).fill('Trabajo')
+  await categoryDialog.getByRole('button', { name: 'Crear categoría' }).click()
+  await expect(categoryDialog).not.toBeVisible()
 
+  await page.getByRole('button', { name: 'Añadir acceso directo' }).click()
+  const shortcutDialog = page.getByRole('dialog', { name: 'Añadir acceso directo' })
+  await shortcutDialog.getByRole('textbox', { name: /nombre/i }).fill('Jira')
+  await shortcutDialog.getByRole('textbox', { name: /url/i }).fill('https://jira.example.com')
+  await shortcutDialog.getByRole('button', { name: /categoría/i }).click()
+  await page.getByRole('option', { name: 'Trabajo' }).click()
+  await shortcutDialog.getByRole('button', { name: /crear/i }).click()
+  await expect(shortcutDialog).not.toBeVisible()
+
+  await page.getByRole('button', { name: 'General', exact: true }).click()
   await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Jira' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Trabajo', exact: true }).click()
+  await expect(page.getByRole('link', { name: 'Jira' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Gmail' })).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Todas', exact: true }).click()
+  await expect(page.getByRole('link', { name: 'Gmail' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Jira' })).toBeVisible()
 })

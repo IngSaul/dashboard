@@ -1,3 +1,4 @@
+import { createDefaultDashboardConfig } from '../../src/config/defaults'
 import { DASHBOARD_CONFIG_STORAGE_KEY } from '../../src/services/configStore'
 import { defaultStorageProvider } from '../../src/services/storage/LocalStorageProvider'
 import type {
@@ -113,6 +114,24 @@ export const defaultDashboardConfigFixture: DashboardConfiguration = {
   shortcuts: dashboardShortcutFixtures,
   categories: [workCategoryFixture, personalCategoryFixture, emptyCategoryFixture, generalCategoryFixture],
   updatedAt: FIXED_TIMESTAMP,
+  // The widget/theme groups this fixture predates. Taken from the real
+  // defaults rather than hand-written so they cannot drift, with the one
+  // clock-dependent field pinned — a fixture that changes per run is not a
+  // fixture.
+  ...widgetAndThemeDefaults(),
+}
+
+function widgetAndThemeDefaults(): Pick<
+  DashboardConfiguration,
+  'widgetLayout' | 'themePreferences' | 'monitoringSourceConfig' | 'note'
+> {
+  const defaults = createDefaultDashboardConfig()
+  return {
+    widgetLayout: defaults.widgetLayout,
+    themePreferences: defaults.themePreferences,
+    monitoringSourceConfig: defaults.monitoringSourceConfig,
+    note: { ...defaults.note, updatedAt: FIXED_TIMESTAMP },
+  }
 }
 
 /** Serialized form of a valid, previously-saved dashboard configuration. */

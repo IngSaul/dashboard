@@ -17,9 +17,15 @@ describe('decideMigration', () => {
   it('found: uses the server config as-is and never needs uploading', () => {
     const serverConfig = createDefaultDashboardConfig()
 
-    const decision = decideMigration({ kind: 'found', config: serverConfig })
+    const decision = decideMigration({ kind: 'found', config: serverConfig, revision: 4 })
 
-    expect(decision).toEqual({ config: serverConfig, needsUpload: false, migratedFromLocal: false })
+    expect(decision).toEqual({
+      config: serverConfig,
+      needsUpload: false,
+      migratedFromLocal: false,
+      // Carried through, so later writes can prove what they are based on.
+      revision: 4,
+    })
   })
 
   it('not-found with a pre-existing local config: repairs and returns it for upload, flagged as migrated', () => {

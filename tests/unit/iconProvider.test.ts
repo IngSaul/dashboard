@@ -64,30 +64,10 @@ describe('resolveIcon', () => {
       expect(fetchSpy).not.toHaveBeenCalled()
     })
 
-    it('honors an explicit custom-svg choice immediately', async () => {
-      const icon = await resolveIcon('https://example.com', 'Example', {
-        manualChoice: { provider: 'custom-svg', value: '<svg>mine</svg>' },
-      })
-
-      expect(icon).toMatchObject({ provider: 'custom-svg', value: '<svg>mine</svg>' })
-    })
-
     it('does not downgrade an existing manual lucide icon when re-run without a new manual choice', async () => {
       const currentIcon = {
         provider: 'lucide' as const,
         value: 'book-open',
-        resolvedAt: '2026-01-01T00:00:00.000Z',
-      }
-
-      const icon = await resolveIcon('https://github.com', 'GitHub', { currentIcon })
-
-      expect(icon).toEqual(currentIcon)
-    })
-
-    it('does not downgrade an existing manual custom-svg icon when re-run', async () => {
-      const currentIcon = {
-        provider: 'custom-svg' as const,
-        value: '<svg>mine</svg>',
         resolvedAt: '2026-01-01T00:00:00.000Z',
       }
 
@@ -105,20 +85,26 @@ describe('resolveIcon', () => {
 
       const icon = await resolveIcon('https://github.com', 'GitHub', {
         currentIcon,
-        manualChoice: { provider: 'custom-svg', value: '<svg>new</svg>' },
+        manualChoice: { provider: 'lucide', value: 'star' },
       })
 
-      expect(icon.provider).toBe('custom-svg')
-      expect(icon.value).toBe('<svg>new</svg>')
+      expect(icon.provider).toBe('lucide')
+      expect(icon.value).toBe('star')
     })
   })
 
   describe('simple-icons brand match (step 2)', () => {
-    it('resolves a known brand domain to its Simple Icons SVG', async () => {
+    /**
+     * The persisted value is a slug, not markup (TD-06). Storing the SVG
+     * document itself is what made a stored configuration a route into the
+     * DOM; a slug is only a lookup key against the icons this build bundles.
+     */
+    it('resolves a known brand domain to its Simple Icons slug, never to markup', async () => {
       const icon = await resolveIcon('https://github.com/anthropics', 'GitHub')
 
       expect(icon.provider).toBe('simple-icons')
-      expect(icon.value).toContain('<svg')
+      expect(icon.value).toBe('github')
+      expect(icon.value).not.toContain('<')
     })
 
     it('matches regardless of a www. prefix or subpath', async () => {

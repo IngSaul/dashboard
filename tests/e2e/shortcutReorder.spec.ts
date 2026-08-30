@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test'
+import type { APIRequestContext } from '@playwright/test'
+import { expect, test, waitForPersistedConfig } from './fixtures'
 
 /**
  * Real pointer-drag coverage for the shortcuts drag & drop reorder
@@ -9,13 +10,34 @@ import { expect, test } from '@playwright/test'
  * as a user would trigger it.
  */
 
+// `fixtures.ts` reseeds this worker's account with the default configuration
+// before every test, so the grid always starts from the four seed shortcuts
+// in a single "General" category.
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => window.localStorage.clear())
-  await page.reload()
+  await expect(page.getByRole('link', { name: 'Gmail', exact: true })).toBeVisible()
 })
 
-test('dragging a shortcut reorders it within its category and the order survives a reload', async ({ page }) => {
+/**
+ * Blocks until the reorder has actually reached SQLite, so the reload that
+ * follows reads the new order rather than racing the debounced write that
+ * carries it (see `waitForPersistedConfig`).
+ */
+async function waitForPersistedOrder(api: APIRequestContext, expected: string[]): Promise<void> {
+  await waitForPersistedConfig(
+    api,
+    (config) =>
+      [...config.shortcuts]
+        .sort((first, second) => first.globalOrder - second.globalOrder)
+        .map((shortcut) => shortcut.label)
+        .join('|') === expected.join('|'),
+  )
+}
+
+test('dragging a shortcut reorders it within its category and the order survives a reload', async ({
+  page,
+  accountApi,
+}) => {
   // "Todas" has no independent order of its own — switch to a specific
   // category ("General", the default seed data) to reorder it directly.
   await page.getByRole('button', { name: 'General', exact: true }).click()
@@ -58,6 +80,8 @@ test('dragging a shortcut reorders it within its category and the order survives
   }).toPass()
 
   const orderBeforeReload = await labelOrder()
+  // Every seed shortcut is in "General", so the grid order is the global order.
+  await waitForPersistedOrder(accountApi, orderBeforeReload)
 
   await page.reload()
   await page.getByRole('button', { name: 'General', exact: true }).click()
@@ -110,6 +134,7 @@ test('keeps the dragged overlay tracking the pointer, not offset by an ancestor 
 
 test('dragging a shortcut onto a card from a different category only reorders it globally — it keeps its own category, and that persists', async ({
   page,
+  accountApi,
 }) => {
   // The default seed only has one category ("General") — create a second
   // one with its own shortcut so there's something to drag across, exactly
@@ -170,6 +195,12 @@ test('dragging a shortcut onto a card from a different category only reorders it
     expect(await gmailIsInTrabajo()).toBe(false)
     expect(await gmailIsInGeneral()).toBe(true)
   }).toPass()
+
+  await page.getByRole('button', { name: 'Todas', exact: true }).click()
+  await waitForPersistedOrder(
+    accountApi,
+    await page.locator('.shortcuts-widget__grid .shortcut-card .shortcut-card__label').allTextContents(),
+  )
 
   await page.reload()
   expect(await gmailIsInTrabajo()).toBe(false)

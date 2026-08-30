@@ -156,12 +156,29 @@ export interface Note {
 
 // Shortcut icon resolution
 
-export type IconProviderKind = 'lucide' | 'simple-icons' | 'custom-svg' | 'favicon' | 'fallback'
+/**
+ * `custom-svg` was removed deliberately (the audit's TD-06). It persisted
+ * arbitrary SVG markup that was rendered through `dangerouslySetInnerHTML`,
+ * which is a stored-XSS surface that cannot be closed without a real
+ * sanitiser and a matching CSP — far out of proportion to a feature that
+ * never had an authoring UI. A stored config asking for it is now repaired
+ * away rather than rendered.
+ */
+export type IconProviderKind = 'lucide' | 'simple-icons' | 'favicon' | 'fallback'
 
 /** The resolved icon for a single shortcut, produced and cached by `iconProvider`. */
 export interface IconSource {
   provider: IconProviderKind
-  /** Lucide icon name, Simple Icons slug, inline/reference SVG, cached favicon data reference, or the fallback initials string, depending on `provider`. */
+  /**
+   * Depending on `provider`: a Lucide icon name, a Simple Icons **slug**, a
+   * favicon URL, or the fallback initials.
+   *
+   * Never markup. Icons used to persist whole SVG documents here, which
+   * meant a stored configuration could put arbitrary HTML into the DOM. The
+   * slug is resolved against the icons bundled at build time instead, so
+   * the only markup that can ever render is markup that shipped with the
+   * app.
+   */
   value: string
   /** When resolution last ran; allows a manual re-check without auto re-fetching on every load. */
   resolvedAt: string
