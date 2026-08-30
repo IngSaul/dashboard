@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 COPY server/package.json ./server/package.json
 RUN npm ci --ignore-scripts
 
-COPY tsconfig.json tsconfig.app.json tsconfig.node.json vite.config.ts index.html ./
+COPY tsconfig.json tsconfig.app.json tsconfig.node.json tsconfig.test.json vite.config.ts index.html ./
 COPY public ./public
 COPY src ./src
 RUN npm run build
